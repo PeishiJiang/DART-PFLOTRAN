@@ -1,0 +1,205 @@
+&location_nml
+   nx                  = 10
+   ny                  = 10
+   nz                  = 10
+   x_is_periodic       = .false.
+   min_x_for_periodic  = -888888.0
+   max_x_for_periodic  = -888888.0
+   y_is_periodic       = .false.
+   min_y_for_periodic  = -888888.0
+   max_y_for_periodic  = -888888.0
+   z_is_periodic       = .false.
+   min_z_for_periodic  = -888888.0
+   max_z_for_periodic  = -888888.0
+   compare_to_correct  = .false.
+   output_box_info     = .false.
+   print_box_level     = 0
+   debug               = 0
+  /
+
+
+# distribute_mean = false is faster if your model does vertical
+#                   conversions but takes more memory
+# distribute_mean = true is slower but takes much less memory and
+#                   may allow you to run at all compared to not
+#                   for very large state vectors
+
+# enabling sampling error correction is generally beneficial
+# the default file is in assimilation_code/programs/gen_sampling_err_table/work
+
+# With a deterministic filter (filter_kind == 1 or 8)
+# and a deterministic inflation (filter_nml:inf_deterministic == .true.)
+# sort_obs_inc is not needed and is expensive. Should be .false.
+
+# specify special localization items in the same order
+# in both lists, the same number of items
+
+&assim_tools_nml
+   filter_kind                       = 1
+   cutoff                            = 0.2
+   distribute_mean                   = .false.
+   sort_obs_inc                      = .false.
+   spread_restoration                = .false.
+   sampling_error_correction         = .false.
+   adaptive_localization_threshold   = -1
+   adaptive_cutoff_floor             = 0.0
+   output_localization_diagnostics   = .false.
+   localization_diagnostics_file     = 'localization_diagnostics'
+   print_every_nth_obs               = 0
+   rectangular_quadrature            = .true.
+   gaussian_likelihood_tails         = .false.
+   close_obs_caching                 = .true.
+   adjust_obs_impact                 = .false.
+   obs_impact_filename               = ""
+   allow_any_impact_values           = .false.
+   convert_all_obs_verticals_first   = .true.
+   convert_all_state_verticals_first = .false.
+   special_localization_obs_types    = 'null'
+   special_localization_cutoffs      = -888888.0
+  /
+
+&cov_cutoff_nml
+   select_localization = 1  /
+
+&filter_nml
+   single_file_in               = .false.,
+   input_state_files            = ''
+   input_state_file_list        = ''
+   init_time_days               = 0,
+   init_time_seconds            = 0,
+   perturb_from_single_instance = .false.,
+   perturbation_amplitude       = 0.2,
+
+   stages_to_write              = 'output'
+
+   single_file_out              = .false.,
+   output_state_files           = ''
+   output_state_file_list       = ''
+   output_interval              = 1,
+   output_members               = .true.
+   num_output_state_members     = 0,
+   output_mean                  = .true.
+   output_sd                    = .true.
+   write_all_stages_at_end      = .false.
+   compute_posterior            = .true.
+
+   ens_size                     = 20,
+   num_groups                   = 1,
+   distributed_state            = .true.
+
+   async                        = 0,
+   adv_ens_command              = "./advance_model.csh",
+   tasks_per_model_advance      = 1
+
+   obs_sequence_in_name         = "obs_seq.out",
+   obs_sequence_out_name        = "obs_seq.final",
+   num_output_obs_members       = 0,
+   first_obs_days               = -1,
+   first_obs_seconds            = -1,
+   last_obs_days                = -1,
+   last_obs_seconds             = -1,
+   obs_window_days              = -1,
+   obs_window_seconds           = -1,
+
+   inf_flavor                  = 0,                       0,
+   inf_initial_from_restart    = .false.,                 .false.,
+   inf_sd_initial_from_restart = .false.,                 .false.,
+   inf_deterministic           = .true.,                  .true.,
+   inf_initial                 = 1.0,                     1.0,
+   inf_lower_bound             = 0.0,                     1.0,
+   inf_upper_bound             = 1000000.0,               1000000.0,
+   inf_damping                 = 1.0,                     1.0,
+   inf_sd_initial              = 0.0,                     0.0,
+   inf_sd_lower_bound          = 0.0,                     0.0
+   inf_sd_max_change           = 1.05,                    1.05,
+
+   trace_execution              = .false.,
+   output_timestamps            = .false.,
+   output_forward_op_errors     = .false.,
+   write_obs_every_cycle        = .false.,
+   silence                      = .false.,
+   
+   allow_missing_clm            = .false.
+   /
+&quality_control_nml
+   input_qc_threshold          = 3
+   outlier_threshold           = -1
+   enable_special_outlier_code = .false.
+  /
+
+&reg_factor_nml
+   select_regression    = 1,
+   input_reg_file       = "time_mean_reg",
+   save_reg_diagnostics = .false.,
+   reg_diagnostics_file = "reg_diagnostics"  /
+
+&smoother_nml
+   num_lags              = 0,
+   start_from_restart    = .false.,
+   output_restart        = .false.,
+   restart_in_file_name  = 'ics',
+   restart_out_file_name = 'restart'  /
+
+&state_vector_io_nml
+   buffer_state_io         = .false.
+   single_precision_output = .false.
+/
+&obs_kind_nml
+   assimilate_these_obs_types          = 'null',
+   evaluate_these_obs_types            = 'null'  
+   use_precomputed_FOs_these_obs_types = 'null'
+/
+
+&obs_sequence_nml
+   write_binary_obs_sequence = .false.
+   read_binary_file_format   = 'native'
+  /
+
+&ensemble_manager_nml
+   layout                      = 1
+   tasks_per_node              = 1
+   communication_configuration = 1
+   debug                       = .false.
+ /
+
+&utilities_nml
+   TERMLEVEL      = 2
+   logfilename    = 'dart_log.out'
+   nmlfilename    = 'dart_log.nml'
+   module_details = .true.
+   print_debug    = .false.
+   write_nml      = 'file'
+  /
+
+
+&model_mod_check_nml
+   num_ens               = 1
+   single_file           = .FALSE.
+   input_state_files     = 'null'
+   output_state_files    = 'null'
+   all_metadata_file     = 'metadata.txt'
+   x_ind                 = -1
+   loc_of_interest       = -1.0, -1.0, -1.0
+   kind_of_interest      = 'ANY'
+   interp_test_dlon      = 10.0
+   interp_test_dlat      = 10.0
+   interp_test_dvert     = 10.0
+   interp_test_lonrange  = 0.0, 120.0
+   interp_test_latrange  = 0.0, 120.0
+   interp_test_vertrange = 0.0, 100.0
+   interp_test_dx        = -888888.0
+   interp_test_dy        = -888888.0
+   interp_test_dz        = -888888.0
+   interp_test_xrange    = -888888.0, -888888.0
+   interp_test_yrange    = -888888.0, -888888.0
+   interp_test_zrange    = -888888.0, -888888.0
+   interp_test_vertcoord = 'VERTISHEIGHT'
+   test1thru             = 7
+   run_tests             = -1
+   verbose               = .FALSE.
+  /
+
+&model_nml
+   time_step_days      = 0,
+   time_step_seconds   = 3600  /
+

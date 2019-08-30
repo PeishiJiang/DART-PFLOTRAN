@@ -1,0 +1,1367 @@
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 10 20 53
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+ ERROR FROM:
+  model_mod_check: setup_run_array
+  routine: model_mod_check: setup_run_array
+  message:  No tests selected from the namelist.
+  message: ...  Either specify "test1thru" to be a positive number - or -
+  message: ...  specify a list of tests to run in "run_tests".
+ 
+  source file: $URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/assimilation_code/programs/model_mod_check/model_mod_check.f90 $
+  file revision: $Revision: 13137 $
+  revision date: $Date: 2019-04-30 08:48:00 -0700 (Tue, 30 Apr 2019) $
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 10 41 17
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../../../assimilation_code/modules/observations/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../utils/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 10 41 17
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 11 10 19
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 11 10 19
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 11 15 14
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 11 15 14
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 11 20 20
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 11 20 20
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 13  8 22
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 13  8 22
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 13  8 34
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+ ERROR FROM:
+  model_mod_check: setup_run_array
+  routine: model_mod_check: setup_run_array
+  message:  No tests selected from the namelist.
+  message: ...  Either specify "test1thru" to be a positive number - or -
+  message: ...  specify a list of tests to run in "run_tests".
+ 
+  source file: $URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/assimilation_code/programs/model_mod_check/model_mod_check.f90 $
+  file revision: $Revision: 13137 $
+  revision date: $Date: 2019-04-30 08:48:00 -0700 (Tue, 30 Apr 2019) $
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 13 43  3
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 13 43  3
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 13 43 16
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+ ERROR FROM:
+  check_namelist_read
+  routine: check_namelist_read
+  message:  INVALID NAMELIST ENTRY:    run_tests            = -1 in namelist model_mod_check_nml
+ 
+  source file: $URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/assimilation_code/modules/utilities/utilities_mod.f90 $
+  file revision: $Revision: 13137 $
+  revision date: $Date: 2019-04-30 08:48:00 -0700 (Tue, 30 Apr 2019) $
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 13 46 55
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 13 46 55
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 13 47  8
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+ ERROR FROM:
+  find_namelist_in_file
+  routine: find_namelist_in_file
+  message:  Namelist entry &grid_nml must exist in file input.nml
+ 
+  source file: $URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/assimilation_code/modules/utilities/utilities_mod.f90 $
+  file revision: $Revision: 13137 $
+  revision date: $Date: 2019-04-30 08:48:00 -0700 (Tue, 30 Apr 2019) $
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 13 55  6
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 13 55  6
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 13 55 19
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+ ERROR FROM:
+  check_namelist_read
+  routine: check_namelist_read
+  message:  INVALID NAMELIST ENTRY:    dx                  = 1, in namelist model_nml
+ 
+  source file: $URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/assimilation_code/modules/utilities/utilities_mod.f90 $
+  file revision: $Revision: 13137 $
+  revision date: $Date: 2019-04-30 08:48:00 -0700 (Tue, 30 Apr 2019) $
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 13 56 27
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 13 56 27
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 13 56 40
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+ ERROR FROM:
+  find_namelist_in_file
+  routine: find_namelist_in_file
+  message:  Namelist entry &location_nml must exist in file input.nml
+ 
+  source file: $URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/assimilation_code/modules/utilities/utilities_mod.f90 $
+  file revision: $Revision: 13137 $
+  revision date: $Date: 2019-04-30 08:48:00 -0700 (Tue, 30 Apr 2019) $
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14  4 53
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14  4 53
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 19 45
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 19 45
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 22 13
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 22 13
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 22 26
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 22 26
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 22 51
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 22 51
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 25 14
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 25 14
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 25 35
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 25 35
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 29 16
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 29 16
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 29 29
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 29 29
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 29 35
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 29 35
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 31 54
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 31 54
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 32 18
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 32 18
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 32 26
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+ ERROR FROM:
+  check_namelist_read
+  routine: check_namelist_read
+  message:  INVALID NAMELIST ENTRY:    run_tests            = 0, 1, 2 in namelist model_mod_check_nml
+ 
+  source file: $URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/assimilation_code/modules/utilities/utilities_mod.f90 $
+  file revision: $Revision: 13137 $
+  revision date: $Date: 2019-04-30 08:48:00 -0700 (Tue, 30 Apr 2019) $
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 32 41
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+ ERROR FROM:
+  check_namelist_read
+  routine: check_namelist_read
+  message:  INVALID NAMELIST ENTRY:    run_tests            = -1 in namelist model_mod_check_nml
+ 
+  source file: $URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/assimilation_code/modules/utilities/utilities_mod.f90 $
+  file revision: $Revision: 13137 $
+  revision date: $Date: 2019-04-30 08:48:00 -0700 (Tue, 30 Apr 2019) $
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 33  0
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 33  0
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 33 20
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 33 20
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 33 24
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 33 24
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 33 26
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 33 26
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 34 25
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+ ERROR FROM:
+  set_date
+  routine: set_date
+  message:  type is            0  must be one of            1           3           2           4           5           6
+ 
+  source file: $URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/assimilation_code/modules/utilities/time_manager_mod.f90 $
+  file revision: $Revision: 11289 $
+  revision date: $Date: 2017-03-10 13:56:06 -0800 (Fri, 10 Mar 2017) $
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 46 34
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 46 34
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 47  4
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 47  4
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 47 17
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+ ERROR FROM:
+  set_date
+  routine: set_date
+  message:  type is            0  must be one of            1           3           2           4           5           6
+ 
+  source file: $URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/assimilation_code/modules/utilities/time_manager_mod.f90 $
+  file revision: $Revision: 11289 $
+  revision date: $Date: 2017-03-10 13:56:06 -0800 (Fri, 10 Mar 2017) $
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 50 59
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 50 59
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 51 12
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+ ERROR FROM:
+  read_variables: nf90_inq_varid
+  routine: read_variables: nf90_inq_varid
+  message: LIQUID_SATURATION: NetCDF: Variable not found
+  message: ...
+ 
+  source file: $URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/assimilation_code/modules/utilities/netcdf_utilities_mod.f90 $
+  file revision: $Revision: 12664 $
+  revision date: $Date: 2018-06-12 15:04:36 -0700 (Tue, 12 Jun 2018) $
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 53 36
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 53 36
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 53 48
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+ ERROR FROM:
+  read_variables: nf90_inq_varid
+  routine: read_variables: nf90_inq_varid
+  message: LIQUID_SATURATION: NetCDF: Variable not found
+  message: ...
+ 
+  source file: $URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/assimilation_code/modules/utilities/netcdf_utilities_mod.f90 $
+  file revision: $Revision: 12664 $
+  revision date: $Date: 2018-06-12 15:04:36 -0700 (Tue, 12 Jun 2018) $
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 14 56 29
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+ ERROR FROM:
+  read_variables: nf90_inq_varid
+  routine: read_variables: nf90_inq_varid
+  message: LIQUID_SATURATION: NetCDF: Variable not found
+  message: ...
+ 
+  source file: $URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/assimilation_code/modules/utilities/netcdf_utilities_mod.f90 $
+  file revision: $Revision: 12664 $
+  revision date: $Date: 2018-06-12 15:04:36 -0700 (Tue, 12 Jun 2018) $
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 15  0 20
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+ ERROR FROM:
+  read_variables: nf90_inq_varid
+  routine: read_variables: nf90_inq_varid
+  message: TEMPERATURE: NetCDF: Variable not found
+  message: ...
+ 
+  source file: $URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/assimilation_code/modules/utilities/netcdf_utilities_mod.f90 $
+  file revision: $Revision: 12664 $
+  revision date: $Date: 2018-06-12 15:04:36 -0700 (Tue, 12 Jun 2018) $
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 15  5 58
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    LIQUID_PRESSURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+ ERROR FROM:
+  read_variables: nf90_inq_varid
+  routine: read_variables: nf90_inq_varid
+  message: TEMPERATURE: NetCDF: Variable not found
+  message: ...
+ 
+  source file: $URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/assimilation_code/modules/utilities/netcdf_utilities_mod.f90 $
+  file revision: $Revision: 12664 $
+  revision date: $Date: 2018-06-12 15:04:36 -0700 (Tue, 12 Jun 2018) $
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 15  6 35
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+ ERROR FROM:
+  read_variables: nf90_inq_varid
+  routine: read_variables: nf90_inq_varid
+  message: TEMPERATURE: NetCDF: Variable not found
+  message: ...
+ 
+  source file: $URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/assimilation_code/modules/utilities/netcdf_utilities_mod.f90 $
+  file revision: $Revision: 12664 $
+  revision date: $Date: 2018-06-12 15:04:36 -0700 (Tue, 12 Jun 2018) $
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 15  9  8
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 15  9  8
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 15  9 21
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+ ERROR FROM:
+  initialize_module
+  routine: initialize_module
+  message:  "TEMPERATURE" from obs_kind_nml is not a legal observation kind to assimilate
+ 
+  source file: $URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/assimilation_code/modules/observations/DEFAULT_obs_kind_mod.F90 $
+  file revision: $Revision: 13137 $
+  revision date: $Date: 2019-04-30 08:48:00 -0700 (Tue, 30 Apr 2019) $
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 15 10 42
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 15 10 42
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 15 10 55
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    LIQUID_PRESSURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+ ERROR FROM:
+  read_variables: nf90_inq_varid
+  routine: read_variables: nf90_inq_varid
+  message: TEMPERATURE: NetCDF: Variable not found
+  message: ...
+ 
+  source file: $URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/assimilation_code/modules/utilities/netcdf_utilities_mod.f90 $
+  file revision: $Revision: 12664 $
+  revision date: $Date: 2018-06-12 15:04:36 -0700 (Tue, 12 Jun 2018) $
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 15 11 30
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    LIQUID_PRESSURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+ ERROR FROM:
+  read_variables: nf90_inq_varid
+  routine: read_variables: nf90_inq_varid
+  message: TEMPERATURE: NetCDF: Variable not found
+  message: ...
+ 
+  source file: $URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/assimilation_code/modules/utilities/netcdf_utilities_mod.f90 $
+  file revision: $Revision: 12664 $
+  revision date: $Date: 2018-06-12 15:04:36 -0700 (Tue, 12 Jun 2018) $
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 15 12 16
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    LIQUID_PRESSURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+ ERROR FROM:
+  read_variables: nf90_inq_varid
+  routine: read_variables: nf90_inq_varid
+  message: PERMEABILITY: NetCDF: Variable not found
+  message: ...
+ 
+  source file: $URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/assimilation_code/modules/utilities/netcdf_utilities_mod.f90 $
+  file revision: $Revision: 12664 $
+  revision date: $Date: 2018-06-12 15:04:36 -0700 (Tue, 12 Jun 2018) $
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 15 12 33
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    LIQUID_PRESSURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+ ERROR FROM:
+  read_variables: nf90_inq_varid
+  routine: read_variables: nf90_inq_varid
+  message: PERMEABILITY: NetCDF: Variable not found
+  message: ...
+ 
+  source file: $URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/assimilation_code/modules/utilities/netcdf_utilities_mod.f90 $
+  file revision: $Revision: 12664 $
+  revision date: $Date: 2018-06-12 15:04:36 -0700 (Tue, 12 Jun 2018) $
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 15 12 42
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    LIQUID_PRESSURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+ ERROR FROM:
+  read_variables: nf90_inq_varid
+  routine: read_variables: nf90_inq_varid
+  message:                                                                                                                                                                                                                                                                 : NetCDF: Variable not found
+  message: ...
+ 
+  source file: $URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/assimilation_code/modules/utilities/netcdf_utilities_mod.f90 $
+  file revision: $Revision: 12664 $
+  revision date: $Date: 2018-06-12 15:04:36 -0700 (Tue, 12 Jun 2018) $
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 15 13 12
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    LIQUID_PRESSURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+  create_and_open_state_output:  Creating output file mmc_output.nc
+  write_model_time no variable "time" found in file
+  write_model_time ... creating one
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 15 13 12
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 15 13 54
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 15 13 54
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 15 14  7
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    LIQUID_PRESSURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 15 14  7
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 16 12 38
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  8 30 16 12 38
+ Program model_mod_check
+ --------------------------------------
+
