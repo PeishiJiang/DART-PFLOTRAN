@@ -33,17 +33,20 @@ for t in time_set:
     for varname in list(dataset.keys()):
         state_set[t][varname] = dataset[varname][:]
 
-ntime    = len(time_set)
+# ntime    = len(time_set)
+ntime    = 1
 nx,ny,nz = len(x_set), len(y_set), len(z_set)
 
 var_set  = list(state_set[t].keys())
 
 state_set2 = dict.fromkeys(var_set)
 for var in var_set:
-    state_set2[var] = np.zeros([ntime,1,nx,ny,nz])
-    for i in range(ntime):
-        t = time_set[i]
-        state_set2[var][i,0,:,:,:] = state_set[t][var]
+    state_set2[var] = np.zeros([nx,ny,nz])
+    state_set2[var][:,:,:] = state_set[time_set[ntime-1]][var]
+    # state_set2[var] = np.zeros([ntime,nx,ny,nz])
+    # for i in range(ntime):
+        # t = time_set[i]
+        # state_set2[var][i,:,:,:] = state_set[t][var]
 
 time_set  = [t.split()[1:] for t in state_set.keys()]
 time_vset = [float(t[0]) for t in time_set]
@@ -60,10 +63,10 @@ xloc     = root_nc.createDimension('x_location', nx)
 yloc     = root_nc.createDimension('y_location', ny)
 zloc     = root_nc.createDimension('z_location', nz)
 time     = root_nc.createDimension('time', ntime)
-member   = root_nc.createDimension('member', 1)
+# member   = root_nc.createDimension('member', 1)
 
 # Write the values
-times     = root_nc.createVariable('time', 'f8', ('time',))
+times = root_nc.createVariable('time', 'f8', ('time',))
 xloc = root_nc.createVariable('x_location', 'f8', ('x_location',))
 yloc = root_nc.createVariable('y_location', 'f8', ('y_location',))
 zloc = root_nc.createVariable('z_location', 'f8', ('z_location',))
@@ -77,7 +80,7 @@ zloc = root_nc.createVariable('z_location', 'f8', ('z_location',))
 # Create the attributes
 times.units = time_unit
 times.calendar = 'none'
-times[:] = time_vset
+times[:] = time_vset[:ntime]
 
 # Write coordinates values
 xloc[:], yloc[:], zloc[:] = x_set, y_set, z_set
@@ -96,8 +99,9 @@ for var in var_set:
     # Make the variable name uppercase
     varn = varn.upper()
     # Save the variable into netcdf
-    vargrp               = root_nc.createVariable(varn, 'f8', ('time', 'member', 'x_location','y_location','z_location'))
-    vargrp.unit = varunit
+    # vargrp               = root_nc.createVariable(varn, 'f8', ('time', 'member', 'x_location','y_location','z_location'))
+    vargrp               = root_nc.createVariable(varn, 'f8', ('x_location','y_location','z_location'))
+    vargrp.unit          = varunit
     var_dict_nc[varn]    = vargrp
     var_dict_nc[varn][:] = state_set2[var]
 

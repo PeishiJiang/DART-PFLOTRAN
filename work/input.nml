@@ -125,20 +125,26 @@
    evaluate_these_obs_types   = ''
    /
 
+! TODO
+! model_nml should be read from PFLOTRAN.in file.
 &model_nml
-   model_size          = 2,
+   nvar                = 2,
    time_step_days      = 0,
    time_step_seconds   = 3600,
    var_names           = 'LIQUID_SATURATION', 'LIQUID_PRESSURE'
+   template_file       = '../utils/pflotran_test.nc'
+   var_qtynames        = 'QTY_LIQUID_SATURATION', 'QTY_LIQUID_PRESSURE'
    /
 
+! TODO
+! grid_nml should be read from PFLOTRAN.in file.
 &grid_nml
    dx                  = 1,
    dy                  = 1,
    dz                  = 1,
    nx                  = 1,
-   ny                  = 2,
-   nz                  = 64
+   ny                  = 6,
+   nz                  = 11,
    x0                  = 0,
    y0                  = 0,
    z0                  = 0,
@@ -213,11 +219,11 @@
 &model_mod_check_nml
    input_state_files    = '../utils/pflotran_test.nc'
    output_state_files   = 'mmc_output.nc'
-   test1thru            = 2
+   test1thru            = 3
    run_tests            = -1
-   x_ind                = 42
+   x_ind                = 100
    loc_of_interest      = 0.3
-   quantity_of_interest = 'QTY_STATE_VARIABLE'
+   quantity_of_interest = 'QTY_LIQUID_PRESSURE'
    interp_test_dx       = 0.02
    interp_test_xrange   = 0.0, 1.0
    verbose              = .true.

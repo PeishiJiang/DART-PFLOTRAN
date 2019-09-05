@@ -23,7 +23,8 @@ use time_manager_mod, only : time_type, set_time, set_time_missing, set_date
 use     location_mod, only : location_type, get_close_type, &
                              get_close_obs, get_close_state, &
                              convert_vertical_obs, convert_vertical_state, &
-                             set_location, set_location_missing
+                             set_location, get_location, set_location_missing, &
+                             LocationDims
 use    utilities_mod, only : register_module, error_handler, &
                              nmlfileunit, do_output, do_nml_file, do_nml_term,  &
                              E_ERR, E_MSG, &
@@ -31,7 +32,12 @@ use    utilities_mod, only : register_module, error_handler, &
 use netcdf_utilities_mod, only : nc_add_global_attribute, nc_synchronize_file, &
                                  nc_add_global_creation_time, &
                                  nc_begin_define_mode, nc_end_define_mode
-use state_structure_mod, only : add_domain, get_index_start, get_index_end
+use distributed_state_mod, only : get_state
+use state_structure_mod, only : add_domain, get_index_start, get_index_end, &
+                                get_dart_vector_index, get_varid_from_kind, &
+                                get_model_variable_indices, add_dimension_to_variable, &
+                                finished_adding_domain, state_structure_info, &
+                                get_io_num_unique_dims
 use ensemble_manager_mod, only : ensemble_type
 use dart_time_io_mod, only  : read_model_time, write_model_time
 use default_model_mod, only : pert_model_copies, nc_write_model_vars
@@ -71,6 +77,8 @@ character(len=256), parameter :: source   = &
 character(len=32 ), parameter :: revision = "$Revision: 12591 $"
 character(len=128), parameter :: revdate  = "$Date: 2018-05-21 13:49:26 -0700 (Mon, 21 May 2018) $"
 
+integer :: dom_id
+
 character(len=512) :: string1, string2, string3
 
 type(location_type), allocatable :: state_loc(:)  ! state locations, compute once and store for speed
@@ -86,11 +94,12 @@ integer  :: time_step_days      = 0
 integer  :: time_step_seconds   = 3600
 
 integer          :: model_size
+integer          :: nvar
 ! TODO revise var_names
 character(len=MAX_STATE_NAME_LEN) :: var_names(MAX_STATE_VARIABLES)
 character(len=MAX_STATE_NAME_LEN) :: var_qtynames(MAX_STATE_VARIABLES)
+integer :: qty_list(MAX_STATE_VARIABLES)
 
-! TODO check what is NF90_MAX_NAME
 ! Everything needed to describe a variable
 type progvartype
    private
@@ -101,16 +110,22 @@ type progvartype
 end type progvartype
 
 type(progvartype), dimension(MAX_STATE_VARIABLES) :: progvar
+logical :: debug = .true.  ! turn up for more and more debug messages
+character(len=256) :: template_file = 'null'   ! optional; sets sizes of arrays
 
 ! uncomment this, the namelist related items in the 'use utilities' section above,
 ! and the namelist related items below in static_init_model() to enable the
 ! run-time namelist settings.
 ! TODO revise the model namelist
 namelist /model_nml/            &
-   model_size,                  &
+   nvar,                        &
    time_step_days,              &
    time_step_seconds,           &
-   var_names
+   debug,                       &
+   var_names,                   &
+   template_file,               &
+   var_qtynames
+
 !namelist /model_nml/ model_size, time_step_days, time_step_seconds, pflotran_variables
 
 ! Define the grids/locations information
@@ -143,14 +158,15 @@ contains
 subroutine static_init_model()
 
  real(r8) :: x_loc, y_loc, z_loc
- integer  :: index_in, state_ind, i, j, k, dom_id
+ integer  :: index_in, state_ind, i, j, k
  integer  :: iunit, io, ivar
+ integer  :: num_dims
 
 ! Print module information to log file and stdout.
 call register_module(source, revision, revdate)
 
 ! Read the model information from model_nml in input.nml
-! the model namelist includes model_size and the list of variable names
+! the model namelist includes and the list of variable names
 call find_namelist_in_file("input.nml", "model_nml", iunit)
 read(iunit, nml = model_nml, iostat = io)
 call check_namelist_read(iunit, io, "model_nml")
@@ -173,13 +189,14 @@ call check_namelist_read(iunit, io, "grid_nml")
 ! Change model_size*nx*ny*nz to a more flexible count of
 ! the number of locations to be assimilated
 ! Create storage for locations
-allocate(state_loc(model_size*nx*ny*nz))
+model_size = nvar*nx*ny*nz
+allocate(state_loc(model_size))
 
 ! Define the locations of the model state variables
 ! naturally, this can be done VERY differently for more complicated models.
 ! set_location() is different for 1D vs. 3D models, not surprisingly.
 index_in = 1
-do state_ind = 1, model_size
+do ivar = 1, nvar
     do k = 1, nz
         do j = 1, ny
             do i = 1,nx
@@ -202,18 +219,50 @@ time_step = set_time(time_step_seconds, &
 ! Read the table of state vector/variables and DART variable quantity from obs_def_***_mod.f90 file
 !call read_variable_info(iunit, model_size, var_names)
 
-! TODO
+! Get the variable quantity/kind indices
+do ivar = 1, nvar
+    qty_list(ivar) = get_index_for_quantity(var_qtynames(ivar))
+end do
+
 ! Add all the variable names to the domain by using add_domain()
 ! tell dart the size of the model
-! Actually, we are using add_domain_from_spec() function
-!dom_id = add_domain(int(model_size,i8))
-dom_id = add_domain(model_size, var_names)
+if (template_file /= 'null') then
+    ! Use add_domain_from_file() function
+    dom_id = add_domain(template_file, nvar, var_names, qty_list)
 
-do ivar = 1, model_size
+else
+    ! Use add_domain_from_spec() function
+    dom_id = add_domain(nvar, var_names, qty_list)
+
+    ! TODO
+    ! The size of the dimension time and ensemble member should be revised later on
+    ! Add the dimension to each variable
+    do ivar = 1, nvar
+        !call add_dimension_to_variable(dom_id, ivar, "time", 6)
+        !call add_dimension_to_variable(dom_id, ivar, "member", 1)
+        call add_dimension_to_variable(dom_id, ivar, "x_location", nx)
+        call add_dimension_to_variable(dom_id, ivar, "y_location", ny)
+        call add_dimension_to_variable(dom_id, ivar, "z_location", nz)
+    end do
+
+    call finished_adding_domain(dom_id)
+
+    print *, 'Test...'
+    print *, get_index_start(dom_id,1), get_index_end(dom_id,1)
+    print *, get_index_start(dom_id,2), get_index_end(dom_id,2)
+    !num_dims = get_io_num_unique_dims(dom_id)
+    !print *, num_dims
+    !call state_structure_info(dom_id)
+endif
+
+do ivar = 1, nvar
     progvar(ivar)%varname     = var_names(ivar)
     progvar(ivar)%domain      = dom_id
     progvar(ivar)%dartqtyname = var_qtynames(ivar)
-    progvar(ivar)%dartqtyind  = get_index_for_quantity(var_qtynames(ivar))
+    progvar(ivar)%dartqtyind  = qty_list(ivar)
+
+    !print *, varstring, index_in, get_index_start(progvar(n)%domain, varstring), get_index_end(progvar(n)%domain, varstring)
+    !print *, progvar(ivar)
 end do
 
 end subroutine static_init_model
@@ -312,31 +361,109 @@ end subroutine init_time
 ! state variable is observed), this can be a NULL INTERFACE.
 
 ! TODO
-! Why do we need model_interpolate function in DA?
-subroutine model_interpolate(state_handle, ens_size, location, obs_type, expected_obs, istatus)
+subroutine model_interpolate(state_handle, ens_size, location, obs_qty, expected_obs, istatus)
 
 
 type(ensemble_type), intent(in) :: state_handle
 integer,             intent(in) :: ens_size
 type(location_type), intent(in) :: location
-integer,             intent(in) :: obs_type
+integer,             intent(in) :: obs_qty
 real(r8),           intent(out) :: expected_obs(ens_size) !< array of interpolated values
 integer,            intent(out) :: istatus(ens_size)
 
-! This should be the result of the interpolation of a
-! given kind (itype) of variable at the given location.
-expected_obs(:) = MISSING_R8
+! Local storage
+real(r8), dimension(LocationDims) :: loc_array
+real(r8) :: loc_x, loc_y, loc_z
+integer  :: loc_x_ind, loc_y_ind, loc_z_ind
+real(r8), dimension(LocationDims) :: loc_lr, loc_ll, loc_ur, loc_ul
+integer, dimension(LocationDims)  :: loc_lr_ind, loc_ll_ind, loc_ur_ind, loc_ul_ind
+real(r8) :: w_lr, w_ll, w_ur, w_ul
+real(r8) :: val(2,2, ens_size)
+integer  :: e
 
-! The return code for successful return should be 0.
-! Any positive number is an error.
-! Negative values are reserved for use by the DART framework.
-! Using distinct positive values for different types of errors can be
-! useful in diagnosing problems.
-istatus(:) = 1
+! Let's assume failure.  Set return val to missing, then the code can
+! just set istatus to something indicating why it failed, and return.
+! If the interpolation is good, the expected_obs will be set to the
+! good value, and the last line here sets istatus to 0.
+! make any error codes set here be in the 10s
+expected_obs(:) = MISSING_R8
+istatus(:) = 0
+
+! Get the individual location values
+loc_array = get_location(location)
+loc_x     = loc_array(1)
+loc_y     = loc_array(2)
+loc_z     = loc_array(3)
+
+if ((debug) .and. do_output()) print *, 'requesting interpolation at ', loc_x,loc_y,loc_z
+
+! TODO
+! For now, this is applied to structured cartesian grids. Later on, it should be modified to unstructured grids.
+! Get the four locations that surrounds the location to be interpolated
+! Four locations: lower right, lower left, upper right, upper left
+! And their indices.
+
+
+! Get the weights of the four locations (based on the inverse distances of
+! these locations to the location to be interpolated)
+w_ul = sqrt(sum((loc_ul-loc_array)**2))
+w_ur = sqrt(sum((loc_ur-loc_array)**2))
+w_ll = sqrt(sum((loc_ll-loc_array)**2))
+w_lr = sqrt(sum((loc_lr-loc_array)**2))
+w_ul = w_ul / (w_ul+w_ur+w_ll+w_lr)
+w_ur = w_ur / (w_ul+w_ur+w_ll+w_lr)
+w_ll = w_ll / (w_ul+w_ur+w_ll+w_lr)
+w_lr = w_lr / (w_ul+w_ur+w_ll+w_lr)
+
+! Get the values of the four locations
+! Four locations: lower right, lower left, upper right, upper left
+val(1, 1,:) =  get_val(state_handle, ens_size, loc_ul_ind, obs_qty)
+val(1, 2,:) =  get_val(state_handle, ens_size, loc_ur_ind, obs_qty)
+val(2, 1,:) =  get_val(state_handle, ens_size, loc_ll_ind, obs_qty)
+val(2, 2,:) =  get_val(state_handle, ens_size, loc_lr_ind, obs_qty)
+
+! Conduct the interpolation based on the weighted summation of the state values at the four locations
+expected_obs = w_ul * val(1,1,:) + w_ur * val(1,2,:) + w_ll * val(2,1,:) + w_lr * val(2,2,:)
+
+! if the forward operater failed set the value to missing_r8
+do e = 1, ens_size
+   if (istatus(e) /= 0) then
+      expected_obs(e) = MISSING_R8
+   endif
+enddo
 
 end subroutine model_interpolate
 
 
+!------------------------------------------------------------------
+function get_val(state_handle, ens_size, loc_array_ind, var_kind)
+
+type(ensemble_type), intent(in) :: state_handle
+integer, dimension(LocationDims) :: loc_array_ind
+!integer, intent(in) :: lon_index, lat_index, level, var_kind
+integer, intent(in) :: var_kind
+integer, intent(in) :: ens_size
+real(r8) :: get_val(ens_size)
+
+integer :: loc_x_ind, loc_y_ind, loc_z_ind
+
+character(len = 129) :: msg_string
+integer :: var_id
+integer(i8) :: state_index
+
+! Get the individual location values
+loc_x_ind = loc_array_ind(1)
+loc_y_ind = loc_array_ind(2)
+loc_z_ind = loc_array_ind(3)
+
+var_id = get_varid_from_kind(dom_id, var_kind)
+
+! Find the index into state array and return this value
+!dom_id = progvar(var_id)%domain
+state_index = get_dart_vector_index(loc_x_ind, loc_y_ind, loc_z_ind, dom_id, var_id)
+get_val     = get_state(state_index, state_handle)
+
+end function get_val
 
 !------------------------------------------------------------------
 ! Returns the smallest increment in time that the model is capable
@@ -364,35 +491,50 @@ end function shortest_time_between_assimilations
 ! required for all filter applications as it is required for computing
 ! the distance between observations and state variables.
 ! TODO
-subroutine get_state_meta_data(index_in, location, var_type)
+subroutine get_state_meta_data(index_in, location, var_qty)
 
 integer(i8),         intent(in)  :: index_in
 type(location_type), intent(out) :: location
-integer,             intent(out), optional :: var_type
+integer,             intent(out), optional :: var_qty
 
 integer  :: n
-character(len=32) :: varstring
+integer  :: loc_x_ind, loc_y_ind, loc_z_ind
+integer(i8) :: index_start, index_end
+integer  :: var_id, dom_id
+character(len=256) :: varstring
+character(len=256) :: kind_string
 
 ! these should be set to the actual location and state quantity
 location = state_loc(index_in)
 
-! Get the variable type/variable name
-if (present(var_type)) then
+!print *, get_location(location), index_in
 
-   var_type = MISSING_I
+! Get the indices of the location and the associated variable information
+!call get_model_variable_indices(index_in, loc_x_ind, loc_y_ind, loc_z_ind, var_id, dom_id, var_qty, kind_string)
 
-   FINDTYPE : do n = 1, model_size
-      varstring = progvar(n)%varname
-      if((index_in >= get_index_start(progvar(n)%domain, varstring)).and. &
-         (index_in <= get_index_end(progvar(n)%domain, varstring)) ) then
-         var_type = progvar(n)%dartqtyind
-         !var_type = varstring
-         !var_type = progvar(n)%dart_kind
-         exit FINDTYPE
+! Get the variable kind/variable name
+if (present(var_qty)) then
+
+   var_qty = MISSING_I
+
+   FINDQTY : do n = 1, nvar
+      dom_id      = progvar(n)%domain
+      varstring   = progvar(n)%varname
+      index_start = get_index_start(dom_id,varstring)
+      index_end   = get_index_end(dom_id,varstring)
+      if (debug) then
+          print *, varstring, index_in, dom_id, index_start, index_end
       endif
-   enddo FINDTYPE
+      if((index_in >= index_start).and. &
+         (index_in <= index_end  ) ) then
+         var_qty = progvar(n)%dartqtyind
+         !var_qty = varstring
+         !var_qty = progvar(n)%dart_kind
+         exit FINDQTY
+      endif
+   enddo FINDQTY
 
-   if( var_type == MISSING_I ) then
+   if( var_qty == MISSING_I ) then
       write(string1,*) 'Problem, cannot find base_offset, indx is: ', index_in
       call error_handler(E_ERR,'get_state_meta_data',string1,source,revision,revdate)
    endif
