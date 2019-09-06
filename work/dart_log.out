@@ -4083,3 +4083,3367 @@
  Program model_mod_check
  --------------------------------------
 
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5  9 48  3
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5  9 48  3
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5  9 56 53
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5  9 56 53
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5  9 57  5
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5  9 57  5
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10  6  9
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10  6  9
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 10 49
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 10 49
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 14 32
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 14 32
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 15 20
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 15 20
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 15 22
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 15 22
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 15 40
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 15 40
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 16 37
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 16 37
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 16 49
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 16 49
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 18 27
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 18 27
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 18 40
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 18 40
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 19  8
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 19  8
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 21 50
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 21 50
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 22  3
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 22  3
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 22 59
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 22 59
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 23 11
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 23 11
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 25  9
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 25  9
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 25 21
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 25 21
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 27  6
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 27  6
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 28 36
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 28 36
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 29 28
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 29 28
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 29 41
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 29 41
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 30 11
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 30 11
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 30 24
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 30 24
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 46  0
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 46  0
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 46 12
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 46 13
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 46 35
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 46 35
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 46 47
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 46 47
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 59 36
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 10 59 36
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11  9 31
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11  9 31
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11  9 43
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11  9 43
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 11 31
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 11 31
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 11 44
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 11 44
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 12 14
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 12 14
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 12 26
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 12 26
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 12 52
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 12 52
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 13  5
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 13  5
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 14 42
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 14 42
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 14 55
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 14 55
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 15 36
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 15 36
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 15 49
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 15 49
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 16 18
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 16 18
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 16 30
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 16 30
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 26 59
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 26 59
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 35 43
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 35 43
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 37 25
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 37 25
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 39 13
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 39 13
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 39 40
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 39 40
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 42 45
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 42 45
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 46 35
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 46 35
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 47  6
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 47  6
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 47 51
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 47 51
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 49  0
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 49  0
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 49 56
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 49 56
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 50 44
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 50 44
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 52 48
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 52 48
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 53 32
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 53 32
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 54 56
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 54 56
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 56 20
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 11 56 20
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 12  1  0
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 12  1  0
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 12  1 13
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 12  1 13
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 12  2 11
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 12  2 11
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 12  2 24
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 12  2 24
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 12  3  1
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 12  3  1
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 12  3 14
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 12  3 14
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 12  3 46
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 12  3 46
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 12  3 59
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 12  3 59
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 12  6 19
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 12  6 19
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 12  6 32
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 12  6 32
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 20 18
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 20 18
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 20 30
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 20 30
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 22 53
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 22 53
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 24 36
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 24 36
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 24 49
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 24 49
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 30 57
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 30 57
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 31  9
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 31  9
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 32  9
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 32  9
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 32 22
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 32 22
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 34  3
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 34  3
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 34 16
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 34 16
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 40 31
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 40 31
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 40 44
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 40 44
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 41  7
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 41  7
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 41 20
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 41 20
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 41 43
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 41 43
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 41 56
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 41 56
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 44 45
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 44 45
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 44 58
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 44 58
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 46  3
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 46  3
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 46 16
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 46 16
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 49  8
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 49  8
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 49 21
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 49 21
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 49 57
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 13 49 57
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 12 56
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 12 56
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 13  0
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 13  0
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 13 46
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 13 46
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 14 16
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 14 16
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 14 29
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 14 29
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 15  7
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 15  7
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 18 55
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 18 55
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 19 38
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 19 38
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 19 51
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 19 51
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 31 18
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 31 18
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 31 31
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+ ERROR FROM:
+  load_variable_ids, nf90_inq_var_id
+  routine: load_variable_ids, nf90_inq_var_id
+  message:  domain            1 , variable #           1  "LIQUID_SATURATION" from file "../utils/pflotran_test.nc": NetCDF: Variable not found
+  message: ...
+ 
+  source file: $URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/assimilation_code/modules/utilities/netcdf_utilities_mod.f90 $
+  file revision: $Revision: 12664 $
+  revision date: $Date: 2018-06-12 15:04:36 -0700 (Tue, 12 Jun 2018) $
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 32 41
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 32 41
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 32 47
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 32 47
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 33 48
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 33 48
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 35 57
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 35 57
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 36 11
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 36 11
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 36 27
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 36 27
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 38 57
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 38 57
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 39  9
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 39  9
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 42 19
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 42 19
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 42 31
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 42 31
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 44  9
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 44  9
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 44 22
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 44 22
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 44 42
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 44 42
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 46 36
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 46 36
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 51 29
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+   Checking for indices into the state vector that are close to
+   ...  X/Y/Z:        0.0000000            2.3000000            5.6000000 for "QTY_LIQUID_SATURATION"
+ 
+  X/Y/Z:        0.0000000            2.0000000            6.0000000 is index           39 (QTY_LIQUID_SATURATION)
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 14 51 29
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 15  1  5
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+   Checking for indices into the state vector that are close to
+   ...  X/Y/Z:        0.0000000            2.3000000            5.6000000 for "QTY_LIQUID_SATURATION"
+ 
+  X/Y/Z:        0.0000000            2.0000000            6.0000000 is index           39 (QTY_LIQUID_SATURATION)
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 15  1  5
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 15 46 31
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 15 46 31
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 15 46 40
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 15 46 40
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 15 48 29
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 15 48 29
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 15 50 13
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 15 50 13
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 15 50 26
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 15 50 26
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 15 51 52
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 15 51 52
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 15 52  5
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 15 52  5
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 16 43 58
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 16 43 58
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 16 44 11
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 16 44 11
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 16 48 32
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 16 48 32
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 16 48 45
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 16 48 45
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 16 49 57
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 16 49 57
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 16 50 10
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 16 50 10
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 16 52 13
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ ../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../obs_type/obs_def_toy_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 16 52 13
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 16 52 27
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9  5 16 52 27
+ Program model_mod_check
+ --------------------------------------
+

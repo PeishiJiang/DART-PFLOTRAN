@@ -32,6 +32,7 @@ for t in time_set:
     state_set[t] = {}
     for varname in list(dataset.keys()):
         state_set[t][varname] = dataset[varname][:]
+        print(dataset[varname][:].shape)
 
 # ntime    = len(time_set)
 ntime    = 1
@@ -43,6 +44,7 @@ state_set2 = dict.fromkeys(var_set)
 for var in var_set:
     state_set2[var] = np.zeros([nx,ny,nz])
     state_set2[var][:,:,:] = state_set[time_set[ntime-1]][var]
+    # print(state_set[time_set[ntime-1]][var])
     # state_set2[var] = np.zeros([ntime,nx,ny,nz])
     # for i in range(ntime):
         # t = time_set[i]
@@ -100,9 +102,14 @@ for var in var_set:
     varn = varn.upper()
     # Save the variable into netcdf
     # vargrp               = root_nc.createVariable(varn, 'f8', ('time', 'member', 'x_location','y_location','z_location'))
-    vargrp               = root_nc.createVariable(varn, 'f8', ('x_location','y_location','z_location'))
+    # vargrp               = root_nc.createVariable(varn, 'f8', ('x_location','y_location','z_location'))
+    # Save the variables in the opposite ordering so that the Fortran-NetCDF can read them in a correct way
+    # See more explanations at: https://github.com/Unidata/netcdf4-python/issues/337
+    vargrp               = root_nc.createVariable(varn, 'f8', ('z_location','y_location','x_location'))
     vargrp.unit          = varunit
     var_dict_nc[varn]    = vargrp
-    var_dict_nc[varn][:] = state_set2[var]
+    # var_dict_nc[varn][:] = state_set2[var]
+    var_dict_nc[varn][:] = np.asfortranarray(state_set2[var].T)
+    print(var_dict_nc[varn][:][1,:,0])
 
 root_nc.close()

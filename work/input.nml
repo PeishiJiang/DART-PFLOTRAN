@@ -28,8 +28,6 @@
    /
 
 &filter_nml
-   single_file_in               = .true.,
-   input_state_files            = ''
    input_state_file_list        = 'filter_input_list.txt'
 
    stages_to_write  = 'preassim', 'analysis', 'output'
@@ -50,7 +48,7 @@
    perturbation_amplitude       = 0.2,
    distributed_state            = .true.
 
-   async                        = 0,
+   async                        = 2,
    adv_ens_command              = "./advance_model.csh",
 
    obs_sequence_in_name         = "obs_seq.out",
@@ -219,13 +217,17 @@
 &model_mod_check_nml
    input_state_files    = '../utils/pflotran_test.nc'
    output_state_files   = 'mmc_output.nc'
-   test1thru            = 3
+   all_metadata_file    = 'metadata.txt'
+   test1thru            = 4
    run_tests            = -1
    x_ind                = 100
-   loc_of_interest      = 0.3
-   quantity_of_interest = 'QTY_LIQUID_PRESSURE'
-   interp_test_dx       = 0.02
-   interp_test_xrange   = 0.0, 1.0
+   loc_of_interest      = 0.0, 2.3, 5.6
+   quantity_of_interest = 'QTY_LIQUID_SATURATION'
+   interp_test_dy       = 0.5
+   interp_test_dz       = 0.5
+   interp_test_xrange   = .0, .0
+   interp_test_yrange   = 3.0, 5.0
+   interp_test_zrange   = 3.0, 6.0
    verbose              = .true.
    /
 
