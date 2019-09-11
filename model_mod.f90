@@ -191,6 +191,7 @@ do ivar = 1, nvar
     qty_list(ivar) = get_index_for_quantity(var_qtynames(ivar))
 end do
 
+print *, 'Wait here'
 ! Add all the variable names to the domain by using add_domain()
 ! tell dart the size of the model
 if (template_file /= 'null') then
@@ -222,6 +223,7 @@ else
     !call state_structure_info(dom_id)
 endif
 
+print *, 'Wait here b'
 ! TODO
 ! Read a file about the spatial information of the model.
 ! For now, the information is read from input.nml file.
@@ -282,6 +284,7 @@ do ivar = 1, nvar
     !print *, varstring, index_in, get_index_start(progvar(n)%domain, varstring), get_index_end(progvar(n)%domain, varstring)
     !print *, progvar(ivar)
 end do
+print *, 'Wait here c'
 
 end subroutine static_init_model
 

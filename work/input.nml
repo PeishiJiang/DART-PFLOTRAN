@@ -130,8 +130,8 @@
    time_step_days      = 0,
    time_step_seconds   = 3600,
    var_names           = 'LIQUID_SATURATION', 'LIQUID_PRESSURE'
-   template_file       = '../utils/pflotran_test.nc'
-   var_qtynames        = 'QTY_LIQUID_SATURATION', 'QTY_LIQUID_PRESSURE'
+   template_file       = '../data_files/pflotran_test.nc'
+   var_qtynames        = 'QTY_PFLOTRAN_LIQUID_SATURATION', 'QTY_PFLOTRAN_LIQUID_PRESSURE'
    /
 
 ! TODO
@@ -180,7 +180,7 @@
    output_obs_def_mod_file = '../../../observations/forward_operators/obs_def_mod.f90'
    input_obs_kind_mod_file = '../obs_kind/DEFAULT_obs_kind_mod.F90'
   output_obs_kind_mod_file = '../../../assimilation_code/modules/observations/obs_kind_mod.f90'
-               input_files = '../obs_type/obs_def_toy_mod.f90'
+               input_files = '../obs_type/obs_def_pflotran_mod.f90'
    /
 
 &obs_sequence_tool_nml
@@ -215,14 +215,14 @@
    /
 
 &model_mod_check_nml
-   input_state_files    = '../utils/pflotran_test.nc'
+   input_state_files    = '../data_files/pflotran_test.nc'
    output_state_files   = 'mmc_output.nc'
    all_metadata_file    = 'metadata.txt'
    test1thru            = 4
    run_tests            = -1
    x_ind                = 100
    loc_of_interest      = 0.0, 2.3, 5.6
-   quantity_of_interest = 'QTY_LIQUID_SATURATION'
+   quantity_of_interest = 'QTY_PFLOTRAN_LIQUID_SATURATION'
    interp_test_dy       = 0.5
    interp_test_dz       = 0.5
    interp_test_xrange   = .0, .0
