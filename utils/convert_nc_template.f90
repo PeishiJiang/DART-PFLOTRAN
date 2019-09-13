@@ -31,7 +31,10 @@ use obs_utilities_mod, only : getvar_real, get_or_fill_QC, add_obs_to_seq, &
 
 use           netcdf
 
-use obs_kind_mod, only: TEMPERATURE
+!$TODO Add here 1
+! Add the definition of different variables
+!use      obs_kind_mod, only : TEMPERATURE
+!$END
 
 implicit none
 
@@ -54,13 +57,25 @@ real(r8), allocatable :: xloc(:), yloc(:), zloc(:), &
                          tobs(:), tobsu(:)
 
 
-real(r8), allocatable :: temperature_val(:,:)
+!$TODO Add here 2
+! Add the definition of different variables values
+!real(r8), allocatable :: temp(:,:)
+!$END
 
-real(r8) :: temperature_miss
+!$TODO Add here 3
+! Add the definition of variable missing value
+!real(r8) :: temp_miss
+!$END
 
-integer, allocatable :: qc_temperature(:,:)
+!$TODO Add here 4
+! Add the definition of variable quality control
+!integer,  allocatable :: qc_temp(:,:)
+!$END
 
-integer, parameter :: nvar=1
+!$TODO Add here 5
+! Add the parameter for the total number of variables
+!integer,  parameter   :: nvar = 1
+!$END
 
 type(obs_sequence_type) :: obs_seq
 type(obs_type)          :: obs, prev_obs
@@ -95,8 +110,9 @@ allocate(yloc(nloc)) ; allocate(ylocu(nloc*ntime))
 allocate(zloc(nloc)) ; allocate(zlocu(nloc*ntime))
 allocate(tobs(ntime)); allocate(tobsu(nloc*ntime))
 
-allocate(temperature_val(ntime,nloc))
-allocate(qc_temperature(ntime,nloc))
+!$TODO Add here 6
+!allocate(temp(ntime,nloc))    ;  allocate(qc_temp(ntime,nloc))
+!$END
 
 ! read in the data arrays
 call    getvar_real(ncid, "time",  tobs      ) ! time index
@@ -104,14 +120,18 @@ call    getvar_real(ncid, "x_location",  xloc) ! x location or easting
 call    getvar_real(ncid, "y_location",  yloc) ! y location or northing
 call    getvar_real(ncid, "z_location",  zloc) ! z location or latitude
 
-call getvar_real_2d(ncid, 'TEMPERATURE',temperature_val,temperature_miss)
+!$TODO Add here 7
+!call getvar_real_2d(ncid, "TEMPERATURE",  temp, temp_miss) ! temperature
+!$END
 
+!$TODO Add here 8
 ! Define or get the quality control value for each observation variable
-if (use_input_qc) then
-call getvar_int_2d(ncid, 'TEMPERATUREQCR', qc_temperature)
-else
-qc_temperature = 0
-endif
+!if (use_input_qc) then
+   !call getvar_int_2d(ncid, "TEMPERATUREQCR",   qc_temp) ! wind direction qc
+!else
+   !qc_temp = 0
+!endif
+!$END
 
 !  either read existing obs_seq or create a new one
 call static_init_obs_sequence()
@@ -165,12 +185,18 @@ locloop: do k = 1, nloc
            tobs(n)  == tobsu(i) ) cycle locloop
     end do
 
-! Add each observation value here
-if ( &
-  temperature_val(n,k) /= temperature_miss .and. qc_temperature(n,k) == 0) then
-   call create_3d_obs(xloc(k), yloc(k), zloc(k), 0, temperature_val(n,k), TEMPERATURE, oerr, oday, osec, qc, obs)
-   call add_obs_to_seq(obs_seq, obs, time_obs, prev_obs, prev_time, first_obs)
-endif
+!$TODO Add here 9
+! Add each observation value
+  !if ( temp(n,k) /= temp_miss .and. qc_temp(n,k) == 0) then
+
+   !!if ( oerr == missing_r8)  cycle locloop
+
+      !call create_3d_obs(xloc(k), yloc(k), zloc(k), 0, temp(n,k), &
+                         !TEMPERATURE, oerr, oday, osec, qc, obs)
+      !call add_obs_to_seq(obs_seq, obs, time_obs, prev_obs, prev_time, first_obs)
+
+  !endif
+!$END
 
   nused = nused + 1
   xlocu(nused) = xloc(k)

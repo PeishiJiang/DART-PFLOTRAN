@@ -59,11 +59,12 @@ zloc = root_nc.createVariable('z_location', 'f8', ('location',))
 #        time:units = "days since 1986-01-01 00:00:00" ;
 #        time:calendar = "gregorian" ;
 # Create the attributes
-zloc.units  = 'm'
-yloc.units  = 'm'
-xloc.units  = 'm'
-times.units = 'minutes since 2017-04-01 00:00:00'
+zloc.units, zloc.type  = 'm', 'dimension_value'
+yloc.units, yloc.type  = 'm', 'dimension_value'
+xloc.units, xloc.type  = 'm', 'dimension_value'
+times.units    = 'minutes since 2017-04-01 00:00:00'
 times.calendar = 'gregorian'
+times.type     = 'dimension_value'
 times[:] = date2num(dates,units=times.units,calendar=times.calendar)
 
 # Write coordinates values
@@ -81,5 +82,6 @@ vargrp      = root_nc.createVariable(
                fill_value=-99999)
 vargrp.unit = 'C'
 vargrp[:]   = temperature.T
+vargrp.type = 'observation_value'
 
 root_nc.close()

@@ -31,7 +31,10 @@ use obs_utilities_mod, only : getvar_real, get_or_fill_QC, add_obs_to_seq, &
 
 use           netcdf
 
-use obs_kind_mod, only: TEMPERATURE
+! TODO
+! How to make it in a more generic way to obtain the observation quantities in obs_kind_mod?
+! Or should I generate a separate converter for each case?
+use      obs_kind_mod, only : TEMPERATURE
 
 implicit none
 
@@ -53,14 +56,17 @@ real(r8), allocatable :: xloc(:), yloc(:), zloc(:), &
                          xlocu(:), ylocu(:), zlocu(:), &
                          tobs(:), tobsu(:)
 
+! TODO
+! Same here, the definition of observation variables should be more generic.
+real(r8) :: temp_miss
 
-real(r8), allocatable :: temperature_val(:,:)
+! TODO
+! Same here, the definition of observation variables should be more generic.
+real(r8), allocatable :: temp(:,:)
+integer,  allocatable :: qc_temp(:,:)
 
-real(r8) :: temperature_miss
-
-integer, allocatable :: qc_temperature(:,:)
-
-integer, parameter :: nvar=1
+! TODO nvar should be changed according to the number of observation variables in .nc file
+integer,  parameter   :: nvar = 1
 
 type(obs_sequence_type) :: obs_seq
 type(obs_type)          :: obs, prev_obs
@@ -95,8 +101,7 @@ allocate(yloc(nloc)) ; allocate(ylocu(nloc*ntime))
 allocate(zloc(nloc)) ; allocate(zlocu(nloc*ntime))
 allocate(tobs(ntime)); allocate(tobsu(nloc*ntime))
 
-allocate(temperature_val(ntime,nloc))
-allocate(qc_temperature(ntime,nloc))
+allocate(temp(ntime,nloc))    ;  allocate(qc_temp(ntime,nloc))
 
 ! read in the data arrays
 call    getvar_real(ncid, "time",  tobs      ) ! time index
@@ -104,13 +109,14 @@ call    getvar_real(ncid, "x_location",  xloc) ! x location or easting
 call    getvar_real(ncid, "y_location",  yloc) ! y location or northing
 call    getvar_real(ncid, "z_location",  zloc) ! z location or latitude
 
-call getvar_real_2d(ncid, 'TEMPERATURE',temperature_val,temperature_miss)
+call getvar_real_2d(ncid, "TEMPERATURE",  temp, temp_miss) ! temperature
 
-! Define or get the quality control value for each observation variable
+! TODO
+! if user says to use them, read in QCs if present
 if (use_input_qc) then
-call getvar_int_2d(ncid, 'TEMPERATUREQCR', qc_temperature)
+   call getvar_int_2d(ncid, "TEMPERATUREQCR",   qc_temp) ! wind direction qc
 else
-qc_temperature = 0
+   qc_temp = 0
 endif
 
 !  either read existing obs_seq or create a new one
@@ -165,12 +171,17 @@ locloop: do k = 1, nloc
            tobs(n)  == tobsu(i) ) cycle locloop
     end do
 
-! Add each observation value here
-if ( &
-  temperature_val(n,k) /= temperature_miss .and. qc_temperature(n,k) == 0) then
-   call create_3d_obs(xloc(k), yloc(k), zloc(k), 0, temperature_val(n,k), TEMPERATURE, oerr, oday, osec, qc, obs)
-   call add_obs_to_seq(obs_seq, obs, time_obs, prev_obs, prev_time, first_obs)
-endif
+! TODO How to make it in a more generic way to obtain the observation quantities in obs_kind_mod?  Or should I generate a separate converter for each case?
+  ! add wind component data to obs_seq
+  if ( temp(n,k) /= temp_miss .and. qc_temp(n,k) == 0) then
+
+   !if ( oerr == missing_r8)  cycle locloop
+
+      call create_3d_obs(xloc(k), yloc(k), zloc(k), 0, temp(n,k), &
+                         TEMPERATURE, oerr, oday, osec, qc, obs)
+      call add_obs_to_seq(obs_seq, obs, time_obs, prev_obs, prev_time, first_obs)
+
+  endif
 
   nused = nused + 1
   xlocu(nused) = xloc(k)
