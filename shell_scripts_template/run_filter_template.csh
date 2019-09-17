@@ -89,8 +89,8 @@ set ASYNC_TYPE = `echo $ASYNCSTRING[3] | sed -e "s#,##"`
 if ( "${ASYNC_TYPE}" == "0" || "${ASYNC_TYPE}" == "2") then
   set parallel_model = "false"
 else if ( "${ASYNC_TYPE}" == "4") then
-set parallel_model = "true"
-else 
+  set parallel_model = "true"
+else
   echo 'cannot autodetect async value in the filter_nml namelist in input.nml file.'
   echo 'hardcode the parallel_model shell variable and comment out these lines.'
   exit -1

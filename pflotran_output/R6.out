@@ -1,0 +1,270 @@
+ Extent of Gridded Domain
+  X: 0.0000000000000000 - 1.0000000000000000
+  Y: 0.0000000000000000 - 1.0000000000000000
+  Z: -0.64000000000000001 - 0.0000000000000000
+
+
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+  Initial Condition
+
+--------------------------------------------------------------------------------
+          Flow Condition:   initial
+                  Region:   all
+--------------------------------------------------------------------------------
+
+  Flow Condition: initial
+    Synchronize time with update: no
+    Time units: yr
+    Length units: m
+      Datum:
+
+    Sub Condition: pressure
+      Type: hydrostatic
+      Gradient:
+      Data:
+        Dataset: Unnamed Ascii Dataset
+          Type: dataset_ascii_type
+          Transient: no
+          Array Rank:  1
+
+    Sub Condition: temperature
+      Type: dirichlet
+      Gradient:
+      Data:
+        Dataset: Unnamed Ascii Dataset
+          Type: dataset_ascii_type
+          Transient: no
+          Array Rank:  1
+
+--------------------------------------------------------------------------------
+
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+  Boundary Condition
+
+--------------------------------------------------------------------------------
+          Flow Condition:   flow_top
+                  Region:   top
+--------------------------------------------------------------------------------
+
+  Flow Condition: flow_top
+    Synchronize time with update: no
+    Time units: yr
+    Length units: m
+      Datum:
+
+    Sub Condition: pressure
+      Type: neumann
+      Gradient:
+      Data:
+        Dataset: Unnamed Ascii Dataset
+          Type: dataset_ascii_type
+          Transient: no
+          Array Rank:  1
+
+    Sub Condition: temperature
+      Type: dirichlet
+      Gradient:
+      Data:
+        Dataset: Unnamed Ascii Dataset
+          Type: dataset_ascii_type
+          Filename: ../pflotran_input/temp_top.dat
+          Is transient?: yes
+          Number of times:   1001
+          Is cyclic?: no
+          Buffer:
+            Rank:  2
+            Dims:    11001
+            Buffer Slice Size:   0
+          Array Rank:  1
+
+--------------------------------------------------------------------------------
+
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+  Boundary Condition
+
+--------------------------------------------------------------------------------
+          Flow Condition:   flow_bottom
+                  Region:   bottom
+--------------------------------------------------------------------------------
+
+  Flow Condition: flow_bottom
+    Synchronize time with update: no
+    Time units: yr
+    Length units: m
+      Datum:
+        Dataset: Unnamed Ascii Dataset
+          Type: dataset_ascii_type
+          Transient: no
+          Array Rank:  3
+
+    Sub Condition: pressure
+      Type: hydrostatic
+      Gradient:
+      Data:
+        Dataset: Unnamed Ascii Dataset
+          Type: dataset_ascii_type
+          Transient: no
+          Array Rank:  1
+
+    Sub Condition: temperature
+      Type: dirichlet
+      Gradient:
+      Data:
+        Dataset: Unnamed Ascii Dataset
+          Type: dataset_ascii_type
+          Filename: ../pflotran_input/temp_bottom.dat
+          Is transient?: yes
+          Number of times:   1001
+          Is cyclic?: no
+          Buffer:
+            Rank:  2
+            Dims:    11001
+            Buffer Slice Size:   0
+          Array Rank:  1
+
+--------------------------------------------------------------------------------
+
+ Requested processors and decomposition =     1, npx,y,z=   -1  -1  -1
+ Actual decomposition: npx,y,z=    1   1   1
+
+
+FLOW Time Stepper
+                 acceleration: on
+       acceleration threshold: 8
+       number of ramp entries: 8
+                ramp entry #1: 2.0000
+                ramp entry #2: 2.0000
+                ramp entry #3: 2.0000
+                ramp entry #4: 2.0000
+                ramp entry #5: 2.0000
+                ramp entry #6: 1.8000
+                ramp entry #7: 1.6000
+                ramp entry #8: 1.4000
+                ramp entry #9: 1.2000
+               ramp entry #10: 1.0000
+               ramp entry #11: 1.0000
+               ramp entry #12: 1.0000
+               ramp entry #13: 1.0000
+      maximum number of steps: 999999
+constant time steps threshold: 5
+       maximum number of cuts: 50
+             reduction factor: 5.000000E-01
+        maximum growth factor: 2.000000E+00
+
+FLOW Newton Solver
+                         atol: 1.000000E-50
+                         rtol: 1.000000E-50
+                         stol: 1.000000E-60
+                         dtol: 1.000000E+20
+                      maxnorm: 1.000000E+20
+                    inftolres: -9.990000E+02
+                    inftolupd: 1.000000E+00
+                 inftolrelupd: -9.990000E+02
+                 inftolsclres: -9.990000E+02
+                     max iter: 20
+                     min iter: 1
+                         maxf: 10000
+                  matrix type: baij
+         precond. matrix type: baij
+               inexact newton: off
+            print convergence: on
+   print detailed convergence: off
+          check infinity norm: on
+
+FLOW Linear Solver
+                       solver: bcgs
+               preconditioner: ilu
+                         atol: 1.000000E-50
+                         rtol: 1.000000E-05
+                         dtol: 1.000000E+04
+            maximum iteration: 10000
+
+== TH FLOW =====================================================================
+  0 2r: 1.53E+03 2x: 0.00E+00 2u: 0.00E+00 ir: 1.41E+03 iu: 0.00E+00 rsn:   0
+  1 2r: 5.87E-04 2x: 1.23E+06 2u: 3.92E+05 ir: 4.24E-04 iu: 4.90E+04 rsn:   0
+  2 2r: 1.43E-07 2x: 1.23E+06 2u: 5.56E-01 ir: 9.38E-08 iu: 1.04E-01 rsn: itol_upd
+ Step      1 Time=  3.60000E+03 Dt=  3.60000E+03 [sec] snes_conv_reason:   11
+  newton =   2 [       2] linear =     2 [         2] cuts =  0 [   0]
+  --> max chng: dpmx=   4.9034E+04 dtmpmx=   1.5581E-01
+
+== TH FLOW =====================================================================
+  0 2r: 1.11E-02 2x: 0.00E+00 2u: 0.00E+00 ir: 8.99E-03 iu: 0.00E+00 rsn:   0
+  1 2r: 8.67E-07 2x: 1.23E+06 2u: 9.15E-01 ir: 6.56E-07 iu: 2.25E-01 rsn: itol_upd
+ Step      2 Time=  7.20000E+03 Dt=  3.60000E+03 [sec] snes_conv_reason:   11
+  newton =   1 [       3] linear =     1 [         3] cuts =  0 [   0]
+  --> max chng: dpmx=   1.7714E-01 dtmpmx=   2.2537E-01
+
+== TH FLOW =====================================================================
+  0 2r: 2.64E-03 2x: 0.00E+00 2u: 0.00E+00 ir: 2.62E-03 iu: 0.00E+00 rsn:   0
+  1 2r: 1.31E-08 2x: 1.23E+06 2u: 2.64E-01 ir: 6.23E-09 iu: 5.30E-02 rsn: itol_upd
+ Step      3 Time=  1.08000E+04 Dt=  3.60000E+03 [sec] snes_conv_reason:   11
+  newton =   1 [       4] linear =     1 [         4] cuts =  0 [   0]
+  --> max chng: dpmx=   3.2935E-02 dtmpmx=   5.2967E-02
+
+== TH FLOW =====================================================================
+  0 2r: 2.43E-03 2x: 0.00E+00 2u: 0.00E+00 ir: 2.42E-03 iu: 0.00E+00 rsn:   0
+  1 2r: 1.63E-08 2x: 1.23E+06 2u: 2.05E-01 ir: 1.37E-08 iu: 5.18E-02 rsn: itol_upd
+ Step      4 Time=  1.44000E+04 Dt=  3.60000E+03 [sec] snes_conv_reason:   11
+  newton =   1 [       5] linear =     1 [         5] cuts =  0 [   0]
+  --> max chng: dpmx=   2.6247E-02 dtmpmx=   5.1753E-02
+
+== TH FLOW =====================================================================
+  0 2r: 2.21E-03 2x: 0.00E+00 2u: 0.00E+00 ir: 2.12E-03 iu: 0.00E+00 rsn:   0
+  1 2r: 1.52E-08 2x: 1.23E+06 2u: 1.90E-01 ir: 1.30E-08 iu: 4.62E-02 rsn: itol_upd
+ Step      5 Time=  1.80000E+04 Dt=  3.60000E+03 [sec] snes_conv_reason:   11
+  newton =   1 [       6] linear =     1 [         6] cuts =  0 [   0]
+  --> max chng: dpmx=   2.5264E-02 dtmpmx=   4.6229E-02
+
+== TH FLOW =====================================================================
+  0 2r: 1.96E-03 2x: 0.00E+00 2u: 0.00E+00 ir: 1.86E-03 iu: 0.00E+00 rsn:   0
+  1 2r: 1.26E-08 2x: 1.23E+06 2u: 1.45E-01 ir: 1.08E-08 iu: 4.08E-02 rsn: itol_upd
+ Step      6 Time=  2.16000E+04 Dt=  3.60000E+03 [sec] snes_conv_reason:   11
+  newton =   1 [       7] linear =     1 [         7] cuts =  0 [   0]
+  --> max chng: dpmx=   1.8447E-02 dtmpmx=   4.0758E-02
+
+== TH FLOW =====================================================================
+  0 2r: 1.62E-03 2x: 0.00E+00 2u: 0.00E+00 ir: 1.22E-03 iu: 0.00E+00 rsn:   0
+  1 2r: 9.95E-09 2x: 1.23E+06 2u: 1.34E-01 ir: 6.23E-09 iu: 2.74E-02 rsn: itol_upd
+ Step      7 Time=  2.52000E+04 Dt=  3.60000E+03 [sec] snes_conv_reason:   11
+  newton =   1 [       8] linear =     1 [         8] cuts =  0 [   0]
+  --> max chng: dpmx=   1.9588E-02 dtmpmx=   2.7394E-02
+
+== TH FLOW =====================================================================
+  0 2r: 7.75E-04 2x: 0.00E+00 2u: 0.00E+00 ir: 6.37E-04 iu: 0.00E+00 rsn:   0
+  1 2r: 3.63E-09 2x: 1.23E+06 2u: 6.98E-02 ir: 3.01E-09 iu: 1.73E-02 rsn: itol_upd
+ Step      8 Time=  2.88000E+04 Dt=  3.60000E+03 [sec] snes_conv_reason:   11
+  newton =   1 [       9] linear =     1 [         9] cuts =  0 [   0]
+  --> max chng: dpmx=   1.3130E-02 dtmpmx=   1.7335E-02
+
+== TH FLOW =====================================================================
+  0 2r: 1.55E-03 2x: 0.00E+00 2u: 0.00E+00 ir: 1.13E-03 iu: 0.00E+00 rsn:   0
+  1 2r: 7.05E-09 2x: 1.23E+06 2u: 8.37E-02 ir: 6.07E-09 iu: 2.41E-02 rsn: itol_upd
+ Step      9 Time=  3.24000E+04 Dt=  3.60000E+03 [sec] snes_conv_reason:   11
+  newton =   1 [      10] linear =     1 [        10] cuts =  0 [   0]
+  --> max chng: dpmx=   1.8352E-02 dtmpmx=   2.4135E-02
+
+== TH FLOW =====================================================================
+  0 2r: 2.69E-03 2x: 0.00E+00 2u: 0.00E+00 ir: 2.47E-03 iu: 0.00E+00 rsn:   0
+  1 2r: 1.39E-08 2x: 1.23E+06 2u: 1.21E-01 ir: 9.89E-09 iu: 5.14E-02 rsn: itol_upd
+ Step     10 Time=  3.60000E+04 Dt=  3.60000E+03 [sec] snes_conv_reason:   11
+  newton =   1 [      11] linear =     1 [        11] cuts =  0 [   0]
+  --> max chng: dpmx=   1.7707E-02 dtmpmx=   5.1417E-02
+
+== TH FLOW =====================================================================
+  0 2r: 4.24E-03 2x: 0.00E+00 2u: 0.00E+00 ir: 4.06E-03 iu: 0.00E+00 rsn:   0
+  1 2r: 3.98E-08 2x: 1.23E+06 2u: 1.86E-01 ir: 3.24E-08 iu: 8.56E-02 rsn: itol_upd
+ Step     11 Time=  3.96000E+04 Dt=  3.60000E+03 [sec] snes_conv_reason:   11
+  newton =   1 [      12] linear =     1 [        12] cuts =  0 [   0]
+  --> max chng: dpmx=   2.0080E-02 dtmpmx=   8.5599E-02
+
+== TH FLOW =====================================================================
+  0 2r: 4.66E-03 2x: 0.00E+00 2u: 0.00E+00 ir: 4.49E-03 iu: 0.00E+00 rsn:   0
+  1 2r: 5.72E-08 2x: 1.23E+06 2u: 2.27E-01 ir: 4.79E-08 iu: 9.61E-02 rsn: itol_upd
+ Step     12 Time=  4.32000E+04 Dt=  3.60000E+03 [sec] snes_conv_reason:   11
+  newton =   1 [      13] linear =     1 [        13] cuts =  0 [   0]
+  --> max chng: dpmx=   1.9857E-02 dtmpmx=   9.6082E-02
+
+ Wall Clock Time:  7.1449E-02 [sec]   1.1908E-03 [min]   1.9847E-05 [hr]
