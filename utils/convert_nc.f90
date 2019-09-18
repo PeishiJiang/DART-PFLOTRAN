@@ -16,10 +16,12 @@ program convert_nc
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 use         types_mod, only : r8, missing_r8
-use     utilities_mod, only : initialize_utilities, finalize_utilities
+use     utilities_mod, only : initialize_utilities, finalize_utilities, &
+                             find_namelist_in_file, check_namelist_read, &
+                             error_handler, E_ERR
 use  netcdf_utilities_mod, only : nc_open_file_readonly, nc_close_file
 use  time_manager_mod, only : time_type, set_calendar_type, set_date, &
-                              increment_time, get_time, operator(-), GREGORIAN
+                              increment_time, get_time, operator(-), GREGORIAN, set_time
 use  obs_sequence_mod, only : obs_sequence_type, obs_type, read_obs_seq, &
                               static_init_obs_sequence, init_obs, write_obs_seq, &
                               init_obs_sequence, get_num_obs, &
@@ -35,17 +37,21 @@ use obs_kind_mod, only: TEMPERATURE
 
 implicit none
 
-character(len=256),  parameter :: netcdf_file = '../data_files/obs_pflotran.nc'
-character(len=256), parameter :: out_file    = '../data_files/obs_seq.pflotran'
+!character(len=256),  parameter :: netcdf_file = '../data_files/obs_pflotran.nc'
+!character(len=256), parameter :: out_file    = '../data_files/obs_seq.pflotran'
+character(len=256) :: netcdf_file
+character(len=256) :: out_file
 
 logical, parameter :: use_input_qc           = .false.
 
 integer, parameter :: num_copies = 1,   &   ! number of copies in sequence
                       num_qc     = 1        ! number of QC entries
 
-integer  :: ncid, ntime, nloc
+integer  :: ncid, ios, ivar, ntime, nloc
 integer  :: n, i, oday, osec, nused, k, index
 logical  :: file_exist, first_obs
+
+integer  :: iunit, io
 
 real(r8) :: oerr, qc
 
@@ -53,6 +59,13 @@ real(r8), allocatable :: xloc(:), yloc(:), zloc(:), &
                          xlocu(:), ylocu(:), zlocu(:), &
                          tobs(:), tobsu(:)
 
+! version controlled file description for error handling, do not edit
+character(len=256), parameter :: source   = &
+   "$URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/model/pflotran/utils/convert_nc.f90 $"
+character(len=32 ), parameter :: revision = "$Revision: Unknown $"
+character(len=128), parameter :: revdate  = "$Date: 2019-09-17 08:48:00 -0700 (Tue, 17 Sept 2019) $"
+
+character(len=512) :: string1, string2, string3
 
 real(r8), allocatable :: temperature_val(:,:)
 
@@ -62,9 +75,16 @@ integer, allocatable :: qc_temperature(:,:)
 
 integer, parameter :: nvar=1
 
+namelist /convert_nc_nml/            &
+    netcdf_file,                &
+    out_file
+
 type(obs_sequence_type) :: obs_seq
 type(obs_type)          :: obs, prev_obs
 type(time_type)         :: comp_day0, time_obs, prev_time
+character(len=256)      :: file_calendar
+character(len=256)      :: unitstring
+integer                 :: second, minute, hour, day, month, year
 
 character(len=NF90_MAX_NAME) :: namelist(5)
 
@@ -74,16 +94,78 @@ character(len=NF90_MAX_NAME) :: namelist(5)
 
 call initialize_utilities('convert_nc')
 
-
-! TODO
-! Should I change it to the start time in observation file?
-! put the reference date into DART format
-call set_calendar_type(GREGORIAN)
-comp_day0 = set_date(2017, 4, 1, 0, 0, 0)
+! Read in the convert_nc_nml
+call find_namelist_in_file("input.nml.convert_nc", "convert_nc_nml", iunit)
+read(iunit, nml = convert_nc_nml, iostat = io)
+call check_namelist_read(iunit, io, "convert_nc_nml")
 
 first_obs = .true.
 
 ncid = nc_open_file_readonly(netcdf_file, 'convert_nc')
+
+! TODO
+!call set_calendar_type(GREGORIAN)
+!comp_day0 = set_date(2017, 4, 1, 0, 0, 0)
+! Should I change it to the start time in observation file?
+! put the reference date into DART format
+ios = nf90_inq_varid(ncid, "time", ivar)
+! Get the calendar type
+ios = nf90_get_att(ncid, ivar, 'calendar', file_calendar)
+
+print *, file_calendar
+
+file_calendar = ''
+if ( file_calendar == '' .or. file_calendar == 'None' ) then
+
+   !> assumes time variable is real and fractional days.  if this isn't true,
+   !> user has to supply their own read time routine.
+
+   !comp_day0 = set_date(year, month, day, hour, minute, second)
+   comp_day0 = set_time(0, 0)
+
+else if ( file_calendar == 'GREGORIAN' .or. file_calendar == 'gregorian') then
+
+   call set_calendar_type(GREGORIAN)
+   ios = nf90_get_att(ncid, ivar, 'units', unitstring)
+
+   if (unitstring(1:10) == 'days since') then
+
+      read(unitstring,'(11x,i4,5(1x,i2))',iostat=ios)year,month,day,hour,minute,second
+      if (ios /= 0) then
+         write(string1,*)'Unable to interpret time unit attribute. Error status was ',ios
+         write(string2,*)'expected "days since YYYY-MM-DD HH:MM:SS", got "'//trim(unitstring)//'"'
+         call error_handler(E_ERR, 'convert_nc:', string1, &
+                source, revision, revdate, text2=string2, text3=string3)
+      endif
+
+      ! This is the start of their calendar
+      comp_day0 = set_date(year, month, day, hour, minute, second)
+
+   else if (unitstring(1:13) == 'seconds since') then
+
+      read(unitstring,'(14x,i4,5(1x,i2))',iostat=ios)year,month,day,hour,minute,second
+      if (ios /= 0) then
+         write(string1,*)'Unable to interpret time unit attribute. Error status was ',ios
+         write(string2,*)'expected "seconds since YYYY-MM-DD HH:MM:SS", got "'//trim(unitstring)//'"'
+         call error_handler(E_ERR, 'read_model_time:', string1, &
+                source, revision, revdate, text2=string2)
+      endif
+
+      ! This is the start of their calendar
+      comp_day0  = set_date(year, month, day, hour, minute, second)
+
+   else
+
+      write(string1, *) 'looking for "days since" or "seconds since" in the "units" attribute'
+      call error_handler(E_ERR, 'read_model_time:', 'unable to set base time for gregorian calendar', &
+                         source, revision, revdate, text2=string1)
+
+   endif
+else
+   call error_handler(E_ERR, 'read_model_time:', &
+    'calendar type "'//trim(file_calendar)//' unsupported by default read_model_time() routine', &
+                      source, revision, revdate)
+endif
 
 ! Get the dimension
 call getdimlen(ncid, "time", ntime)

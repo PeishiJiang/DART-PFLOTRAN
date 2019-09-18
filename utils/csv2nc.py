@@ -62,7 +62,8 @@ zloc = root_nc.createVariable('z_location', 'f8', ('location',))
 zloc.units, zloc.type  = 'm', 'dimension_value'
 yloc.units, yloc.type  = 'm', 'dimension_value'
 xloc.units, xloc.type  = 'm', 'dimension_value'
-times.units    = 'minutes since 2017-04-01 00:00:00'
+times.units    = 'seconds since 2017-04-01 00:00:00'
+# times.units    = 'None'
 times.calendar = 'gregorian'
 times.type     = 'dimension_value'
 times[:] = date2num(dates,units=times.units,calendar=times.calendar)
@@ -85,3 +86,5 @@ vargrp[:]   = temperature.T
 vargrp.type = 'observation_value'
 
 root_nc.close()
+
+print("Finished converting raw observation in NetCDF format...")

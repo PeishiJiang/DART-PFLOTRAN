@@ -183,88 +183,63 @@ FLOW Linear Solver
             maximum iteration: 10000
 
 == TH FLOW =====================================================================
-  0 2r: 1.53E+03 2x: 0.00E+00 2u: 0.00E+00 ir: 1.41E+03 iu: 0.00E+00 rsn:   0
-  1 2r: 5.49E-04 2x: 1.23E+06 2u: 3.92E+05 ir: 4.02E-04 iu: 4.90E+04 rsn:   0
-  2 2r: 1.67E-07 2x: 1.23E+06 2u: 4.78E-01 ir: 1.13E-07 iu: 8.53E-02 rsn: itol_upd
  Step      1 Time=  3.60000E+03 Dt=  3.60000E+03 [sec] snes_conv_reason:   11
   newton =   2 [       2] linear =     2 [         2] cuts =  0 [   0]
-  --> max chng: dpmx=   4.9034E+04 dtmpmx=   1.5433E-01
+  --> max chng: dpmx=   4.9234E+04 dtmpmx=   1.5591E-01
 
 == TH FLOW =====================================================================
-  0 2r: 8.34E-03 2x: 0.00E+00 2u: 0.00E+00 ir: 5.91E-03 iu: 0.00E+00 rsn:   0
-  1 2r: 7.58E-07 2x: 1.23E+06 2u: 9.98E-01 ir: 5.76E-07 iu: 2.22E-01 rsn: itol_upd
  Step      2 Time=  7.20000E+03 Dt=  3.60000E+03 [sec] snes_conv_reason:   11
   newton =   1 [       3] linear =     1 [         3] cuts =  0 [   0]
-  --> max chng: dpmx=   1.7765E-01 dtmpmx=   2.2200E-01
+  --> max chng: dpmx=   2.2587E-01 dtmpmx=   1.9975E-01
 
 == TH FLOW =====================================================================
-  0 2r: 1.88E-03 2x: 0.00E+00 2u: 0.00E+00 ir: 1.86E-03 iu: 0.00E+00 rsn:   0
-  1 2r: 1.13E-08 2x: 1.23E+06 2u: 2.41E-01 ir: 5.57E-09 iu: 5.11E-02 rsn: itol_upd
  Step      3 Time=  1.08000E+04 Dt=  3.60000E+03 [sec] snes_conv_reason:   11
   newton =   1 [       4] linear =     1 [         4] cuts =  0 [   0]
-  --> max chng: dpmx=   2.8918E-02 dtmpmx=   5.1141E-02
+  --> max chng: dpmx=   5.6456E-02 dtmpmx=   5.5546E-02
 
 == TH FLOW =====================================================================
-  0 2r: 1.74E-03 2x: 0.00E+00 2u: 0.00E+00 ir: 1.74E-03 iu: 0.00E+00 rsn:   0
-  1 2r: 1.13E-08 2x: 1.23E+06 2u: 1.93E-01 ir: 9.19E-09 iu: 5.07E-02 rsn: itol_upd
  Step      4 Time=  1.44000E+04 Dt=  3.60000E+03 [sec] snes_conv_reason:   11
   newton =   1 [       5] linear =     1 [         5] cuts =  0 [   0]
-  --> max chng: dpmx=   2.3885E-02 dtmpmx=   5.0738E-02
+  --> max chng: dpmx=   9.1326E-02 dtmpmx=   5.4960E-02
 
 == TH FLOW =====================================================================
-  0 2r: 1.60E-03 2x: 0.00E+00 2u: 0.00E+00 ir: 1.53E-03 iu: 0.00E+00 rsn:   0
-  1 2r: 1.12E-08 2x: 1.23E+06 2u: 1.88E-01 ir: 9.30E-09 iu: 4.55E-02 rsn: itol_upd
  Step      5 Time=  1.80000E+04 Dt=  3.60000E+03 [sec] snes_conv_reason:   11
   newton =   1 [       6] linear =     1 [         6] cuts =  0 [   0]
-  --> max chng: dpmx=   2.4655E-02 dtmpmx=   4.5457E-02
+  --> max chng: dpmx=   1.2382E-01 dtmpmx=   4.9134E-02
 
 == TH FLOW =====================================================================
-  0 2r: 1.42E-03 2x: 0.00E+00 2u: 0.00E+00 ir: 1.34E-03 iu: 0.00E+00 rsn:   0
-  1 2r: 9.55E-09 2x: 1.23E+06 2u: 1.47E-01 ir: 7.96E-09 iu: 4.01E-02 rsn: itol_upd
  Step      6 Time=  2.16000E+04 Dt=  3.60000E+03 [sec] snes_conv_reason:   11
   newton =   1 [       7] linear =     1 [         7] cuts =  0 [   0]
-  --> max chng: dpmx=   1.9052E-02 dtmpmx=   4.0130E-02
+  --> max chng: dpmx=   1.3949E-01 dtmpmx=   4.3843E-02
 
 == TH FLOW =====================================================================
-  0 2r: 1.20E-03 2x: 0.00E+00 2u: 0.00E+00 ir: 8.78E-04 iu: 0.00E+00 rsn:   0
-  1 2r: 8.48E-09 2x: 1.23E+06 2u: 1.45E-01 ir: 5.58E-09 iu: 2.71E-02 rsn: itol_upd
  Step      7 Time=  2.52000E+04 Dt=  3.60000E+03 [sec] snes_conv_reason:   11
   newton =   1 [       8] linear =     1 [         8] cuts =  0 [   0]
-  --> max chng: dpmx=   1.9632E-02 dtmpmx=   2.7095E-02
+  --> max chng: dpmx=   1.5591E-01 dtmpmx=   3.7460E-02
 
 == TH FLOW =====================================================================
-  0 2r: 5.95E-04 2x: 0.00E+00 2u: 0.00E+00 ir: 4.24E-04 iu: 0.00E+00 rsn:   0
-  1 2r: 3.26E-09 2x: 1.23E+06 2u: 7.64E-02 ir: 2.69E-09 iu: 1.74E-02 rsn: itol_upd
  Step      8 Time=  2.88000E+04 Dt=  3.60000E+03 [sec] snes_conv_reason:   11
   newton =   1 [       9] linear =     1 [         9] cuts =  0 [   0]
-  --> max chng: dpmx=   1.3160E-02 dtmpmx=   1.7375E-02
+  --> max chng: dpmx=   1.3960E-01 dtmpmx=   3.2351E-02
 
 == TH FLOW =====================================================================
-  0 2r: 1.14E-03 2x: 0.00E+00 2u: 0.00E+00 ir: 8.08E-04 iu: 0.00E+00 rsn:   0
-  1 2r: 6.24E-09 2x: 1.23E+06 2u: 8.86E-02 ir: 5.41E-09 iu: 2.41E-02 rsn: itol_upd
  Step      9 Time=  3.24000E+04 Dt=  3.60000E+03 [sec] snes_conv_reason:   11
   newton =   1 [      10] linear =     1 [        10] cuts =  0 [   0]
-  --> max chng: dpmx=   1.8395E-02 dtmpmx=   2.4080E-02
+  --> max chng: dpmx=   1.2750E-01 dtmpmx=   2.8200E-02
 
 == TH FLOW =====================================================================
-  0 2r: 1.94E-03 2x: 0.00E+00 2u: 0.00E+00 ir: 1.77E-03 iu: 0.00E+00 rsn:   0
-  1 2r: 9.50E-09 2x: 1.23E+06 2u: 1.12E-01 ir: 5.73E-09 iu: 5.02E-02 rsn: itol_upd
  Step     10 Time=  3.60000E+04 Dt=  3.60000E+03 [sec] snes_conv_reason:   11
   newton =   1 [      11] linear =     1 [        11] cuts =  0 [   0]
-  --> max chng: dpmx=   1.7750E-02 dtmpmx=   5.0171E-02
+  --> max chng: dpmx=   1.0974E-01 dtmpmx=   5.4561E-02
 
 == TH FLOW =====================================================================
-  0 2r: 3.06E-03 2x: 0.00E+00 2u: 0.00E+00 ir: 2.91E-03 iu: 0.00E+00 rsn:   0
-  1 2r: 2.66E-08 2x: 1.23E+06 2u: 1.70E-01 ir: 2.06E-08 iu: 8.37E-02 rsn: itol_upd
  Step     11 Time=  3.96000E+04 Dt=  3.60000E+03 [sec] snes_conv_reason:   11
   newton =   1 [      12] linear =     1 [        12] cuts =  0 [   0]
-  --> max chng: dpmx=   2.0130E-02 dtmpmx=   8.3733E-02
+  --> max chng: dpmx=   9.6465E-02 dtmpmx=   9.0879E-02
 
 == TH FLOW =====================================================================
-  0 2r: 3.36E-03 2x: 0.00E+00 2u: 0.00E+00 ir: 3.22E-03 iu: 0.00E+00 rsn:   0
-  1 2r: 4.04E-08 2x: 1.23E+06 2u: 2.06E-01 ir: 3.28E-08 iu: 9.43E-02 rsn: itol_upd
  Step     12 Time=  4.32000E+04 Dt=  3.60000E+03 [sec] snes_conv_reason:   11
   newton =   1 [      13] linear =     1 [        13] cuts =  0 [   0]
-  --> max chng: dpmx=   1.9908E-02 dtmpmx=   9.4281E-02
+  --> max chng: dpmx=   8.1176E-02 dtmpmx=   1.0215E-01
 
- Wall Clock Time:  7.3037E-02 [sec]   1.2173E-03 [min]   2.0288E-05 [hr]
+ Wall Clock Time:  5.5875E-02 [sec]   9.3125E-04 [min]   1.5521E-05 [hr]

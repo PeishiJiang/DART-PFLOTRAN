@@ -484,11 +484,10 @@ integer, parameter, public :: &
   QTY_PFLOTRAN_THERMALCONDUCTIVITY  = 370, &
   QTY_PFLOTRAN_LIQUID_SATURATION  = 371, &
   QTY_PFLOTRAN_LIQUID_PRESSURE  = 372, &
-  QTY_PFLOTRAN_TEST_VARIABLEAAA  = 373, &
-  QTY_PFLOTRAN_TEST_VARIABLE  = 374
+  QTY_PFLOTRAN_FLOWFLUX  = 373
 
 
-integer, parameter :: max_defined_quantities = 374
+integer, parameter :: max_defined_quantities = 373
 
 
 !----------------------------------------------------------------------------
@@ -908,8 +907,7 @@ obs_kind_names(369) = obs_kind_type(QTY_PFLOTRAN_POROSITY, 'QTY_PFLOTRAN_POROSIT
 obs_kind_names(370) = obs_kind_type(QTY_PFLOTRAN_THERMALCONDUCTIVITY, 'QTY_PFLOTRAN_THERMALCONDUCTIVITY')
 obs_kind_names(371) = obs_kind_type(QTY_PFLOTRAN_LIQUID_SATURATION, 'QTY_PFLOTRAN_LIQUID_SATURATION')
 obs_kind_names(372) = obs_kind_type(QTY_PFLOTRAN_LIQUID_PRESSURE, 'QTY_PFLOTRAN_LIQUID_PRESSURE')
-obs_kind_names(373) = obs_kind_type(QTY_PFLOTRAN_TEST_VARIABLEAAA, 'QTY_PFLOTRAN_TEST_VARIABLEAAA')
-obs_kind_names(374) = obs_kind_type(QTY_PFLOTRAN_TEST_VARIABLE, 'QTY_PFLOTRAN_TEST_VARIABLE')
+obs_kind_names(373) = obs_kind_type(QTY_PFLOTRAN_FLOWFLUX, 'QTY_PFLOTRAN_FLOWFLUX')
 
 
 ! count here, then output below

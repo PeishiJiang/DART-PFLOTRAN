@@ -169,12 +169,12 @@ def generate_dbase(nreaz,mod,filename):
         variables.append("PERMEABILITY")
     elif 'flux' in mod.da_para:
         # variables.append("Flux_top")
-        variables.append("FLOW_FLUX")
+        variables.append("FLOWFLUX")
     else:
         raise Exception("Please choose 'permeability' or 'flux'")
     if 'thermal conductivity' in mod.da_para:
         # variables.append('ThermalConductivity')
-        variables.append('THERMAL_CONDUCTIVITY')
+        variables.append('THERMALCONDUCTIVITY')
     if 'porosity' in mod.da_para:
         variables.append('POROSITY')
 
