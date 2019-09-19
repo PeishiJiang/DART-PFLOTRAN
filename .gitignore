@@ -2,3 +2,4 @@ dart_inout/*.nc
 pflotran_output/*.h5
 pflotran_output/*.out
 pflotran_output/*.chk
+.DS_Store
