@@ -112,9 +112,7 @@ ios = nf90_inq_varid(ncid, "time", ivar)
 ! Get the calendar type
 ios = nf90_get_att(ncid, ivar, 'calendar', file_calendar)
 
-print *, file_calendar
-
-file_calendar = ''
+!file_calendar = ''
 if ( file_calendar == '' .or. file_calendar == 'None' ) then
 
    !> assumes time variable is real and fractional days.  if this isn't true,

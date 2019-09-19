@@ -223,7 +223,7 @@ else
     !call state_structure_info(dom_id)
 endif
 
-print *, 'Wait here b'
+!print *, 'Wait here b'
 ! TODO
 ! Read a file about the spatial information of the model.
 ! For now, the information is read from input.nml file.
