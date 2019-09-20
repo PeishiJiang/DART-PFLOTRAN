@@ -1,32 +1,3 @@
-&perfect_model_obs_nml
-   read_input_state_from_file = .true.,
-   single_file_in             = .true.
-   input_state_files          = "perfect_input.nc"
-
-   write_output_state_to_file = .true.,
-   single_file_out            = .true.
-   output_state_files         = "perfect_output.nc"
-   output_interval            = 1,
-
-   async                      = 0,
-   adv_ens_command            = "./advance_model.csh",
-
-   obs_seq_in_file_name       = "obs_seq.in",
-   obs_seq_out_file_name      = "obs_seq.out",
-   init_time_days             = 0,
-   init_time_seconds          = 0,
-   first_obs_days             = -1,
-   first_obs_seconds          = -1,
-   last_obs_days              = -1,
-   last_obs_seconds           = -1,
-
-   trace_execution            = .false.,
-   output_timestamps          = .false.,
-   print_every_nth_obs        = -1,
-   output_forward_op_errors   = .false.,
-   silence                    = .false.,
-   /
-
 &filter_nml
    input_state_file_list        = 'filter_input_list.txt'
 
@@ -79,17 +50,6 @@
    silence                      = .false.,
    /
 
-&smoother_nml
-   num_lags              = 0,
-   start_from_restart    = .false.,
-   output_restart        = .false.,
-   restart_in_file_name  = 'smoother_ics',
-   restart_out_file_name = 'smoother_restart'
-   /
-
-&ensemble_manager_nml
-   /
-
 &assim_tools_nml
    filter_kind                     = 1,
    cutoff                          = 1000000.0
@@ -103,50 +63,73 @@
    print_every_nth_obs             = 0
    /
 
-&cov_cutoff_nml
-   select_localization = 1
-   /
-
-&reg_factor_nml
-   select_regression    = 1,
-   input_reg_file       = "time_mean_reg",
-   save_reg_diagnostics = .false.,
-   reg_diagnostics_file = "reg_diagnostics"
-   /
-
-&obs_sequence_nml
-   write_binary_obs_sequence = .false.
-   /
 
 &obs_kind_nml
    assimilate_these_obs_types = 'TEMPERATURE'
    evaluate_these_obs_types   = ''
    /
 
-! TODO
-! model_nml should be read from PFLOTRAN.in file.
+
 &model_nml
    nvar                = 2,
    time_step_days      = 0,
    time_step_seconds   = 3600,
    var_names           = 'LIQUID_SATURATION', 'LIQUID_PRESSURE'
-   template_file       = '../data_files/pflotran_test.nc'
+   template_file       = '../dart_inout/prior_Rtemplate.nc'
    var_qtynames        = 'QTY_PFLOTRAN_LIQUID_SATURATION', 'QTY_PFLOTRAN_LIQUID_PRESSURE'
    /
 
-! TODO
-! grid_nml should be read from PFLOTRAN.in file.
-&grid_nml
-   dx                  = 1,
-   dy                  = 1,
-   dz                  = 1,
-   nx                  = 1,
-   ny                  = 6,
-   nz                  = 11,
-   x0                  = 0,
-   y0                  = 0,
-   z0                  = 0,
+
+&model_mod_check_nml
+   input_state_files    = '../dart_inout/prior_Rtemplate.nc'
+   output_state_files   = '../dart_inout/mmc_output.nc'
+   all_metadata_file    = 'metadata.txt'
+   test1thru            = 4
+   run_tests            = -1
+   x_ind                = 100
+   loc_of_interest      = 0.0, 2.3, -.36
+   quantity_of_interest = 'QTY_PFLOTRAN_TEMPERATURE'
+   interp_test_dy       = 0.5
+   interp_test_dz       = 0.5
+   interp_test_xrange   = .5, .5
+   interp_test_yrange   = .5, .5
+   interp_test_zrange   = -3.0, -6.0
+   verbose              = .true.
    /
+
+
+&preprocess_nml
+          overwrite_output = .true.,
+   input_obs_kind_mod_file = '../obs_kind/DEFAULT_obs_kind_mod.F90'
+   output_obs_def_mod_file = '../../../observations/forward_operators/obs_def_mod.f90',
+   input_obs_kind_mod_file = '../../../assimilation_code/modules/observations/DEFAULT_obs_kind_mod.F90',
+  output_obs_kind_mod_file = '../../../assimilation_code/modules/observations/obs_kind_mod.f90',
+               input_files = '../obs_type/obs_def_pflotran_mod.f90'
+ /
+
+&convert_nc_nml
+    netcdf_file = '../pflotran_input/obs_pflotran.nc'
+    out_file  = '../dart_inout/obs_seq_pflotran.out'
+ /
+
+&obs_sequence_nml
+   write_binary_obs_sequence = .false.
+   /
+
+
+&quality_control_nml
+   input_qc_threshold       =  3.0,
+   outlier_threshold        = -1.0,
+/
+
+
+&state_vector_io_nml
+   /
+
+
+&ensemble_manager_nml
+   /
+
 
 &location_nml
    nx                  = 10
@@ -167,6 +150,16 @@
    debug               = 0
   /
 
+
+&smoother_nml
+   num_lags              = 0,
+   start_from_restart    = .false.,
+   output_restart        = .false.,
+   restart_in_file_name  = 'smoother_ics',
+   restart_out_file_name = 'smoother_restart'
+   /
+
+
 &utilities_nml
    TERMLEVEL = 1,
    module_details = .false.,
@@ -174,65 +167,3 @@
    nmlfilename = 'dart_log.nml',
    write_nml   = 'none'
    /
-
-&preprocess_nml
-    input_obs_def_mod_file = '../../../observations/forward_operators/DEFAULT_obs_def_mod.F90'
-   output_obs_def_mod_file = '../../../observations/forward_operators/obs_def_mod.f90'
-   input_obs_kind_mod_file = '../obs_kind/DEFAULT_obs_kind_mod.F90'
-  output_obs_kind_mod_file = '../../../assimilation_code/modules/observations/obs_kind_mod.f90'
-               input_files = '../obs_type/obs_def_pflotran_mod.f90'
-   /
-
-&obs_sequence_tool_nml
-   filename_seq      = 'obs_seq.one', 'obs_seq.two',
-   filename_out      = 'obs_seq.processed',
-   first_obs_days    = -1,
-   first_obs_seconds = -1,
-   last_obs_days     = -1,
-   last_obs_seconds  = -1,
-   print_only        = .false.,
-   gregorian_cal     = .false.
-   /
-
-&obs_diag_nml
-   obs_sequence_name     = 'obs_seq.final',
-   bin_width_days        = -1,
-   bin_width_seconds     = -1,
-   init_skip_days        = 0,
-   init_skip_seconds     = 0,
-   Nregions              = 3,
-   trusted_obs           = 'null',
-   lonlim1               = 0.00, 0.00, 0.50
-   lonlim2               = 1.01, 0.50, 1.01
-   reg_names             = 'whole', 'yin', 'yang'
-   create_rank_histogram = .true.,
-   outliers_in_histogram = .true.,
-   use_zero_error_obs    = .false.,
-   verbose               = .false.
-   /
-
-&state_vector_io_nml
-   /
-
-&model_mod_check_nml
-   input_state_files    = '../data_files/pflotran_test.nc'
-   output_state_files   = 'mmc_output.nc'
-   all_metadata_file    = 'metadata.txt'
-   test1thru            = 4
-   run_tests            = -1
-   x_ind                = 100
-   loc_of_interest      = 0.0, 2.3, 5.6
-   quantity_of_interest = 'QTY_PFLOTRAN_LIQUID_SATURATION'
-   interp_test_dy       = 0.5
-   interp_test_dz       = 0.5
-   interp_test_xrange   = .0, .0
-   interp_test_yrange   = 3.0, 5.0
-   interp_test_zrange   = 3.0, 6.0
-   verbose              = .true.
-   /
-
-&quality_control_nml
-   input_qc_threshold       =  3.0,
-   outlier_threshold        = -1.0,
-/
-

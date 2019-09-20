@@ -10,7 +10,7 @@ import sys
 ########################
 nc_file       = sys.argv[1]
 dart_obs_file = sys.argv[2]
-nml_file      = "../obs_converter/input.nml.convert_nc"
+nml_file      = "../work/input.nml.convert_nc"
 
 ########################
 # Create the namelist

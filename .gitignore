@@ -3,3 +3,9 @@ pflotran_output/*.h5
 pflotran_output/*.out
 pflotran_output/*.chk
 .DS_Store
+.swp
+
+work/*.o
+work/*.mod
+work/convert_nc
+work/*default

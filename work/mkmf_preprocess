@@ -12,7 +12,7 @@
 exit $status
 
 # <next few lines under version control, do not edit>
-# $URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/models/template/work/mkmf_preprocess $
+# $URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/observations/obs_converters/MADIS/work/mkmf_preprocess $
 # $Revision: 11289 $
 # $Date: 2017-03-10 13:56:06 -0800 (Fri, 10 Mar 2017) $
 

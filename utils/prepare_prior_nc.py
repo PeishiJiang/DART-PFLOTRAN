@@ -148,12 +148,16 @@ for i in range(nens):
     yloc = root_nc.createVariable('y_location', 'f8', ('y_location',))
     zloc = root_nc.createVariable('z_location', 'f8', ('z_location',))
 
+    # Convert the time unit to day, as required by DART's read_model_time() subroutine
     if (time_unit.lower() == 's') or (time_unit.lower() == 'second'):
-        time.units = "second"
+        time.units = "day"
+        time[:] = last_time / 86400.
+    elif (time_unit.lower() == 'd') or (time_unit.lower() == 'day'):
+        time.units = "day"
+        time[:] = last_time
     else:
         raise Exception("Unknow time unit %s" % time_unit)
     time.calendar = 'none'
-    time[:] = last_time
     member[:] = ens
 
     member.type, time.type = 'dimension_value', 'dimension_value'

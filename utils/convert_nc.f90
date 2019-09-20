@@ -95,7 +95,8 @@ character(len=NF90_MAX_NAME) :: namelist(5)
 call initialize_utilities('convert_nc')
 
 ! Read in the convert_nc_nml
-call find_namelist_in_file("input.nml.convert_nc", "convert_nc_nml", iunit)
+!call find_namelist_in_file("input.nml.convert_nc", "convert_nc_nml", iunit)
+call find_namelist_in_file("input.nml", "convert_nc_nml", iunit)
 read(iunit, nml = convert_nc_nml, iostat = io)
 call check_namelist_read(iunit, io, "convert_nc_nml")
 
@@ -130,8 +131,8 @@ else if ( file_calendar == 'GREGORIAN' .or. file_calendar == 'gregorian') then
 
       read(unitstring,'(11x,i4,5(1x,i2))',iostat=ios)year,month,day,hour,minute,second
       if (ios /= 0) then
-         write(string1,*)'Unable to interpret time unit attribute. Error status was ',ios
          write(string2,*)'expected "days since YYYY-MM-DD HH:MM:SS", got "'//trim(unitstring)//'"'
+         write(string1,*)'Unable to interpret time unit attribute. Error status was ',ios
          call error_handler(E_ERR, 'convert_nc:', string1, &
                 source, revision, revdate, text2=string2, text3=string3)
       endif
@@ -204,8 +205,10 @@ inquire(file=out_file, exist=file_exist)
 ! Or should I generate a separate converter for each case?
 if ( file_exist ) then
 
+  write(string1,*)'The DART observation file exists, with name', out_file
+  call error_handler(E_ERR, 'convert_nc:', string1, source, revision, revdate)
   ! existing file found, append to it
-  call read_obs_seq(out_file, 0, 0, nvar*ntime*nloc, obs_seq)
+  !call read_obs_seq(out_file, 0, 0, nvar*ntime*nloc, obs_seq)
 
 else
 

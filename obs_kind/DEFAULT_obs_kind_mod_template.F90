@@ -473,7 +473,7 @@ integer, parameter, public :: &
   QTY_ION_O_MIXING_RATIO            = 365, &
   QTY_ATOMIC_H_MIXING_RATIO         = 366
 
-! PFLOTRAN (PEISHI JIANG)
+! PFLOTRAN -- Added by Peishi
 integer, parameter, public :: &
   QTY_LIQUID_SATURATION             = 367, &
   QTY_LIQUID_PRESSURE               = 368, &

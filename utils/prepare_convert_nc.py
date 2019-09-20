@@ -39,7 +39,8 @@ with open(convert_template_file, 'r') as f:
     data = f.readlines()
 
 # Remove the current one
-os.remove(convert_file)
+if os.path.isfile(convert_file):
+    os.remove(convert_file)
 
 n_line = len(data)
 

@@ -27,7 +27,8 @@ use    utilities_mod, only : register_module, error_handler, &
                              find_namelist_in_file, check_namelist_read
 use netcdf_utilities_mod, only : nc_add_global_attribute, nc_synchronize_file, &
                                  nc_add_global_creation_time, &
-                                 nc_begin_define_mode, nc_end_define_mode
+                                 nc_begin_define_mode, nc_end_define_mode, &
+                                 nc_open_file_readonly, nc_close_file, nc_check
 use distributed_state_mod, only : get_state
 use state_structure_mod, only : add_domain, get_index_start, get_index_end, &
                                 get_dart_vector_index, get_varid_from_kind, &
@@ -38,6 +39,10 @@ use ensemble_manager_mod, only : ensemble_type
 use dart_time_io_mod, only  : read_model_time, write_model_time
 use default_model_mod, only : pert_model_copies, nc_write_model_vars
 use obs_kind_mod, only: get_index_for_quantity
+
+use netcdf
+
+!use obs_utilities_mod, only : getvar_real, getdimlen
 
 implicit none
 private
@@ -130,19 +135,18 @@ namelist /model_nml/            &
 real(r8) :: x0, y0, z0  ! the lowest values
 real(r8) :: dx, dy, dz  ! the grid sizes
 integer  :: nx, ny, nz  ! the numbers of grids
-!real(r8) :: x_set(nx), y_set(ny), z_set(nz)  ! the grid locations in each dimension
 real(r8), allocatable :: x_set(:), y_set(:), z_set(:)  ! the grid locations in each dimension
-namelist /grid_nml/  &
-   x0,               &
-   y0,               &
-   z0,               &
-   dx,               &
-   dx,               &
-   dy,               &
-   dz,               &
-   nx,               &
-   ny,               &
-   nz
+!namelist /grid_nml/  &
+   !x0,               &
+   !y0,               &
+   !z0,               &
+   !dx,               &
+   !dx,               &
+   !dy,               &
+   !dz,               &
+   !nx,               &
+   !ny,               &
+   !nz
 
 contains
 
@@ -159,6 +163,7 @@ subroutine static_init_model()
  real(r8) :: x_loc, y_loc, z_loc
  integer  :: index_in, state_ind, i, j, k
  integer  :: iunit, io, ivar
+ integer  :: ncid, dimid, varid
  integer  :: num_dims
 
 ! Print module information to log file and stdout.
@@ -182,74 +187,64 @@ if (do_nml_term()) write(     *     , nml=model_nml)
 time_step = set_time(time_step_seconds, &
                                   time_step_days)
 
-! TODO
-! Read the table of state vector/variables and DART variable quantity from obs_def_***_mod.f90 file
-!call read_variable_info(iunit, model_size, var_names)
-
 ! Get the variable quantity/kind indices
 do ivar = 1, nvar
     qty_list(ivar) = get_index_for_quantity(var_qtynames(ivar))
 end do
 
-print *, 'Wait here'
+!print *, 'Wait here'
 ! Add all the variable names to the domain by using add_domain()
 ! tell dart the size of the model
 if (template_file /= 'null') then
     ! Use add_domain_from_file() function
     dom_id = add_domain(template_file, nvar, var_names, qty_list)
-
 else
-    ! Use add_domain_from_spec() function
-    dom_id = add_domain(nvar, var_names, qty_list)
 
-    ! TODO
-    ! The size of the dimension time and ensemble member should be revised later on
-    ! Add the dimension to each variable
-    do ivar = 1, nvar
-        !call add_dimension_to_variable(dom_id, ivar, "time", 6)
-        !call add_dimension_to_variable(dom_id, ivar, "member", 1)
-        call add_dimension_to_variable(dom_id, ivar, "z_location", nz)
-        call add_dimension_to_variable(dom_id, ivar, "y_location", ny)
-        call add_dimension_to_variable(dom_id, ivar, "x_location", nx)
-    end do
-
-    call finished_adding_domain(dom_id)
-
-    print *, 'Test...'
-    print *, get_index_start(dom_id,1), get_index_end(dom_id,1)
-    print *, get_index_start(dom_id,2), get_index_end(dom_id,2)
-    !num_dims = get_io_num_unique_dims(dom_id)
-    !print *, num_dims
-    !call state_structure_info(dom_id)
 endif
 
-!print *, 'Wait here b'
-! TODO
+! Get the grid dimensions
 ! Read a file about the spatial information of the model.
-! For now, the information is read from input.nml file.
 ! Let's assume structured CARTESIAN coordinates for now.
 ! That is: x0, y0, z0, nx, ny, nz, dx, dy, dz
 ! There information can be read from the namelist file.
-call find_namelist_in_file("input.nml", "grid_nml", iunit)
-read(iunit, nml = grid_nml, iostat = io)
-call check_namelist_read(iunit, io, "grid_nml")
+ncid = nc_open_file_readonly(template_file, 'static_init_model')
+! get the requested dimension size
+call nc_check( nf90_inq_dimid(ncid, "x_location", dimid), &
+               'static_init_model', 'inq dimid'//trim("x_location"))
+call nc_check( nf90_inquire_dimension(ncid, dimid, len=nx), &
+               'static_init_model', 'inquire dimension'//trim("x_location"))
+call nc_check( nf90_inq_dimid(ncid, "y_location", dimid), &
+               'static_init_model', 'inq dimid'//trim("y_location"))
+call nc_check( nf90_inquire_dimension(ncid, dimid, len=ny), &
+               'static_init_model', 'inquire dimension'//trim("y_location"))
+call nc_check( nf90_inq_dimid(ncid, "z_location", dimid), &
+               'static_init_model', 'inq dimid'//trim("z_location"))
+call nc_check( nf90_inquire_dimension(ncid, dimid, len=nz), &
+               'static_init_model', 'inquire dimension'//trim("z_location"))
 
 ! Obtain the one-dimensional location in each dimension
 allocate(x_set(nx))
 allocate(y_set(ny))
 allocate(z_set(nz))
-x_set(1) = x0
-do i = 2,nx
-    x_set(i) = x_set(i-1)+dx
-end do
-y_set(1) = y0
-do j = 2,ny
-    y_set(j) = y_set(j-1)+dy
-end do
-z_set(1) = z0
-do k = 2,nz
-    z_set(k) = z_set(k-1)+dz
-end do
+call nc_check( nf90_inq_varid(ncid, "x_location", varid), &
+               'static_init_model', 'inq varid'//trim("x_location"))
+call nc_check( nf90_get_var(ncid, varid, x_set), &
+               'static_init_model', 'inquire variable'//trim("x_location"))
+call nc_check( nf90_inq_varid(ncid, "y_location", varid), &
+               'static_init_model', 'inq varid'//trim("y_location"))
+call nc_check( nf90_get_var(ncid, varid, y_set), &
+               'static_init_model', 'inquire variable'//trim("y_location"))
+call nc_check( nf90_inq_varid(ncid, "z_location", varid), &
+               'static_init_model', 'inq varid'//trim("z_location"))
+call nc_check( nf90_get_var(ncid, varid, z_set), &
+               'static_init_model', 'inquire variable'//trim("z_location"))
+
+x0 = x_set(1)
+y0 = y_set(1)
+z0 = z_set(1)
+dx = x_set(2) - x_set(1)
+dy = y_set(2) - y_set(1)
+dz = z_set(2) - z_set(1)
 
 ! TODO
 ! Change model_size*nx*ny*nz to a more flexible count of
@@ -266,7 +261,8 @@ do ivar = 1, nvar
     do k = 1, nz
         do j = 1, ny
             do i = 1,nx
-                state_loc(index_in) = set_location(x0+dx*(i-1),y0+dy*(j-1),z0+dz*(k-1))
+                !state_loc(index_in) = set_location(x0+dx*(i-1),y0+dy*(j-1),z0+dz*(k-1))
+                state_loc(index_in) = set_location(x_set(i),y_set(j),z_set(k))
                 index_in = index_in + 1
             end do
         end do
@@ -280,11 +276,10 @@ do ivar = 1, nvar
     progvar(ivar)%domain      = dom_id
     progvar(ivar)%dartqtyname = var_qtynames(ivar)
     progvar(ivar)%dartqtyind  = qty_list(ivar)
-
-    !print *, varstring, index_in, get_index_start(progvar(n)%domain, varstring), get_index_end(progvar(n)%domain, varstring)
-    !print *, progvar(ivar)
 end do
-print *, 'Wait here c'
+
+! Close the file
+call nc_close_file(ncid, 'static_init_model')
 
 end subroutine static_init_model
 
@@ -405,8 +400,7 @@ real(r8) :: val(2,2,2,ens_size)
 integer  :: e
 integer  :: i,j,k
 
-!print *, 'ensemble', state_handle%num_copies
-print *, 'ensemble', ens_size
+!print *, 'ensemble', ens_size
 
 ! Let's assume failure.  Set return val to missing, then the code can
 ! just set istatus to something indicating why it failed, and return.

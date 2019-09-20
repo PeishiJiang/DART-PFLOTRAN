@@ -1,4 +1,0 @@
-&convert_nc_nml
-    netcdf_file = '../pflotran_input/obs_pflotran.nc'
-    out_file  = '../dart_inout/obs_seq_pflotran.out'
- /

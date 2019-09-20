@@ -32,7 +32,7 @@ dates     = [datetime.strptime(t, '%m/%d/%Y %H:%M') for t in time_set]
 
 # Get the temperature values
 temperature = obs_pd[obs_pd.keys()[1:]].values
-print(temperature.shape)
+# print(temperature.shape)
 
 ###############################
 # Write it into NetCDF format

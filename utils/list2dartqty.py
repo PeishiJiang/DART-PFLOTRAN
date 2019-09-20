@@ -60,14 +60,14 @@ with open(obs_kind_file, 'w') as f:
             continue
         # Get the current available PFLOTRAN variables
         elif count and not line.startswith("integer, parameter, public ::") and not line == "\n":
-            if ", &\n" not in line:
-        # TODO change the line of te last current PFLOTRAN variable, i.e., adding ', &\n'
-                line = line[:-1] + ", &\n"
             dart_var = line.split()[0]
-            existing_dart_set.append(dart_var)
             last_dartvar = dart_var
-            num_qty = int(p2.search(line).group())
+            num_qty      = int(p2.search(line).group())
             last_num_qty = num_qty
+            existing_dart_set.append(dart_var)
+            if  (", &\n" not in line) and (not all(elem in existing_dart_set for elem in dart_set)):
+            # change the line of the last current PFLOTRAN variable, i.e., adding ', &\n'
+                line = line[:-1] + ", &\n"
             f.write(line)
             continue
         # End of getting the current PFLOTRAN variables in DART and do the following
@@ -111,10 +111,14 @@ with open(obs_kind_file, 'w') as f:
         f.write(line)
 
 
-print("The added DART variable quantities names and indices are ...")
-print(dart_set_unique)
-print(dart_ind_set)
+if len(dart_ind_set) > 0:
+    print("The added DART variable quantities names and indices are ...")
+    print(dart_set_unique)
+    print(dart_ind_set)
+else:
+    print("No new DART variable quantity is added...")
 
+print("Finished generating the %s..." % obs_kind_file)
 
 ########################
 # Create the obs_type_file
@@ -124,3 +128,5 @@ with open(obs_type_file, 'w') as f:
     for i in range(len(dart_set)):
         f.write("!"+pflotran_set[i]+",  "+dart_set[i]+", COMMON_CODE\n")
     f.write('! END DART PREPROCESS KIND LIST\n')
+
+print("Finished generating the %s..." % obs_type_file)
