@@ -1,9 +1,9 @@
 &filter_nml
-    input_state_file_list = 'filter_input_list.txt'
+    input_state_file_list = '../dart_inout/filter_input_list.txt'
     stages_to_write = 'preassim', 'analysis', 'output'
     single_file_out = .true.
     output_state_files = ''
-    output_state_file_list = 'filter_output_list.txt'
+    output_state_file_list = '../dart_inout/filter_output_list.txt'
     output_interval = 1
     output_members = .true.
     num_output_state_members = 20
@@ -20,8 +20,8 @@
     obs_sequence_in_name = '../dart_inout/obs_seq_pflotran.out'
     obs_sequence_out_name = 'obs_seq.final'
     num_output_obs_members = 20
-    init_time_days = 0
-    init_time_seconds = 0
+    init_time_days = -1
+    init_time_seconds = -1
     first_obs_days = -1
     first_obs_seconds = -1
     last_obs_days = -1
@@ -64,7 +64,7 @@
 &model_nml
     nvar = 4
     time_step_days = 0
-    time_step_seconds = 0
+    time_step_seconds = 600
     var_names = 'TEMPERATURE', 'FLOW_FLUX', 'POROSITY', 'THERMAL_CONDUCTIVITY'
     template_file = '../dart_inout/prior_Rtemplate.nc'
     var_qtynames = 'QTY_PFLOTRAN_TEMPERATURE', 'QTY_PFLOTRAN_FLOW_FLUX',

@@ -202,6 +202,8 @@ obs_timestep       = float(sys.argv[3])              # unit:s, the time interval
 obs_error          = float(sys.argv[4])              # If the error type is 'absolute', the error means the accuracy of temperature measurement with unit degree C. If the error type is 'relative', the error means the percentage of temperature measurement.
 nreaz              = int(sys.argv[5])                # number of ensemble members
 spinup             = bool(sys.argv[6])
+spinup_length      = float(sys.argv[7]) #unit: day, spinup time
+# spinup_length      = .5 #unit: day, spinup time
 
 #configure ES-MDA
 niter = 2 # number of iterations
@@ -239,7 +241,6 @@ therm_loc = [-0.01, -0.05, -0.65] # unit:m, location of thermistor, negative mea
 obs_error_type = 'absolute'    # 'absolute' and 'relative'. 'absolute' means the absolute measurement error in degree C, 'relative' means a perentage of the observation value
 # Configure model domain and PFLOTRAN running environment
 hz = 0.64          # unit: m, height of the 1-D column
-spinup_length = .5 #unit: day, spinup time
 
 
 #----------------------------------------------------------
@@ -315,6 +316,8 @@ with open(pflotran_in_file,'w') as f:
                 pflotranin[i+1] = "   PERIODIC TIME {}".format(259200) + " s" +"\n"
             else:
                 pflotranin[i+1] = "    PERIODIC TIME {}".format(obs.timestep) + " s" +"\n"
+            # if not spinup:
+                # pflotranin[i+1] = "    PERIODIC TIME {}".format(obs.timestep) + " s" +"\n"
         if "FLOW_CONDITION flow_top" in s and "TYPE" in pflotranin[i+1]:
             pflotranin[i+2] = "    FLUX NEUMANN" + "\n"
             pflotranin[i+5] = "\n"

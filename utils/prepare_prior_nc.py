@@ -17,8 +17,10 @@ from netCDF4 import num2date, date2num, Dataset
 pflotran_out_file  = sys.argv[1]
 pflotran_para_file = sys.argv[2]
 dart_prior_file    = sys.argv[3]
-nens               = int(sys.argv[4])
-pflotran_var_set   = sys.argv[5:]
+dart_input_list    = sys.argv[4]
+nens               = int(sys.argv[5])
+spinup             = bool(sys.argv[6])
+pflotran_var_set   = sys.argv[7:]
 
 # Parse the PFLOTRAN variables to be updated/analyzed/assimilated
 p = re.compile('[A-Z_]+')
@@ -37,6 +39,16 @@ for f in pflotran_out_file_set:
 # Get the file names of all ensembles for DART restart file
 dart_prior_file_set = [re.sub(r"\[ENS\]",str(ens),dart_prior_file) for ens in ens_set]
 dart_prior_template = re.sub(r"\[ENS\]",'template',dart_prior_file)
+
+
+###############################
+# Save the list of prior.nc to dart_input_list
+###############################
+if os.path.isfile(dart_input_list):
+    os.remove(dart_input_list)
+with open(dart_input_list, "w") as f:
+    for fname in dart_prior_file_set:
+        f.write(fname+"\n")
 
 
 ###############################
@@ -149,14 +161,18 @@ for i in range(nens):
     zloc = root_nc.createVariable('z_location', 'f8', ('z_location',))
 
     # Convert the time unit to day, as required by DART's read_model_time() subroutine
-    if (time_unit.lower() == 's') or (time_unit.lower() == 'second'):
+    if spinup:
         time.units = "day"
-        time[:] = last_time / 86400.
-    elif (time_unit.lower() == 'd') or (time_unit.lower() == 'day'):
-        time.units = "day"
-        time[:] = last_time
+        time[:] = 0
     else:
-        raise Exception("Unknow time unit %s" % time_unit)
+        if (time_unit.lower() == 's') or (time_unit.lower() == 'second'):
+            time.units = "day"
+            time[:] = last_time / 86400.
+        elif (time_unit.lower() == 'd') or (time_unit.lower() == 'day'):
+            time.units = "day"
+            time[:] = last_time
+        else:
+            raise Exception("Unknow time unit %s" % time_unit)
     time.calendar = 'none'
     member[:] = ens
 
