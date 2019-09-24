@@ -15,31 +15,37 @@
 # so this MUST be run first.
 #----------------------------------------------------------------------
 
+set app_work_dir = $1    # The application work folder
+set dart_work_dir = $PWD # The DART-PFLOTRAN work folder
+
 set nonomatch
 echo "---------------------------------------------------------------"
 echo "Removing *.o *.mod files"
-\rm -f preprocess *.o *.mod Makefile
+\rm -f convert_nc preprocess *.o *.mod Makefile
 \rm -f ../../../obs_def/obs_def_mod.f90
 \rm -f ../../../obs_kind/obs_kind_mod.f90
 
-set MODEL = "NetCDF converters"
-
-@ n = 1
+set MODEL = "PFLOTRAN"
 
 echo
 echo
 echo "---------------------------------------------------------------"
-echo "${MODEL} build number ${n} is preprocess"
+echo "${MODEL}: preprocessing DART-PFLOTRAN generic variable quantities"
 
-csh  mkmf_preprocess || exit 1
+csh  mkmf_preprocess
 make || exit 2
 
+mv preprocess ${app_work_dir} exit || 6
+cd ${app_work_dir}
 ./preprocess || exit 99
 
 echo "---------------------------------------------------------------"
-echo "Generating the DART observation file converter"
-csh  mkmf_convert_nc  || exit 3
+echo "${MODEL}: generating the DART observation file converter"
+cd ${dart_work_dir}
+csh  mkmf_convert_nc
 make || exit 4
+
+mv convert_nc ${app_work_dir} || exit 5
 
 ##----------------------------------------------------------------------
 ## Build all the single-threaded targets
@@ -66,6 +72,7 @@ make || exit 4
 #end
 
 \rm -f *.o *.mod input.nml*_default Makefile .cppdefs
+#\rm -f ../utils/convert_nc.f90
 
 echo "Success: All ${MODEL} programs compiled."
 

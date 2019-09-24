@@ -13,8 +13,8 @@ from datetime import datetime, timedelta
 # Parameters
 ###############################
 obs_nc       = sys.argv[1]
-convert_file = '../utils/convert_nc.f90'
-convert_template_file = '../utils/convert_nc_template.f90'
+convert_file = sys.argv[2]
+convert_template_file = sys.argv[3]
 
 ###############################
 # Read the obs_nc file

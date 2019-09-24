@@ -1,9 +1,9 @@
 &filter_nml
-    input_state_file_list = '../dart_inout/filter_input_list.txt'
+    input_state_file_list = '/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/dart_inout/filter_input_list.txt'
     stages_to_write = 'preassim', 'analysis', 'output'
     single_file_out = .true.
     output_state_files = ''
-    output_state_file_list = '../dart_inout/filter_output_list.txt'
+    output_state_file_list = '/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/dart_inout/filter_output_list.txt'
     output_interval = 1
     output_members = .true.
     num_output_state_members = 20
@@ -16,8 +16,8 @@
     perturbation_amplitude = 0.2
     distributed_state = .true.
     async = 2
-    adv_ens_command = '../work/advance_model.csh'
-    obs_sequence_in_name = '../dart_inout/obs_seq_pflotran.out'
+    adv_ens_command = '/Users/jian449/Codes/DART/manhattan/models/pflotran/work/advance_model.csh'
+    obs_sequence_in_name = '/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/dart_inout/obs_seq_pflotran.out'
     obs_sequence_out_name = 'obs_seq.final'
     num_output_obs_members = 20
     init_time_days = -1
@@ -66,14 +66,14 @@
     time_step_days = 0
     time_step_seconds = 600
     var_names = 'TEMPERATURE', 'FLOW_FLUX', 'POROSITY', 'THERMAL_CONDUCTIVITY'
-    template_file = '../dart_inout/prior_Rtemplate.nc'
+    template_file = '/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/dart_inout/prior_Rtemplate.nc'
     var_qtynames = 'QTY_PFLOTRAN_TEMPERATURE', 'QTY_PFLOTRAN_FLOW_FLUX',
                    'QTY_PFLOTRAN_POROSITY', 'QTY_PFLOTRAN_THERMAL_CONDUCTIVITY'
 /
 
 &model_mod_check_nml
-    input_state_files = '../dart_inout/prior_Rtemplate.nc'
-    output_state_files = '../dart_inout/mmc_output.nc'
+    input_state_files = '/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/dart_inout/prior_Rtemplate.nc'
+    output_state_files = '/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/dart_inout/mmc_output.nc'
     all_metadata_file = 'metadata.txt'
     test1thru = 4
     run_tests = -1
@@ -90,15 +90,16 @@
 
 &preprocess_nml
     overwrite_output = .true.
-    input_obs_kind_mod_file = '../obs_kind/DEFAULT_obs_kind_mod.f90'
-    output_obs_def_mod_file = '../../../observations/forward_operators/obs_def_mod.f90'
-    output_obs_kind_mod_file = '../../../assimilation_code/modules/observations/obs_kind_mod.f90'
-    input_files = '../obs_type/obs_def_pflotran_mod.f90'
+    input_obs_kind_mod_file = '/Users/jian449/Codes/DART/manhattan/models/pflotran/obs_kind/DEFAULT_obs_kind_mod.f90'
+    input_obs_def_mod_file = '/Users/jian449/Codes/DART/manhattan/observations/forward_operators/DEFAULT_obs_def_mod.f90'
+    output_obs_def_mod_file = '/Users/jian449/Codes/DART/manhattan/observations/forward_operators/obs_def_mod.f90'
+    output_obs_kind_mod_file = '/Users/jian449/Codes/DART/manhattan/assimilation_code/modules/observations/obs_kind_mod.f90'
+    input_files = '/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/obs_type/obs_def_pflotran_mod.f90'
 /
 
 &convert_nc_nml
-    netcdf_file = '../pflotran_input/obs_pflotran.nc'
-    out_file = '../dart_inout/obs_seq_pflotran.out'
+    netcdf_file = '/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/pflotran_input/obs_pflotran.nc'
+    out_file = '/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/dart_inout/obs_seq_pflotran.out'
 /
 
 &obs_sequence_nml
@@ -152,6 +153,6 @@
 /
 
 &convertnc_nml
-    netcdf_file = '../pflotran_input/obs_pflotran.nc'
-    out_file = '../dart_inout/obs_seq_pflotran.out'
+    netcdf_file = '/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/pflotran_input/obs_pflotran.nc'
+    out_file = '/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/dart_inout/obs_seq_pflotran.out'
 /

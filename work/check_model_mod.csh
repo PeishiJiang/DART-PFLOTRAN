@@ -17,11 +17,14 @@
 # so this MUST be run first.
 #----------------------------------------------------------------------
 
+set app_work_dir = $1    # The application work folder
+set dart_work_dir = $PWD # The DART-PFLOTRAN work folder
+
 \rm -f preprocess *.o *.mod Makefile .cppdefs
 \rm -f ../../../obs_def/obs_def_mod.f90
 \rm -f ../../../obs_kind/obs_kind_mod.f90
 
-set MODEL = "pflotran"
+set MODEL = "PFLOTRAN"
 
 @ n = 1
 
@@ -30,13 +33,22 @@ echo
 echo "---------------------------------------------------------------"
 echo "${MODEL} build number ${n} is preprocess"
 csh  mkmf_preprocess
-make || exit $n
+make || exit 1
+
+mv preprocess ${app_work_dir} || exit 2
+cd ${app_work_dir}
 ./preprocess || exit 99
 
+echo "---------------------------------------------------------------"
 echo 'building model_mod_check'
+cd ${dart_work_dir}
 csh mkmf_model_mod_check
-make || exit 1
-./model_mod_check
+make || exit $3
+
+mv model_mod_check ${app_work_dir} || exit $4
+cd ${app_work_dir}
+./model_mod_check || exit 100
+
 
 #@ n = 1
 

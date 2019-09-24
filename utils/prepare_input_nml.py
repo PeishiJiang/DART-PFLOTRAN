@@ -10,25 +10,34 @@ import f90nml
 ###############################
 # Parameters
 ###############################
-input_nml_file = sys.argv[1]
-input_nml_dict_file = sys.argv[2]
+input_nml_file          = sys.argv[1]
+input_nml_template_file = sys.argv[2]
+configure_dict_file     = sys.argv[3]
 
-if not os.path.isfile(input_nml_dict_file):
-    raise Exception("The file %s does not exists!" % input_nml_dict_file)
+if not os.path.isfile(configure_dict_file):
+    raise Exception("The file %s does not exists!" % configure_dict_file)
 
-dir_path = os.path.dirname(os.path.realpath(input_nml_dict_file))
-input_nml_template_file = os.path.join(dir_path, "input.nml.template")
+# dir_path = os.path.dirname(os.path.realpath(input_nml_dict_file))
+# input_nml_template_file = os.path.join(dir_path, "input.nml.template")
 if not os.path.isfile(input_nml_template_file):
     raise Exception("The file %s does not exists!" % input_nml_template_file)
 
 
 ###############################
 # Read the namelist information from
-# input_nml_dict
+# configure_pickle
 ###############################
-with open(input_nml_dict_file, "rb") as f:
-    input_nml_dict = pickle.load(f)
+with open(configure_dict_file, "rb") as f:
+    configure = pickle.load(f)
+
+# Get the input namelists
+input_nml_dict = configure["inputnml"]
 added_namelist = input_nml_dict.keys()
+
+# Get the location of DART and application paths
+directories = configure["directories"]
+APP_DIR     = directories["APP_DIR"]
+DART_DIR    = directories["DART_DIR"]
 
 
 ###############################
@@ -51,9 +60,19 @@ for name in added_namelist:
     else:
         nml[name] = added_nml_ele
 
+# Replace the paths of some files
+for name in nml.keys():
+    nml_ele = nml[name]
+    for item, value in nml_ele.items():
+        if not isinstance(value,str):
+            continue
+        if "[APP_DIR]" in value:
+            nml_ele[item] = value.replace("[APP_DIR]", APP_DIR)
+        elif "[DART_DIR]" in value:
+            nml_ele[item] = value.replace("[DART_DIR]", DART_DIR)
+    nml[name] = nml_ele
+
 # Now, let's write
 nml.write(input_nml_file)
-
-os.remove(input_nml_dict_file)
 
 print("Finished generating the input namelist file...")

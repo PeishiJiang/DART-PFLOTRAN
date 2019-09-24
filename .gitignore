@@ -1,16 +1,17 @@
-pflotran_output/*.h5
-pflotran_output/*.out
-pflotran_output/*.chk
 .DS_Store
 *.swp
 
-work/*.o
-work/*.mod
-work/convert_nc
-work/*default
-work/*default
-work/Makefile
-work/dart_log.out
-work/preprocess
+/work/*.o
+/work/*.mod
+/work/convert_nc
+/work/*default
+/work/*default
+/work/Makefile
+/work/dart_log.out
+/work/preprocess
 
-dart_inout/*
+/applications/1dthermal/dart_inout/
+/applications/1dthermal/pflotran_output/*.h5
+/applications/1dthermal/pflotran_output/*.out
+/applications/1dthermal/pflotran_output/*.chk
+/applications/1dthermal/work/

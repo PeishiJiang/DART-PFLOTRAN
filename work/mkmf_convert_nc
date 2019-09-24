@@ -6,8 +6,12 @@
 #
 # DART $Id: mkmf_convert_madis_profiler 11289 2017-03-10 21:56:06Z hendric@ucar.edu $
 
+\rm -f *.o *.mod Makefile .cppdefs
+
 ../../../build_templates/mkmf -p convert_nc -t ../../../build_templates/mkmf.template   \
  -a "../../.." path_names_convert_nc
+
+\rm -f *.o *.mod Makefile .cppdefs
 
 exit $status
 

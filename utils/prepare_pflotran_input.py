@@ -3,6 +3,7 @@
 # Author: Peishi Jiang
 
 import os
+from os.path import dirname
 import sys
 import copy
 import h5py
@@ -201,9 +202,8 @@ pflotran_para_file = sys.argv[2]
 obs_timestep       = float(sys.argv[3])              # unit:s, the time interval that temperatures are collected
 obs_error          = float(sys.argv[4])              # If the error type is 'absolute', the error means the accuracy of temperature measurement with unit degree C. If the error type is 'relative', the error means the percentage of temperature measurement.
 nreaz              = int(sys.argv[5])                # number of ensemble members
-spinup             = bool(sys.argv[6])
-spinup_length      = float(sys.argv[7]) #unit: day, spinup time
-# spinup_length      = .5 #unit: day, spinup time
+spinup_length      = float(sys.argv[6]) #unit: day, spinup time
+spinup             = bool(sys.argv[7])
 
 #configure ES-MDA
 niter = 2 # number of iterations
@@ -243,6 +243,13 @@ obs_error_type = 'absolute'    # 'absolute' and 'relative'. 'absolute' means the
 hz = 0.64          # unit: m, height of the 1-D column
 
 
+# Get the application folder
+pflotran_in_path = dirname(os.path.abspath(pflotran_in_file))
+# print(os.path.abspath(os.pardir))
+# print(os.getcwd())
+# print(dirname(os.path.abspath(__file__)))
+
+
 #----------------------------------------------------------
 kwargs1 = {}
 if 'permeability' in da_para:
@@ -269,7 +276,7 @@ if 'porosity' in da_para:
     kwargs1.update({'poro_low_bound':poro_low_bound})
     kwargs1.update({'poro_up_bound':poro_up_bound})
 
-spinup_length_sec = spinup_length*86400
+spinup_length_sec = spinup_length * 86400.
 obs_length_sec = obs_length*86400
 obs_start_time = spinup_length_sec
 obs_end_time = obs_start_time+obs_length_sec
@@ -285,7 +292,7 @@ mod = TH1D(da_para,nreaz,hz,spinup_length,**kwargs1)
 # Obtain the time information
 ########################################################
 obs_coord = np.array(therm_loc[1:-1])-np.array(therm_loc[0])
-obs_data = np.loadtxt('../pflotran_input/obs_data.dat',skiprows=1)
+obs_data = np.loadtxt(os.path.join(pflotran_in_path, 'obs_data.dat'),skiprows=1)
 obs_start_idx = int(obs_start_time/obs_timestep)
 obs_end_idx = int(obs_end_time/obs_timestep)
 obs_data = obs_data[obs_start_idx:obs_end_idx+1,:]
@@ -297,7 +304,7 @@ obs = Obs(obs_start_time,obs_end_time,obs_timestep,obs_coord,obs_error_type,obs_
 # Write the PFLOTRAN input card file
 ########################################################
 # Read the input card template
-with open('../pflotran_input/1dthermal_template.in','r') as f:
+with open(os.path.join(pflotran_in_path, '1dthermal_template.in'), 'r') as f:
     pflotranin = f.readlines()
 
 # Write the new input card
@@ -334,9 +341,9 @@ with open(pflotran_in_file,'w') as f:
             pflotranin[i] = "  FINAL_TIME {} sec".format(obs.time[-1])+"\n"
         if "MODE TH" in s:
             if not spinup:
-             pflotranin[i+1] = "      OPTIONS"+"\n"
-             pflotranin[i+2] = "        REVERT_PARAMETERS_ON_RESTART"+"\n"
-             pflotranin[i+3] = "      /"+"\n"
+                pflotranin[i+1] = "      OPTIONS"+"\n"
+                pflotranin[i+2] = "        REVERT_PARAMETERS_ON_RESTART"+"\n"
+                pflotranin[i+3] = "      /"+"\n"
         if "FILENAME 1dthermal" in s:
             if not spinup:
 #                        print(pflotranin[i+2])

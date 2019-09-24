@@ -1,0 +1,607 @@
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9 23  9  4 34
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/obs_kind/DEFAULT_obs_kind_mod.f90
+ Path names of output obs_def and obs_kind modules
+ ../../../observations/forward_operators/obs_def_mod.f90
+ ../../../assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/obs_type/obs_def_pflotran_mod.f90
+ INPUT model files follow:
+ ERROR FROM:
+  preprocess
+  routine: preprocess
+  message:  file ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90 must exist (and does not)
+ 
+  source file: $URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/assimilation_code/programs/preprocess/preprocess.f90 $
+  file revision: $Revision: 13137 $
+  revision date: $Date: 2019-04-30 08:48:00 -0700 (Tue, 30 Apr 2019) $
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9 23  9  9 42
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/obs_kind/DEFAULT_obs_kind_mod.f90
+ Path names of output obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/observations/forward_operators/obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/obs_type/obs_def_pflotran_mod.f90
+ INPUT model files follow:
+ ERROR FROM:
+  preprocess
+  routine: preprocess
+  message:  file ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90 must exist (and does not)
+ 
+  source file: $URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/assimilation_code/programs/preprocess/preprocess.f90 $
+  file revision: $Revision: 13137 $
+  revision date: $Date: 2019-04-30 08:48:00 -0700 (Tue, 30 Apr 2019) $
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9 23  9 10 39
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/obs_kind/DEFAULT_obs_kind_mod.f90
+ Path names of output obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/observations/forward_operators/obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/obs_type/obs_def_pflotran_mod.f90
+ INPUT model files follow:
+ ERROR FROM:
+  preprocess
+  routine: preprocess
+  message:  file ../../../observations/forward_operators/DEFAULT_obs_def_mod.F90 must exist (and does not)
+ 
+  source file: $URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/assimilation_code/programs/preprocess/preprocess.f90 $
+  file revision: $Revision: 13137 $
+  revision date: $Date: 2019-04-30 08:48:00 -0700 (Tue, 30 Apr 2019) $
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9 23  9 14 58
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan//observations/forward_operators/DEFAULT_obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/obs_kind/DEFAULT_obs_kind_mod.f90
+ Path names of output obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/observations/forward_operators/obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/obs_type/obs_def_pflotran_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9 23  9 14 58
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9 23  9 41  6
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/observations/forward_operators/DEFAULT_obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/obs_kind/DEFAULT_obs_kind_mod.f90
+ Path names of output obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/observations/forward_operators/obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/obs_type/obs_def_pflotran_mod.f90
+ INPUT model files follow:
+ ERROR FROM:
+  preprocess
+  routine: preprocess
+  message:  file /Users/jian449/Codes/DART/manhattan/models/pflotran/observations/forward_operators/DEFAULT_obs_def_mod.f90 must exist (and does not)
+ 
+  source file: $URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/assimilation_code/programs/preprocess/preprocess.f90 $
+  file revision: $Revision: 13137 $
+  revision date: $Date: 2019-04-30 08:48:00 -0700 (Tue, 30 Apr 2019) $
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9 23  9 47 18
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/observations/forward_operators/DEFAULT_obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/obs_kind/DEFAULT_obs_kind_mod.f90
+ Path names of output obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/observations/forward_operators/obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/obs_type/obs_def_pflotran_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9 23  9 47 18
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 10 11 27
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/observations/forward_operators/DEFAULT_obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/obs_kind/DEFAULT_obs_kind_mod.f90
+ Path names of output obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/observations/forward_operators/obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/obs_type/obs_def_pflotran_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 10 11 27
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 10 14 20
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/observations/forward_operators/DEFAULT_obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/obs_kind/DEFAULT_obs_kind_mod.f90
+ Path names of output obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/observations/forward_operators/obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/obs_type/obs_def_pflotran_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 10 14 20
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 10 24  5
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/observations/forward_operators/DEFAULT_obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/obs_kind/DEFAULT_obs_kind_mod.f90
+ Path names of output obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/observations/forward_operators/obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/obs_type/obs_def_pflotran_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 10 24  5
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 10 26  7
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/observations/forward_operators/DEFAULT_obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/obs_kind/DEFAULT_obs_kind_mod.f90
+ Path names of output obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/observations/forward_operators/obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/obs_type/obs_def_pflotran_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 10 26  7
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 10 26 22
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/observations/forward_operators/DEFAULT_obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/obs_kind/DEFAULT_obs_kind_mod.f90
+ Path names of output obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/observations/forward_operators/obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/obs_type/obs_def_pflotran_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 10 26 22
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 10 39  6
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/observations/forward_operators/DEFAULT_obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/obs_kind/DEFAULT_obs_kind_mod.f90
+ Path names of output obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/observations/forward_operators/obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/obs_type/obs_def_pflotran_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 10 39  6
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 10 43 35
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/observations/forward_operators/DEFAULT_obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/obs_kind/DEFAULT_obs_kind_mod.f90
+ Path names of output obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/observations/forward_operators/obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/obs_type/obs_def_pflotran_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 10 43 35
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 10 47  1
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/observations/forward_operators/DEFAULT_obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/obs_kind/DEFAULT_obs_kind_mod.f90
+ Path names of output obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/observations/forward_operators/obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/obs_type/obs_def_pflotran_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 10 47  1
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 10 48 43
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/observations/forward_operators/DEFAULT_obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/obs_kind/DEFAULT_obs_kind_mod.f90
+ Path names of output obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/observations/forward_operators/obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/obs_type/obs_def_pflotran_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 10 48 43
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 10 49 12
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/observations/forward_operators/DEFAULT_obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/obs_kind/DEFAULT_obs_kind_mod.f90
+ Path names of output obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/observations/forward_operators/obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/obs_type/obs_def_pflotran_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 10 49 12
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 10 50 19
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/observations/forward_operators/DEFAULT_obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/obs_kind/DEFAULT_obs_kind_mod.f90
+ Path names of output obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/observations/forward_operators/obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/obs_type/obs_def_pflotran_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 10 50 19
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 10 50 56
+ Program convert_nc
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  write_obs_seq  opening formatted observation sequence file "/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/dart_inout/obs_seq_pflotran.out"
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+  write_obs_seq  closed observation sequence file "/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/dart_inout/obs_seq_pflotran.out"
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 10 50 57
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 11  1  1
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/observations/forward_operators/DEFAULT_obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/obs_kind/DEFAULT_obs_kind_mod.f90
+ Path names of output obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/observations/forward_operators/obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/obs_type/obs_def_pflotran_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 11  1  1
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 11  1 14
+ Program model_mod_check
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  initialize_mpi_utilities: Running single process
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+  create_and_open_state_output:  Creating output file /Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/dart_inout/mmc_output.nc
+  write_model_time no variable "time" found in file
+  write_model_time ... creating one
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 11  1 14
+ Program model_mod_check
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 16 25 14
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/observations/forward_operators/DEFAULT_obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/obs_kind/DEFAULT_obs_kind_mod.f90
+ Path names of output obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/observations/forward_operators/obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/obs_type/obs_def_pflotran_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 16 25 14
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 16 25 45
+ Program convert_nc
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ ERROR FROM:
+  convert_nc:
+  routine: convert_nc:
+  message:  The DART observation file exists, with name/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/dart_inout/obs_seq_pflotran.out
+ 
+  source file: $URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/model/pflotran/utils/convert_nc.f90 $
+  file revision: $Revision: Unknown $
+  revision date: $Date: 2019-09-17 08:48:00 -0700 (Tue, 17 Sept 2019) $
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 16 26 54
+ Program preprocess
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ Path names of default obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/observations/forward_operators/DEFAULT_obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/obs_kind/DEFAULT_obs_kind_mod.f90
+ Path names of output obs_def and obs_kind modules
+ /Users/jian449/Codes/DART/manhattan/observations/forward_operators/obs_def_mod.f90
+ /Users/jian449/Codes/DART/manhattan/assimilation_code/modules/observations/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ /Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/obs_type/obs_def_pflotran_mod.f90
+ INPUT model files follow:
+  preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 16 26 54
+ Program preprocess
+ --------------------------------------
+
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 16 27 16
+ Program convert_nc
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+ ERROR FROM:
+  convert_nc:
+  routine: convert_nc:
+  message:  The DART observation file exists, with name/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/dart_inout/obs_seq_pflotran.out
+ 
+  source file: $URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/model/pflotran/utils/convert_nc.f90 $
+  file revision: $Revision: Unknown $
+  revision date: $Date: 2019-09-17 08:48:00 -0700 (Tue, 17 Sept 2019) $
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 16 28 56
+ Program convert_nc
+ --------------------------------------
+
+  set_nml_output No echo of NML values
+  write_obs_seq  opening formatted observation sequence file "/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/dart_inout/obs_seq_pflotran.out"
+
+ Assimilate_these_obs_types:
+    TEMPERATURE
+ Evaluate_these_obs_types:
+    none
+ Use the precomputed Prior Forward Operators for these obs types:
+    none
+
+  write_obs_seq  closed observation sequence file "/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/dart_inout/obs_seq_pflotran.out"
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2019  9 23 16 28 58
+ --------------------------------------
+

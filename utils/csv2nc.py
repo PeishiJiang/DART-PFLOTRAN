@@ -14,8 +14,13 @@ from datetime import datetime, timedelta
 ###############################
 # Parameters
 ###############################
-obs_original = sys.argv[1]
-obs_nc       = sys.argv[2]
+obs_original = sys.argv[1]    # The original observation file
+obs_nc       = sys.argv[2]    # The converted observation file
+assim_start_str = sys.argv[3]  # The map between the start of observation and spinup time
+
+# Get the reference time
+# ref_time = datetime.strptime(assim_start_str, "%Y-%m-%d %H:%M:%S")
+ref_time = datetime.strptime(assim_start_str, "%Y-%m-%d")
 
 ###############################
 # Read the csv file
@@ -29,6 +34,9 @@ ntime, nz = obs_pd.shape
 nz        = nz-1
 nloc      = nz*1*1
 dates     = [datetime.strptime(t, '%m/%d/%Y %H:%M') for t in time_set]
+
+dates_ref = [t-ref_time for t in dates]
+dates_ref_values = [t.days+float(t.seconds)/86400. for t in dates_ref]
 
 # Get the temperature values
 temperature = obs_pd[obs_pd.keys()[1:]].values
@@ -62,11 +70,16 @@ zloc = root_nc.createVariable('z_location', 'f8', ('location',))
 zloc.units, zloc.type  = 'm', 'dimension_value'
 yloc.units, yloc.type  = 'm', 'dimension_value'
 xloc.units, xloc.type  = 'm', 'dimension_value'
-times.units    = 'seconds since 2017-04-01 00:00:00'
-# times.units    = 'None'
-times.calendar = 'gregorian'
+# times.units    = 'seconds since 2017-04-01 00:00:00'
+# times.units    = 'days since 2017-04-01 00:00:00'
+# times.calendar = 'gregorian'
+# times.type     = 'dimension_value'
+# times[:] = date2num(dates,units=times.units,calendar=times.calendar)
+
+times.calendar = 'None'
+times.units    = 'days'
 times.type     = 'dimension_value'
-times[:] = date2num(dates,units=times.units,calendar=times.calendar)
+times[:]       = dates_ref_values
 
 # Write coordinates values
 xloc[:] = np.zeros(nloc)
