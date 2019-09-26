@@ -109,12 +109,6 @@ mkfifo model_to_filter.lock filter_to_model.lock
 set filterhome = ~/.filter$$
 if ( ! -e $filterhome) mkdir $filterhome
 
-# ====================================================================
-# Step 1 -- Model Spinup
-# ====================================================================
-# TODO
-#${ADV_CMD} 0 ${NUM_ENS} filter_control00000 || exit 9
-
 # this starts filter but also returns control back to
 # this script immediately.
 

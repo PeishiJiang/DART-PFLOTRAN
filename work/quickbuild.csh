@@ -17,11 +17,16 @@
 # so this MUST be run first.
 #----------------------------------------------------------------------
 
+set app_work_dir = $1    # The application work folder
+set dart_work_dir = $PWD # The DART-PFLOTRAN work folder
+
+echo "---------------------------------------------------------------"
+echo "Removing *.o *.mod files"
 \rm -f preprocess *.o *.mod Makefile .cppdefs
 \rm -f ../../../obs_def/obs_def_mod.f90
 \rm -f ../../../obs_kind/obs_kind_mod.f90
 
-set MODEL = "template"
+set MODEL = "PFLOTRAN"
 
 @ n = 1
 
@@ -33,12 +38,15 @@ echo "${MODEL} build number ${n} is preprocess"
 csh  mkmf_preprocess
 make || exit $n
 
-./preprocess || exit 99
+mv preprocess ${app_work_dir} || exit $n
+cd ${app_work_dir}
+./preprocess || exit $n
 
 #----------------------------------------------------------------------
 # Build all the single-threaded targets
 #----------------------------------------------------------------------
 
+cd ${dart_work_dir}
 foreach TARGET ( mkmf_* )
 
    set PROG = `echo $TARGET | sed -e 's#mkmf_##'`
@@ -52,8 +60,10 @@ foreach TARGET ( mkmf_* )
       echo "---------------------------------------------------"
       echo "${MODEL} build number ${n} is ${PROG}"
       \rm -f ${PROG}
-      csh $TARGET || exit $n
+      #csh $TARGET || exit $n
+      csh $TARGET
       make        || exit $n
+      mv ${PROG} ${app_work_dir} || exit 6
       breaksw
    endsw
 end

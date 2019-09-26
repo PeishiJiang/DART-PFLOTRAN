@@ -14,12 +14,18 @@ Please refer to PFLOTRAN's official [instruction](https://www.pflotran.org/docum
 
 Please refer [here](./Install_DART.md) for DART installation.
 
-### Install Python packages
+### Install other packages
 
-The required Python pacakge includes:
+- [HDF5](https://www.hdfgroup.org/solutions/hdf5/) and [NetCDF4](https://www.unidata.ucar.edu/software/netcdf/) are required.
 
-```
+- The following Python pacakges are required:
 
+```sh
+f90nml >= 1.1.2
+h5py >= 2.9.0
+numpy >= 1.16.4
+pandas >= 0.25.0
+netcdf4-python >= 1.5.1.2
 ```
 
 ### Move the PFLOTRAN-DART repository into DART
@@ -29,6 +35,8 @@ Put the PFLOTRAN-DART repository in DART-compliant models repository by:
 ```
 mv {PFLOTRAN-DART} {DART}/Manhattan/models/pflotran
 ```
+
+
 
 ## File structure
 
@@ -104,11 +112,14 @@ The main structure of this {PFLOTRAN-DART} repository is shown below:
   +-- 1dthermal/
   ```
 
-  
+
+
 
 ## Configuration
 
-## Usage
+
+
+## Implementation
 
 
 

@@ -1,12 +1,11 @@
 &filter_nml
     input_state_file_list = '/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/dart_inout/filter_input_list.txt'
-    stages_to_write = 'preassim', 'analysis', 'output'
-    single_file_out = .true.
-    output_state_files = ''
+    single_file_in = .false.
+    single_file_out = .false.
     output_state_file_list = '/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/dart_inout/filter_output_list.txt'
     output_interval = 1
     output_members = .true.
-    num_output_state_members = 20
+    num_output_state_members = 30
     output_mean = .true.
     output_sd = .true.
     write_all_stages_at_end = .false.
@@ -15,11 +14,10 @@
     perturb_from_single_instance = .false.
     perturbation_amplitude = 0.2
     distributed_state = .true.
-    async = 2
     adv_ens_command = '/Users/jian449/Codes/DART/manhattan/models/pflotran/work/advance_model.csh'
     obs_sequence_in_name = '/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/dart_inout/obs_seq_pflotran.out'
     obs_sequence_out_name = 'obs_seq.final'
-    num_output_obs_members = 20
+    num_output_obs_members = 0
     init_time_days = -1
     init_time_seconds = -1
     first_obs_days = -1
@@ -44,7 +42,7 @@
 /
 
 &assim_tools_nml
-    filter_kind = 1
+    filter_kind = 2
     cutoff = 1000000.0
     sort_obs_inc = .false.
     spread_restoration = .false.
@@ -64,9 +62,9 @@
 &model_nml
     nvar = 4
     time_step_days = 0
-    time_step_seconds = 600
+    time_step_seconds = 1200
     var_names = 'TEMPERATURE', 'FLOW_FLUX', 'POROSITY', 'THERMAL_CONDUCTIVITY'
-    template_file = '/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/dart_inout/prior_Rtemplate.nc'
+    template_file = '/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/dart_inout/prior_template.nc'
     var_qtynames = 'QTY_PFLOTRAN_TEMPERATURE', 'QTY_PFLOTRAN_FLOW_FLUX',
                    'QTY_PFLOTRAN_POROSITY', 'QTY_PFLOTRAN_THERMAL_CONDUCTIVITY'
 /
@@ -100,6 +98,10 @@
 &convert_nc_nml
     netcdf_file = '/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/pflotran_input/obs_pflotran.nc'
     out_file = '/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/dart_inout/obs_seq_pflotran.out'
+    obs_start_day = 0
+    obs_start_second = 43200
+    obs_end_day = 0
+    obs_end_second = 43800
 /
 
 &obs_sequence_nml
@@ -152,7 +154,6 @@
     write_nml = 'none'
 /
 
-&convertnc_nml
-    netcdf_file = '/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/pflotran_input/obs_pflotran.nc'
-    out_file = '/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/dart_inout/obs_seq_pflotran.out'
+&cov_cutoff_nml
+    select_localization = 1
 /

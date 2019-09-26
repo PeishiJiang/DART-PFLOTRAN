@@ -416,7 +416,7 @@ loc_x     = loc_array(1)
 loc_y     = loc_array(2)
 loc_z     = loc_array(3)
 
-if ((debug) .and. do_output()) print *, 'requesting interpolation at ', loc_x,loc_y,loc_z
+!if ((debug) .and. do_output()) print *, 'requesting interpolation at ', loc_x,loc_y,loc_z
 
 ! TODO
 ! For now, this is applied to structured cartesian grids. Later on, it should be modified to unstructured grids.
@@ -461,19 +461,19 @@ val(1, 2, 2, :) =  get_val(state_handle, ens_size, loc_urb_ind, obs_qty)
 val(2, 1, 2, :) =  get_val(state_handle, ens_size, loc_llb_ind, obs_qty)
 val(2, 2, 2, :) =  get_val(state_handle, ens_size, loc_lrb_ind, obs_qty)
 
-if (debug) then
-    print *, 'The eight locations ....'
-    print *, loc_ult
-    print *, loc_urt
-    print *, loc_llt
-    print *, loc_lrt
-    print *, loc_ulb
-    print *, loc_urb
-    print *, loc_llb
-    print *, loc_lrb
-    print *, "The values at the eight locations ...."
-    print *, val(1,1,1,:),val(1,2,1,:),val(2,1,1,:),val(2,2,1,:),val(1,1,2,:),val(1,2,2,:),val(2,1,2,:),val(2,2,2,:)
-end if
+!if (debug) then
+    !print *, 'The eight locations ....'
+    !print *, loc_ult
+    !print *, loc_urt
+    !print *, loc_llt
+    !print *, loc_lrt
+    !print *, loc_ulb
+    !print *, loc_urb
+    !print *, loc_llb
+    !print *, loc_lrb
+    !print *, "The values at the eight locations ...."
+    !print *, val(1,1,1,:),val(1,2,1,:),val(2,1,1,:),val(2,2,1,:),val(1,1,2,:),val(1,2,2,:),val(2,1,2,:),val(2,2,2,:)
+!end if
 
 ! Conduct the interpolation based on the weighted summation of the state values at the four locations
 expected_obs = w_ult * val(1,1,1,:) + w_urt * val(1,2,1,:) + &
@@ -802,9 +802,9 @@ if (present(var_qty)) then
       varstring   = progvar(n)%varname
       index_start = get_index_start(dom_id,varstring)
       index_end   = get_index_end(dom_id,varstring)
-      if (debug) then
-          print *, varstring, index_in, dom_id, index_start, index_end
-      endif
+      !if (debug) then
+          !print *, varstring, index_in, dom_id, index_start, index_end
+      !endif
       if((index_in >= index_start).and. &
          (index_in <= index_end  ) ) then
          var_qty = progvar(n)%dartqtyind

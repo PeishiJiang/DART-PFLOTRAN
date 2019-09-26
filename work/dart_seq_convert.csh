@@ -35,7 +35,7 @@ echo "${MODEL}: preprocessing DART-PFLOTRAN generic variable quantities"
 csh  mkmf_preprocess
 make || exit 2
 
-mv preprocess ${app_work_dir} exit || 6
+mv preprocess ${app_work_dir} || exit 6
 cd ${app_work_dir}
 ./preprocess || exit 99
 

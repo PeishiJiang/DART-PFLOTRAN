@@ -14,9 +14,10 @@ from datetime import datetime, timedelta
 ###############################
 # Parameters
 ###############################
-obs_original = sys.argv[1]    # The original observation file
-obs_nc       = sys.argv[2]    # The converted observation file
-assim_start_str = sys.argv[3]  # The map between the start of observation and spinup time
+obs_original = sys.argv[1]        # The original observation file
+obs_nc       = sys.argv[2]        # The converted observation file
+spinup_time  = float(sys.argv[3]) # The spinup time (day)
+assim_start_str = sys.argv[4]     # The map between the start of observation and spinup time
 
 # Get the reference time
 # ref_time = datetime.strptime(assim_start_str, "%Y-%m-%d %H:%M:%S")
@@ -36,7 +37,7 @@ nloc      = nz*1*1
 dates     = [datetime.strptime(t, '%m/%d/%Y %H:%M') for t in time_set]
 
 dates_ref = [t-ref_time for t in dates]
-dates_ref_values = [t.days+float(t.seconds)/86400. for t in dates_ref]
+dates_ref_values = [t.days+float(t.seconds)/86400.+spinup_time for t in dates_ref]
 
 # Get the temperature values
 temperature = obs_pd[obs_pd.keys()[1:]].values

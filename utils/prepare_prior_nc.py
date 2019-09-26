@@ -18,9 +18,12 @@ pflotran_out_file  = sys.argv[1]
 pflotran_para_file = sys.argv[2]
 dart_prior_file    = sys.argv[3]
 dart_input_list    = sys.argv[4]
-nens               = int(sys.argv[5])
-spinup             = bool(sys.argv[6])
-pflotran_var_set   = sys.argv[7:]
+dart_posterior_file= sys.argv[5]
+dart_output_list   = sys.argv[6]
+dart_prior_template= sys.argv[7]
+nens               = int(sys.argv[8])
+# spinup             = bool(sys.argv[6])
+pflotran_var_set   = sys.argv[9:]
 
 # Parse the PFLOTRAN variables to be updated/analyzed/assimilated
 p = re.compile('[A-Z_]+')
@@ -37,8 +40,9 @@ for f in pflotran_out_file_set:
         raise Exception("The PFLOTRAN output file %s does not exits!" % f)
 
 # Get the file names of all ensembles for DART restart file
-dart_prior_file_set = [re.sub(r"\[ENS\]",str(ens),dart_prior_file) for ens in ens_set]
-dart_prior_template = re.sub(r"\[ENS\]",'template',dart_prior_file)
+dart_prior_file_set = [re.sub(r"R\[ENS\]","ensemble_"+str(ens),dart_prior_file) for ens in ens_set]
+dart_posterior_file_set = [re.sub(r"R\[ENS\]","ensemble_"+str(ens),dart_posterior_file) for ens in ens_set]
+# dart_prior_template = re.sub(r"R\[ENS\]",'template',dart_prior_file)
 
 
 ###############################
@@ -48,6 +52,16 @@ if os.path.isfile(dart_input_list):
     os.remove(dart_input_list)
 with open(dart_input_list, "w") as f:
     for fname in dart_prior_file_set:
+        f.write(fname+"\n")
+
+
+###############################
+# Save the list of posterior.nc to dart_output_list
+###############################
+if os.path.isfile(dart_output_list):
+    os.remove(dart_output_list)
+with open(dart_output_list, "w") as f:
+    for fname in dart_posterior_file_set:
         f.write(fname+"\n")
 
 
@@ -161,18 +175,18 @@ for i in range(nens):
     zloc = root_nc.createVariable('z_location', 'f8', ('z_location',))
 
     # Convert the time unit to day, as required by DART's read_model_time() subroutine
-    if spinup:
+    # if spinup:
+        # time.units = "day"
+        # time[:] = 0
+    # else:
+    if (time_unit.lower() == 's') or (time_unit.lower() == 'second'):
         time.units = "day"
-        time[:] = 0
+        time[:] = last_time / 86400.
+    elif (time_unit.lower() == 'd') or (time_unit.lower() == 'day'):
+        time.units = "day"
+        time[:] = last_time
     else:
-        if (time_unit.lower() == 's') or (time_unit.lower() == 'second'):
-            time.units = "day"
-            time[:] = last_time / 86400.
-        elif (time_unit.lower() == 'd') or (time_unit.lower() == 'day'):
-            time.units = "day"
-            time[:] = last_time
-        else:
-            raise Exception("Unknow time unit %s" % time_unit)
+        raise Exception("Unknow time unit %s" % time_unit)
     time.calendar = 'none'
     member[:] = ens
 
