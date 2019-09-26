@@ -1,5 +1,6 @@
 .DS_Store
 *.swp
+.ipynb_checkpoints
 
 /work/*.o
 /work/*.mod
@@ -10,8 +11,9 @@
 /work/dart_log.out
 /work/preprocess
 
-/applications/1dthermal/dart_inout/
-/applications/1dthermal/pflotran_output/*.h5
-/applications/1dthermal/pflotran_output/*.out
-/applications/1dthermal/pflotran_output/*.chk
-/applications/1dthermal/work/
+/applications/1dthermal/dart_inout/*
+!/applications/1dthermal/dart_inout/.gitignore
+/applications/1dthermal/pflotran_output/*
+!/applications/1dthermal/pflotran_output/.gitignore
+/applications/1dthermal/work/*
+!/applications/1dthermal/work/.gitignore
