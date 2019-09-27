@@ -78,7 +78,7 @@
 
 
 &model_mod_check_nml
-   input_state_files    = '[APP_DIR]/dart_inout/prior_Rtemplate.nc'
+   input_state_files    = '[APP_DIR]/dart_inout/prior_template.nc'
    output_state_files   = '[APP_DIR]/dart_inout/mmc_output.nc'
    all_metadata_file    = 'metadata.txt'
    test1thru            = 4
