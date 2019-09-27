@@ -859,7 +859,7 @@ call nc_add_global_attribute(ncid, "model_source", source )
 call nc_add_global_attribute(ncid, "model_revision", revision )
 call nc_add_global_attribute(ncid, "model_revdate", revdate )
 
-call nc_add_global_attribute(ncid, "model", "template")
+call nc_add_global_attribute(ncid, "model", "pflotran")
 
 call nc_end_define_mode(ncid)
 

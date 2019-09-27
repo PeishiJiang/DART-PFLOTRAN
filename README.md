@@ -12,7 +12,7 @@ Please refer to PFLOTRAN's official [instruction](https://www.pflotran.org/docum
 
 ### Install DART
 
-Please refer [here](./Install_DART.md) for DART installation.
+Please refer [here](./INSTALL_DART.md) for DART installation.
 
 ### Install other packages
 
@@ -80,13 +80,13 @@ The following information are needed to configure the DART-PFLOTRAN for a specif
 
 For the temporal information, the model starts with time t=0, spinup for a duration tsp, and start to assimilate with fixed time window tau. Meanwhile, the actual observation time shoud be mapped to the model time settings.
 
-​                    t=0                                      tsp              tsp+tau         tsp+2tau        tsp+3tau
+​                                     Spinup                t0                t0+tau         t0+2tau          t0+3tau
 
 model time |----------------------------------|-----------------|-----------------|-----------------|.................................................|
 
 obs time      |-------v------------v--------v--|----v---------v-------------v--------------v----------|................................................|
 
-​                  *map*                             *Assimilation starts....*
+​                                          *Assimilation starts....*        (v: observation)
 
 
 

@@ -79,7 +79,8 @@ dart_var_dict = dict.fromkeys(pflotran_var_set)
 
 
 ###############################
-# Convert the state/parameter information to NetCDF file
+# Convert the prior state/parameter information to NetCDF file and
+# Create an empty NetCDF file for each posterior ensemble
 ###############################
 for i in range(nens):
 
@@ -87,13 +88,17 @@ for i in range(nens):
 
     print("Converting state/parameter into NetCDF file for ensemble %d..." % ens)
 
-    nc_fname = dart_prior_file_set[i]
-    pf_fname = pflotran_out_file_set[i]
+    nc_fname_prior     = dart_prior_file_set[i]
+    nc_fname_posterior = dart_posterior_file_set[i]
+    pf_fname           = pflotran_out_file_set[i]
 
     # Remove the NetCDF if it already exists
-    if os.path.isfile(nc_fname):
-        os.remove(nc_fname)
-    root_nc  = Dataset(nc_fname, 'w')
+    if os.path.isfile(nc_fname_prior):
+        os.remove(nc_fname_prior)
+    root_nc_prior = Dataset(nc_fname_prior, 'w')
+    if os.path.isfile(nc_fname_posterior):
+        os.remove(nc_fname_posterior)
+    root_nc_posterior = Dataset(nc_fname_posterior, 'w')
 
     ###############################
     # Read the model output in HDF
@@ -139,10 +144,6 @@ for i in range(nens):
         if varn in pflotran_var_set:
             dart_var_dict[varn] = {"value":dataset[v][:], "unit":varunit}
     f_out.close()
-    # print(pflotran_var_set)
-    # print(pl_out_var_dict.keys())
-    # print(last_time)
-    # print(time_unit)
 
     ###############################
     # Read the parameter.h5
@@ -161,24 +162,20 @@ for i in range(nens):
     # Write the prior to NetCDF file
     ###############################
     # Create the dimensions
-    xloc     = root_nc.createDimension('x_location', nx)
-    yloc     = root_nc.createDimension('y_location', ny)
-    zloc     = root_nc.createDimension('z_location', nz)
-    time     = root_nc.createDimension('time', 1)
-    member   = root_nc.createDimension('member', 1)
+    xloc     = root_nc_prior.createDimension('x_location', nx)
+    yloc     = root_nc_prior.createDimension('y_location', ny)
+    zloc     = root_nc_prior.createDimension('z_location', nz)
+    time     = root_nc_prior.createDimension('time', 1)
+    member   = root_nc_prior.createDimension('member', 1)
 
     # Create the variables
-    time  = root_nc.createVariable('time', 'f8', ('time',))
-    member= root_nc.createVariable('member', 'f8', ('member',))
-    xloc = root_nc.createVariable('x_location', 'f8', ('x_location',))
-    yloc = root_nc.createVariable('y_location', 'f8', ('y_location',))
-    zloc = root_nc.createVariable('z_location', 'f8', ('z_location',))
+    time  = root_nc_prior.createVariable('time', 'f8', ('time',))
+    member= root_nc_prior.createVariable('member', 'f8', ('member',))
+    xloc = root_nc_prior.createVariable('x_location', 'f8', ('x_location',))
+    yloc = root_nc_prior.createVariable('y_location', 'f8', ('y_location',))
+    zloc = root_nc_prior.createVariable('z_location', 'f8', ('z_location',))
 
     # Convert the time unit to day, as required by DART's read_model_time() subroutine
-    # if spinup:
-        # time.units = "day"
-        # time[:] = 0
-    # else:
     if (time_unit.lower() == 's') or (time_unit.lower() == 'second'):
         time.units = "day"
         time[:] = last_time / 86400.
@@ -203,17 +200,66 @@ for i in range(nens):
         if dart_var_dict[varn] is None:
             print("%s is not available in both PFLOTRAN output and parameter.h5" % varn)
             continue
-        vargrp      = root_nc.createVariable(varn, 'f8', ('z_location','y_location','x_location'))
+        vargrp      = root_nc_prior.createVariable(varn, 'f8', ('z_location','y_location','x_location'))
         vargrp.type = 'observation_value'
         vargrp.unit = dart_var_dict[varn]["unit"]
         vargrp[:]   = dart_var_dict[varn]["value"]
 
-    root_nc.close()
+    root_nc_prior.close()
+
+    ###############################
+    # Construct NetCDF file for posterior
+    ###############################
+    # Create the dimensions
+    xloc     = root_nc_posterior.createDimension('x_location', nx)
+    yloc     = root_nc_posterior.createDimension('y_location', ny)
+    zloc     = root_nc_posterior.createDimension('z_location', nz)
+    time     = root_nc_posterior.createDimension('time', 1)
+    member   = root_nc_posterior.createDimension('member', 1)
+
+    # Create the variables
+    time  = root_nc_posterior.createVariable('time', 'f8', ('time',))
+    member= root_nc_posterior.createVariable('member', 'f8', ('member',))
+    xloc = root_nc_posterior.createVariable('x_location', 'f8', ('x_location',))
+    yloc = root_nc_posterior.createVariable('y_location', 'f8', ('y_location',))
+    zloc = root_nc_posterior.createVariable('z_location', 'f8', ('z_location',))
+
+    # Convert the time unit to day, as required by DART's read_model_time() subroutine
+    if (time_unit.lower() == 's') or (time_unit.lower() == 'second'):
+        time.units = "day"
+        time[:] = last_time / 86400.
+    elif (time_unit.lower() == 'd') or (time_unit.lower() == 'day'):
+        time.units = "day"
+        time[:] = last_time
+    else:
+        raise Exception("Unknow time unit %s" % time_unit)
+    time.calendar = 'none'
+
+    member[:] = ens
+
+    member.type, time.type = 'dimension_value', 'dimension_value'
+    yloc.units, yloc.type  = 'm', 'dimension_value'
+    zloc.units, zloc.type  = 'm', 'dimension_value'
+    xloc.units, xloc.type  = 'm', 'dimension_value'
+
+    # Write coordinates values
+    xloc[:], yloc[:], zloc[:] = x_set, y_set, z_set
+
+    # Write the variables without values
+    for varn in pflotran_var_set:
+        if dart_var_dict[varn] is None:
+            print("%s is not available in both PFLOTRAN output and parameter.h5" % varn)
+            continue
+        vargrp      = root_nc_posterior.createVariable(varn, 'f8', ('z_location','y_location','x_location'))
+        vargrp.type = 'observation_value'
+        vargrp.unit = dart_var_dict[varn]["unit"]
+
+    root_nc_posterior.close()
 
     ###############################
     # Copy the first ensemble to the prior template
     ###############################
     if i == 1:
-        shutil.copyfile(nc_fname, dart_prior_template)
+        shutil.copyfile(nc_fname_prior, dart_prior_template)
 
 f_para.close()

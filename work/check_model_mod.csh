@@ -28,16 +28,16 @@ set MODEL = "PFLOTRAN"
 
 @ n = 1
 
-echo
-echo
-echo "---------------------------------------------------------------"
-echo "${MODEL} build number ${n} is preprocess"
-csh  mkmf_preprocess
-make || exit 1
+#echo
+#echo
+#echo "---------------------------------------------------------------"
+#echo "${MODEL} build number ${n} is preprocess"
+#csh  mkmf_preprocess
+#make || exit 1
 
-mv preprocess ${app_work_dir} || exit 2
-cd ${app_work_dir}
-./preprocess || exit 99
+#mv preprocess ${app_work_dir} || exit 2
+#cd ${app_work_dir}
+#./preprocess || exit 99
 
 echo "---------------------------------------------------------------"
 echo 'building model_mod_check'
