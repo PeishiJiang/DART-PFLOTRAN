@@ -8,7 +8,7 @@ Complete the [online form](https://www2.cisl.ucar.edu/software/dart/download) an
 
 
 
-##Step 2: Configure Fortran and NetCDF in DART
+## Step 2: Configure Fortran and NetCDF in DART
 
 Once the DART package is downloaded, in your DART directory {DART}, open the make makefile template in ```{DART}/Manhattan/build_templates/mkmf.template```. Then, modify the following information:
 
