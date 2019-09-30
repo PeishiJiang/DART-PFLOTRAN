@@ -1,14 +1,33 @@
 #!/bin/bash -l
-exeprg=$1
-pflotranin=$2
-indir=$3
-outdir=$4
-nreaz=$5
-mpirun=$6
-ncore=$7
 
-#name="1dthermal"
-#dir="pflotran_results/"
+config_file=$1
+
+exeprg_str=`grep -A 50 exe_cfg $config_file | grep pflotran_exe`
+mpirun_str=`grep -A 50 exe_cfg $config_file | grep mpi_exe`
+ncore_str=`grep -A 50 exe_cfg $config_file | grep ncore_pf`
+pflotranin_str=`grep -A 50 file_cfg $config_file | grep pflotran_in_file`
+indir_str=`grep -A 50 other_dir_cfg $config_file | grep pflotran_in_dir`
+outdir_str=`grep -A 50 other_dir_cfg $config_file | grep pflotran_out_dir`
+nreaz_str=`grep -A 50 da_cfg $config_file | grep nens`
+
+exeprg=`echo $exeprg_str | sed -e 's#.*=\(\)#\1#' -e "s/[']//g" -e 's/[[:space:]]*//g'`
+pflotranin=`echo $pflotranin_str | sed -e 's#.*=\(\)#\1#' -e "s/[']//g" -e 's/[[:space:]]*//g'`
+indir=`echo $indir_str | sed -e 's#.*=\(\)#\1#' -e "s/[']//g" -e 's/[[:space:]]*//g'`
+outdir=`echo $outdir_str | sed -e 's#.*=\(\)#\1#' -e "s/[']//g" -e 's/[[:space:]]*//g'`
+nreaz=`echo $nreaz_str | sed -e 's#.*=\(\)#\1#' -e "s/[']//g" -e 's/[[:space:]]*//g'`
+mpirun=`echo $mpirun_str | sed -e 's#.*=\(\)#\1#' -e "s/[']//g" -e 's/[[:space:]]*//g'`
+ncore=`echo $ncore_str | sed -e 's#.*=\(\)#\1#' -e "s/[']//g" -e 's/[[:space:]]*//g'`
+
+#exeprg=$1
+#pflotranin=$2
+#indir=$3
+#outdir=$4
+#nreaz=$5
+#mpirun=$6
+#ncore=$7
+
+echo $pflotranin
+echo $exeprg
 
 if [ $ncore -eq 1 ]
 then

@@ -7,6 +7,7 @@ from os.path import dirname
 import sys
 import copy
 import h5py
+import f90nml
 import numpy as np
 
 # Let's define the observation and state vector model first
@@ -196,14 +197,25 @@ def generate_dbase(nreaz,mod,filename):
 ########################################################
 # Parameter settings
 ########################################################
+# Parse the configuration in Fortran namelist
+config_nml = sys.argv[1]
+configs    = f90nml.read(config_nml)
+
 # Read them from user input
-pflotran_in_file   = sys.argv[1]
-pflotran_para_file = sys.argv[2]
-obs_timestep       = float(sys.argv[3])              # unit:s, the time interval that temperatures are collected
-obs_error          = float(sys.argv[4])              # If the error type is 'absolute', the error means the accuracy of temperature measurement with unit degree C. If the error type is 'relative', the error means the percentage of temperature measurement.
-nreaz              = int(sys.argv[5])                # number of ensemble members
-spinup_length      = float(sys.argv[6]) #unit: day, spinup time
-spinup             = bool(sys.argv[7])
+pflotran_in_file   = configs["file_cfg"]["pflotran_in_file"]
+pflotran_para_file = configs["file_cfg"]["pflotran_para_file"]
+obs_timestep       = float(configs["da_cfg"]["obs_reso"])  # unit:s, the time interval that temperatures are collected
+obs_error          = float(configs["da_cfg"]["obs_error"])  # If the error type is 'absolute', the error means the accuracy of temperature measurement with unit degree C. If the error type is 'relative', the error means the percentage of temperature measurement.
+nreaz              = int(configs["da_cfg"]["nens"])                # number of ensemble members
+spinup_length      = float(configs["time_cfg"]["spinup_length"]) #unit: day, spinup time
+spinup             = bool(configs["time_cfg"]["is_spinup"])
+# pflotran_in_file   = sys.argv[1]
+# pflotran_para_file = sys.argv[2]
+# obs_timestep       = float(sys.argv[3])              # unit:s, the time interval that temperatures are collected
+# obs_error          = float(sys.argv[4])              # If the error type is 'absolute', the error means the accuracy of temperature measurement with unit degree C. If the error type is 'relative', the error means the percentage of temperature measurement.
+# nreaz              = int(sys.argv[5])                # number of ensemble members
+# spinup_length      = float(sys.argv[6]) #unit: day, spinup time
+# spinup             = bool(sys.argv[7])
 
 #configure ES-MDA
 niter = 2 # number of iterations

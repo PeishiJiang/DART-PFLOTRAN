@@ -32,7 +32,7 @@ netcdf4-python >= 1.5.1.2
 
 Put the PFLOTRAN-DART repository in DART-compliant models repository by:
 
-```
+```sh
 mv {PFLOTRAN-DART} {DART}/Manhattan/models/pflotran
 ```
 

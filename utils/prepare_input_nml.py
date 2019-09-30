@@ -66,10 +66,10 @@ for name in nml.keys():
     for item, value in nml_ele.items():
         if not isinstance(value,str):
             continue
-        if "[APP_DIR]" in value:
-            nml_ele[item] = value.replace("[APP_DIR]", APP_DIR)
-        elif "[DART_DIR]" in value:
-            nml_ele[item] = value.replace("[DART_DIR]", DART_DIR)
+        if "[app_dir]" in value:
+            nml_ele[item] = value.replace("[app_dir]", APP_DIR)
+        elif "[dart_dir]" in value:
+            nml_ele[item] = value.replace("[dart_dir]", DART_DIR)
     nml[name] = nml_ele
 
 # Now, let's write

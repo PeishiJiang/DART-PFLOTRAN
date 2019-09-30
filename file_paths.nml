@@ -1,0 +1,61 @@
+&app_dir_nml
+    obs_type_dir     = '[app_dir]/obs_type' 
+    app_work_dir     = '[app_dir]/work'
+    pflotran_in_dir  = '[app_dir]/pflotran_input'
+    pflotran_out_dir = '[app_dir]/pflotran_output'
+    dart_data_dir    = '[app_dir]/dart_inout'
+    /
+
+&dart_dir_nml
+    obs_kind_dir    = '[dart_pf_dir]/obs_kind'
+    utils_dir       = '[dart_pf_dir]/utils'
+    dart_work_dir   = '[dart_pf_dir]/work'
+    /
+
+&dart_file_nml
+    def_obs_kind_file       = '[obs_kind_dir]/DEFAULT_obs_kind_mod.f90'
+    obs_type_file           = '[obs_type_dir]/obs_def_pflotran_mod.f90'
+    input_nml_file          = '[app_work_dir]/input.nml'
+    input_nml_template_file = '[dart_work_dir]/input.nml.template'
+    config_file             = '[app_work_dir]/config.nml'
+    /
+
+&pflotran_file_nml
+    pflotran_sh_file   = '[utils_dir]/pflotran.sh'
+    pflotran_in_file   = '[pflotran_in_dir]/pflotran.in'
+    pflotran_para_file = '[pflotran_in_dir]/parameter_prior.h5'
+    pflotran_out_file  = '[pflotran_out_dir]/pflotranR[ENS].h5'
+    /
+
+&data_file_nml
+    obs_original_file        = '[pflotran_in_dir]/temperature.csv'
+    obs_nc_file              = '[pflotran_in_dir]/obs_pflotran.nc'
+    obs_dart_file            = '[dart_data_dir]/obs_seq_pflotran.out'
+    dart_prior_nc_file       = '[dart_data_dir]/prior_ensemble_[ENS].nc'
+    dart_posterior_nc_file   = '[dart_data_dir]/posterior_ensemble_[ENS].nc'
+    dart_prior_template_file = '[dart_data_dir]/prior_ensemble_template.nc'
+    dart_input_list_file     = '[dart_data_dir]/filter_input_list.txt'
+    dart_output_list_file    = '[dart_data_dir]/filter_output_list.txt'
+    /
+
+&shellscript_file_nml
+    convert_nc_exe              = '[app_work_dir]/convert_nc'
+    model_mod_check_exe         = '[app_work_dir]/model_mod_check'
+    filter_exe                  = '[app_work_dir]/filter'
+    quickbuild_csh              = '[dart_work_dir]/quickbuild.csh'
+    compile_convert_nc_csh      = '[dart_work_dir]/dart_seq_convert.csh'
+    compile_model_check_mod_csh = '[dart_work_dir]/check_model_mod.csh'
+    run_filter_csh              = '[dart_work_dir]/run_filter.csh'
+    advance_model_csh           = '[dart_work_dir]/advance_model.csh'  
+    /
+
+&utility_file_nml
+    convert_nc_file          = '[utils_dir]/convert_nc.f90'
+    convert_nc_template_file = '[utils_dir]/convert_nc_template.f90'
+    csv_to_nc_file           = '[utils_dir]/csv2nc.py'
+    to_dartqty_file          = '[utils_dir]/list2dartqty.py'
+    prep_pflotran_input_file = '[utils_dir]/prepare_pflotran_input.py'
+    prep_convert_nc_file     = '[utils_dir]/prepare_convert_nc.py'
+    prep_prior_nc_file       = '[utils_dir]/prepare_prior_nc.py'
+    prep_inputnml_file       = '[utils_dir]/prepare_input_nml.py'
+    /
