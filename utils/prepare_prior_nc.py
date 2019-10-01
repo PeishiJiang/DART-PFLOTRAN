@@ -7,31 +7,40 @@ import re
 import sys
 import h5py
 import shutil
+import f90nml
 import numpy as np
-from copy import deepcopy
 from netCDF4 import num2date, date2num, Dataset
 
 ###############################
 # Parameters
 ###############################
-pflotran_out_file  = sys.argv[1]
-pflotran_para_file = sys.argv[2]
-dart_prior_file    = sys.argv[3]
-dart_input_list    = sys.argv[4]
-dart_posterior_file= sys.argv[5]
-dart_output_list   = sys.argv[6]
-dart_prior_template= sys.argv[7]
-nens               = int(sys.argv[8])
-# spinup             = bool(sys.argv[6])
-pflotran_var_set   = sys.argv[9:]
+# Parse the configuration in Fortran namelist
+config_nml = sys.argv[1]
+configs    = f90nml.read(config_nml)
+
+pflotran_out_file  = configs["file_cfg"]["pflotran_out_file"]
+pflotran_para_file = configs["file_cfg"]["pflotran_para_file"]
+dart_prior_file    = configs["file_cfg"]["dart_prior_nc_file"]
+dart_input_list    = configs["file_cfg"]["dart_input_list_file"]
+dart_posterior_file= configs["file_cfg"]["dart_posterior_nc_file"]
+dart_output_list   = configs["file_cfg"]["dart_output_list_file"]
+dart_prior_template= configs["file_cfg"]["dart_prior_template_file"]
+nens               = configs["da_cfg"]["nens"]
+obs_set            = configs["obspara_set_cfg"]["obs_set"]
+para_set           = configs["obspara_set_cfg"]["para_set"]
+if isinstance(obs_set, str):
+    obs_set = [obs_set]
+if isinstance(para_set, str):
+    para_set = [para_set]
+pflotran_var_set  = obs_set + para_set
 
 # Parse the PFLOTRAN variables to be updated/analyzed/assimilated
 p = re.compile('[A-Z_]+')
 pflotran_var_set = [p.search(v).group() for v in pflotran_var_set]
 
 ens_set = np.arange(1,nens+1)
+
 # Get the file names of all ensembles for PFLOTRAN output
-# pflotran_para_file_set = [re.sub(r"[\*]+",str(ens),pflotran_para_file) for ens in ens_set]
 pflotran_out_file_set = [re.sub(r"\[ENS\]",str(ens),pflotran_out_file) for ens in ens_set]
 
 # Check the existences of these files
@@ -40,8 +49,8 @@ for f in pflotran_out_file_set:
         raise Exception("The PFLOTRAN output file %s does not exits!" % f)
 
 # Get the file names of all ensembles for DART restart file
-dart_prior_file_set = [re.sub(r"R\[ENS\]","ensemble_"+str(ens),dart_prior_file) for ens in ens_set]
-dart_posterior_file_set = [re.sub(r"R\[ENS\]","ensemble_"+str(ens),dart_posterior_file) for ens in ens_set]
+dart_prior_file_set = [re.sub(r"\[ENS\]",str(ens),dart_prior_file) for ens in ens_set]
+dart_posterior_file_set = [re.sub(r"\[ENS\]",str(ens),dart_posterior_file) for ens in ens_set]
 # dart_prior_template = re.sub(r"R\[ENS\]",'template',dart_prior_file)
 
 
@@ -79,6 +88,7 @@ dart_var_dict = dict.fromkeys(pflotran_var_set)
 
 
 ###############################
+# TODO Change the model time based on the spinup information
 # Convert the prior state/parameter information to NetCDF file and
 # Create an empty NetCDF file for each posterior ensemble
 ###############################

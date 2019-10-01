@@ -26,9 +26,6 @@ ncore=`echo $ncore_str | sed -e 's#.*=\(\)#\1#' -e "s/[']//g" -e 's/[[:space:]]*
 #mpirun=$6
 #ncore=$7
 
-echo $pflotranin
-echo $exeprg
-
 if [ $ncore -eq 1 ]
 then
     $exeprg -pflotranin $pflotranin -stochastic -num_realizations $nreaz -num_groups 1

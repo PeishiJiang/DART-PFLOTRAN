@@ -208,7 +208,9 @@ obs_timestep       = float(configs["da_cfg"]["obs_reso"])  # unit:s, the time in
 obs_error          = float(configs["da_cfg"]["obs_error"])  # If the error type is 'absolute', the error means the accuracy of temperature measurement with unit degree C. If the error type is 'relative', the error means the percentage of temperature measurement.
 nreaz              = int(configs["da_cfg"]["nens"])                # number of ensemble members
 spinup_length      = float(configs["time_cfg"]["spinup_length"]) #unit: day, spinup time
-spinup             = bool(configs["time_cfg"]["is_spinup"])
+spinup_done        = bool(configs["time_cfg"]["is_spinup_done"])
+
+spinup = not spinup_done
 # pflotran_in_file   = sys.argv[1]
 # pflotran_para_file = sys.argv[2]
 # obs_timestep       = float(sys.argv[3])              # unit:s, the time interval that temperatures are collected
@@ -386,3 +388,12 @@ print("Finished generating the input card for PFLOTRAN...")
 generate_dbase(nreaz, mod, pflotran_para_file)
 
 print("Finished generating the DBASE for PFLOTRAN...")
+
+# ########################################################
+# # Modify and save the configuration namelist
+# ########################################################
+# print("Finished generating the DBASE for PFLOTRAN...")
+# configs["time_cfg"]["is_spinup_done"] = not spinup_done
+# configs.write(config_nml, force=True)
+#
+

@@ -97,10 +97,10 @@
 
 &preprocess_nml
           overwrite_output = .true.,
-   input_obs_kind_mod_file = '[dart_pf_dir]/models/pflotran/obs_kind/DEFAULT_obs_kind_mod.F90'
-   input_obs_def_mod_file  = '[dart_pf_dir]/observations/forward_operators/DEFAULT_obs_def_mod.f90',
-   output_obs_def_mod_file = '[dart_pf_dir]/observations/forward_operators/obs_def_mod.f90',
-  output_obs_kind_mod_file = '[dart_pf_dir]/assimilation_code/modules/observations/obs_kind_mod.f90',
+   input_obs_kind_mod_file = '[dart_dir]/models/pflotran/obs_kind/DEFAULT_obs_kind_mod.F90'
+   input_obs_def_mod_file  = '[dart_dir]/observations/forward_operators/DEFAULT_obs_def_mod.f90',
+   output_obs_def_mod_file = '[dart_dir]/observations/forward_operators/obs_def_mod.f90',
+  output_obs_kind_mod_file = '[dart_dir]/assimilation_code/modules/observations/obs_kind_mod.f90',
                input_files = '[app_dir]/obs_type/obs_def_pflotran_mod.f90'
  /
 

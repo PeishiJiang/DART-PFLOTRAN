@@ -10,34 +10,29 @@ import f90nml
 ###############################
 # Parameters
 ###############################
-input_nml_file          = sys.argv[1]
-input_nml_template_file = sys.argv[2]
-configure_dict_file     = sys.argv[3]
+# Parse the configuration in Fortran namelist
+config_nml = sys.argv[1]
+configs    = f90nml.read(config_nml)
 
-if not os.path.isfile(configure_dict_file):
-    raise Exception("The file %s does not exists!" % configure_dict_file)
+input_nml_file          = configs["file_cfg"]["input_nml_file"]
+input_nml_template_file = configs["file_cfg"]["input_nml_template_file"]
+input_nml_dict          = configs["inputnml_cfg"]
+# configure_dict_file     = sys.argv[3]
 
-# dir_path = os.path.dirname(os.path.realpath(input_nml_dict_file))
-# input_nml_template_file = os.path.join(dir_path, "input.nml.template")
+# Get the location of DART and application paths
+directories = configs["main_dir_cfg"]
+APP_DIR     = directories["app_dir"]
+DART_DIR    = directories["dart_dir"]
+
 if not os.path.isfile(input_nml_template_file):
     raise Exception("The file %s does not exists!" % input_nml_template_file)
 
 
 ###############################
-# Read the namelist information from
-# configure_pickle
+# Read the namelist information
 ###############################
-with open(configure_dict_file, "rb") as f:
-    configure = pickle.load(f)
-
 # Get the input namelists
-input_nml_dict = configure["inputnml"]
 added_namelist = input_nml_dict.keys()
-
-# Get the location of DART and application paths
-directories = configure["directories"]
-APP_DIR     = directories["APP_DIR"]
-DART_DIR    = directories["DART_DIR"]
 
 
 ###############################

@@ -4,17 +4,19 @@
 
 import os
 import sys
-import numpy as np
-import pandas as pd
+import f90nml
 from netCDF4 import num2date, date2num, Dataset
-from datetime import datetime, timedelta
 
 ###############################
 # Parameters
 ###############################
-obs_nc       = sys.argv[1]
-convert_file = sys.argv[2]
-convert_template_file = sys.argv[3]
+# Parse the configuration in Fortran namelist
+config_nml = sys.argv[1]
+configs    = f90nml.read(config_nml)
+
+obs_nc       = configs["file_cfg"]["obs_nc_file"]
+convert_file = configs["file_cfg"]["convert_nc_file"]
+convert_template_file = configs["file_cfg"]["convert_nc_template_file"]
 
 ###############################
 # Read the obs_nc file

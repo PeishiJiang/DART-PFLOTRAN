@@ -6,6 +6,7 @@
 # Here, we consider csv file with and NetCDF format.
 
 import sys
+import f90nml
 import numpy as np
 import pandas as pd
 from netCDF4 import num2date, date2num, Dataset
@@ -14,14 +15,18 @@ from datetime import datetime, timedelta
 ###############################
 # Parameters
 ###############################
-obs_original = sys.argv[1]        # The original observation file
-obs_nc       = sys.argv[2]        # The converted observation file
-spinup_time  = float(sys.argv[3]) # The spinup time (day)
-assim_start_str = sys.argv[4]     # The map between the start of observation and spinup time
+# Parse the configuration in Fortran namelist
+config_nml = sys.argv[1]
+configs    = f90nml.read(config_nml)
+
+obs_original = configs["file_cfg"]["obs_original_file"]        # The original observation file
+obs_nc       = configs["file_cfg"]["obs_nc_file"]        # The converted observation file
+# spinup_time  = float(configs["time_cfg"]["spinup_length"]) # The spinup time (day)
+assim_start_str = configs["time_cfg"]["assim_start"]     # The map between the start of observation and spinup time
 
 # Get the reference time
 # ref_time = datetime.strptime(assim_start_str, "%Y-%m-%d %H:%M:%S")
-ref_time = datetime.strptime(assim_start_str, "%Y-%m-%d")
+ref_time = datetime.strptime(assim_start_str, "%Y-%m-%d %H:%M:%S")
 
 ###############################
 # Read the csv file
@@ -37,7 +42,8 @@ nloc      = nz*1*1
 dates     = [datetime.strptime(t, '%m/%d/%Y %H:%M') for t in time_set]
 
 dates_ref = [t-ref_time for t in dates]
-dates_ref_values = [t.days+float(t.seconds)/86400.+spinup_time for t in dates_ref]
+# dates_ref_values = [t.days+float(t.seconds)/86400.+spinup_time for t in dates_ref]
+dates_ref_values = [t.days+float(t.seconds)/86400. for t in dates_ref]
 
 # Get the temperature values
 temperature = obs_pd[obs_pd.keys()[1:]].values

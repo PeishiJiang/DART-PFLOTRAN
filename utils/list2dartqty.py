@@ -5,7 +5,7 @@
 import os
 import re
 import sys
-import shutil
+import f90nml
 import numpy as np
 
 def intersection(lst1, lst2):
@@ -14,9 +14,21 @@ def intersection(lst1, lst2):
 ########################
 # Parameters
 ########################
-obs_type_file = sys.argv[1]
-obs_kind_file = sys.argv[2]
-pflotran_set  = sys.argv[3:]
+# Parse the configuration in Fortran namelist
+config_nml = sys.argv[1]
+configs    = f90nml.read(config_nml)
+
+obs_type_file = configs["file_cfg"]["obs_type_file"]
+obs_kind_file = configs["file_cfg"]["def_obs_kind_file"]
+obs_set       = configs["obspara_set_cfg"]["obs_set"]
+para_set      = configs["obspara_set_cfg"]["para_set"]
+
+if isinstance(obs_set, str):
+    obs_set = [obs_set]
+if isinstance(para_set, str):
+    para_set = [para_set]
+
+pflotran_set  = obs_set + para_set
 
 # obs_kind_template = '../obs_kind/DEFAULT_obs_kind_mod_template.F90'
 
