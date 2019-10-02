@@ -18,16 +18,22 @@ from netCDF4 import num2date, date2num, Dataset
 config_nml = sys.argv[1]
 configs    = f90nml.read(config_nml)
 
-pflotran_out_file  = configs["file_cfg"]["pflotran_out_file"]
-pflotran_para_file = configs["file_cfg"]["pflotran_para_file"]
-dart_prior_file    = configs["file_cfg"]["dart_prior_nc_file"]
-dart_input_list    = configs["file_cfg"]["dart_input_list_file"]
-dart_posterior_file= configs["file_cfg"]["dart_posterior_nc_file"]
-dart_output_list   = configs["file_cfg"]["dart_output_list_file"]
-dart_prior_template= configs["file_cfg"]["dart_prior_template_file"]
-nens               = configs["da_cfg"]["nens"]
-obs_set            = configs["obspara_set_cfg"]["obs_set"]
-para_set           = configs["obspara_set_cfg"]["para_set"]
+pflotran_out_file   = configs["file_cfg"]["pflotran_out_file"]
+pflotran_para_file  = configs["file_cfg"]["pflotran_para_file"]
+dart_prior_file     = configs["file_cfg"]["dart_prior_nc_file"]
+dart_input_list     = configs["file_cfg"]["dart_input_list_file"]
+dart_posterior_file = configs["file_cfg"]["dart_posterior_nc_file"]
+dart_output_list    = configs["file_cfg"]["dart_output_list_file"]
+dart_prior_template = configs["file_cfg"]["dart_prior_template_file"]
+obs_set             = configs["obspara_set_cfg"]["obs_set"]
+para_set            = configs["obspara_set_cfg"]["para_set"]
+model_time          = float(configs["time_cfg"]["current_model_time"])   # days
+assim_window        = float(configs["da_cfg"]["assim_window_size"])         # days
+nens                = configs["da_cfg"]["nens"]
+# spinup_done         = configs["time_cfg"]["is_spinup_done"]
+
+one_sec             = 1./86400.  # one second in fractional days
+
 if isinstance(obs_set, str):
     obs_set = [obs_set]
 if isinstance(para_set, str):
@@ -38,10 +44,10 @@ pflotran_var_set  = obs_set + para_set
 p = re.compile('[A-Z_]+')
 pflotran_var_set = [p.search(v).group() for v in pflotran_var_set]
 
-ens_set = np.arange(1,nens+1)
+ens_set = np.arange(1, nens+1)
 
 # Get the file names of all ensembles for PFLOTRAN output
-pflotran_out_file_set = [re.sub(r"\[ENS\]",str(ens),pflotran_out_file) for ens in ens_set]
+pflotran_out_file_set = [re.sub(r"\[ENS\]", str(ens), pflotran_out_file) for ens in ens_set]
 
 # Check the existences of these files
 for f in pflotran_out_file_set:
@@ -49,9 +55,8 @@ for f in pflotran_out_file_set:
         raise Exception("The PFLOTRAN output file %s does not exits!" % f)
 
 # Get the file names of all ensembles for DART restart file
-dart_prior_file_set = [re.sub(r"\[ENS\]",str(ens),dart_prior_file) for ens in ens_set]
-dart_posterior_file_set = [re.sub(r"\[ENS\]",str(ens),dart_posterior_file) for ens in ens_set]
-# dart_prior_template = re.sub(r"R\[ENS\]",'template',dart_prior_file)
+dart_prior_file_set = [re.sub(r"\[ENS\]", str(ens)+"_time"+str(model_time), dart_prior_file) for ens in ens_set]
+dart_posterior_file_set = [re.sub(r"\[ENS\]", str(ens)+"_time"+str(model_time), dart_posterior_file) for ens in ens_set]
 
 
 ###############################
@@ -88,7 +93,7 @@ dart_var_dict = dict.fromkeys(pflotran_var_set)
 
 
 ###############################
-# TODO Change the model time based on the spinup information
+# TODO Perhaps save the outputs at all times in one NetCDF file?
 # Convert the prior state/parameter information to NetCDF file and
 # Create an empty NetCDF file for each posterior ensemble
 ###############################
@@ -127,12 +132,12 @@ for i in range(nens):
     x_set = [(a + b) / 2 for a, b in zip(x_set[:-1], x_set[1:])]
     y_set = [(a + b) / 2 for a, b in zip(y_set[:-1], y_set[1:])]
     z_set = [(a + b) / 2 for a, b in zip(z_set[:-1], z_set[1:])]
-    nx,ny,nz = len(x_set), len(y_set), len(z_set)
+    nx, ny, nz = len(x_set), len(y_set), len(z_set)
 
     # Get the last time step
-    time_set_o= [t for t in list(f_out.keys()) if t.startswith("Time")]
-    time_set  = [t.split()[1:] for t in time_set_o]
-    time_vset = [float(t[0]) for t in time_set]
+    time_set_o = [t for t in list(f_out.keys()) if t.startswith("Time")]
+    time_set   = [t.split()[1:] for t in time_set_o]
+    time_vset  = [float(t[0]) for t in time_set]
     last_time, last_time_ind = np.max(time_vset), np.argmax(time_vset)
     time_unit, last_time_o   = time_set[last_time_ind][1], time_set_o[last_time_ind]
 
@@ -149,10 +154,10 @@ for i in range(nens):
             varn, varunit = varinfo[0].upper(), varinfo[1]
         else:
             raise Exception('Invalid variable name %s!' % v)
-        pl_out_var_dict[varn] = {"unit": varunit, "original_name":v}
+        pl_out_var_dict[varn] = {"unit": varunit, "original_name": v}
         # Check if the variable is required by pflotran_var_set
         if varn in pflotran_var_set:
-            dart_var_dict[varn] = {"value":dataset[v][:], "unit":varunit}
+            dart_var_dict[varn] = {"value": dataset[v][:], "unit": varunit}
     f_out.close()
 
     ###############################
@@ -166,36 +171,37 @@ for i in range(nens):
     for varn in para_var_set:
         if varn in pflotran_var_set:
             value = f_para[varn][:][i]
-            dart_var_dict[varn] = {"value":value*np.ones([nx,ny,nz]),"unit":""}
+            dart_var_dict[varn] = {"value": value*np.ones([nx, ny, nz]),
+                                   "unit": ""}
 
     ###############################
     # Write the prior to NetCDF file
     ###############################
+    # Add global attributes
+    root_nc_prior.model_time = model_time
+    root_nc_prior.time_unit  = "day"
+    root_nc_prior.assimilation_window = assim_window
+    root_nc_prior.description = "PFLOTRAN output/DART prior data"
+
     # Create the dimensions
-    xloc     = root_nc_prior.createDimension('x_location', nx)
-    yloc     = root_nc_prior.createDimension('y_location', ny)
-    zloc     = root_nc_prior.createDimension('z_location', nz)
-    time     = root_nc_prior.createDimension('time', 1)
-    member   = root_nc_prior.createDimension('member', 1)
+    xloc_d   = root_nc_prior.createDimension('x_location', nx)
+    yloc_d   = root_nc_prior.createDimension('y_location', ny)
+    zloc_d   = root_nc_prior.createDimension('z_location', nz)
+    time_d   = root_nc_prior.createDimension('time', 1)
+    member_d = root_nc_prior.createDimension('member', 1)
 
     # Create the variables
-    time  = root_nc_prior.createVariable('time', 'f8', ('time',))
-    member= root_nc_prior.createVariable('member', 'f8', ('member',))
-    xloc = root_nc_prior.createVariable('x_location', 'f8', ('x_location',))
-    yloc = root_nc_prior.createVariable('y_location', 'f8', ('y_location',))
-    zloc = root_nc_prior.createVariable('z_location', 'f8', ('z_location',))
+    time   = root_nc_prior.createVariable('time', 'f8', ('time',))
+    member = root_nc_prior.createVariable('member', 'f8', ('member',))
+    xloc   = root_nc_prior.createVariable('x_location', 'f8', ('x_location',))
+    yloc   = root_nc_prior.createVariable('y_location', 'f8', ('y_location',))
+    zloc   = root_nc_prior.createVariable('z_location', 'f8', ('z_location',))
 
-    # Convert the time unit to day, as required by DART's read_model_time() subroutine
-    if (time_unit.lower() == 's') or (time_unit.lower() == 'second'):
-        time.units = "day"
-        time[:] = last_time / 86400.
-    elif (time_unit.lower() == 'd') or (time_unit.lower() == 'day'):
-        time.units = "day"
-        time[:] = last_time
-    else:
-        raise Exception("Unknow time unit %s" % time_unit)
+    # Get the the center of the assimilation window in unit day, as required by DART's read_model_time() subroutine
+    time.units    = "day"
+    time[:]       = model_time+(assim_window-one_sec)/2.
     time.calendar = 'none'
-    member[:] = ens
+    member[:]     = ens
 
     member.type, time.type = 'dimension_value', 'dimension_value'
     yloc.units, yloc.type  = 'm', 'dimension_value'
@@ -210,7 +216,7 @@ for i in range(nens):
         if dart_var_dict[varn] is None:
             print("%s is not available in both PFLOTRAN output and parameter.h5" % varn)
             continue
-        vargrp      = root_nc_prior.createVariable(varn, 'f8', ('z_location','y_location','x_location'))
+        vargrp      = root_nc_prior.createVariable(varn, 'f8', ('z_location', 'y_location', 'x_location'))
         vargrp.type = 'observation_value'
         vargrp.unit = dart_var_dict[varn]["unit"]
         vargrp[:]   = dart_var_dict[varn]["value"]
@@ -220,32 +226,32 @@ for i in range(nens):
     ###############################
     # Construct NetCDF file for posterior
     ###############################
+    # Add global attributes
+    root_nc_posterior.model_time = model_time
+    root_nc_posterior.time_unit  = "day"
+    root_nc_posterior.assimilation_window = assim_window
+    root_nc_posterior.description = "PFLOTRAN output/DART prior data"
+
     # Create the dimensions
-    xloc     = root_nc_posterior.createDimension('x_location', nx)
-    yloc     = root_nc_posterior.createDimension('y_location', ny)
-    zloc     = root_nc_posterior.createDimension('z_location', nz)
-    time     = root_nc_posterior.createDimension('time', 1)
-    member   = root_nc_posterior.createDimension('member', 1)
+    xloc_d   = root_nc_posterior.createDimension('x_location', nx)
+    yloc_d   = root_nc_posterior.createDimension('y_location', ny)
+    zloc_d   = root_nc_posterior.createDimension('z_location', nz)
+    time_d   = root_nc_posterior.createDimension('time', 1)
+    member_d = root_nc_posterior.createDimension('member', 1)
 
     # Create the variables
-    time  = root_nc_posterior.createVariable('time', 'f8', ('time',))
-    member= root_nc_posterior.createVariable('member', 'f8', ('member',))
-    xloc = root_nc_posterior.createVariable('x_location', 'f8', ('x_location',))
-    yloc = root_nc_posterior.createVariable('y_location', 'f8', ('y_location',))
-    zloc = root_nc_posterior.createVariable('z_location', 'f8', ('z_location',))
+    time   = root_nc_posterior.createVariable('time', 'f8', ('time',))
+    member = root_nc_posterior.createVariable('member', 'f8', ('member',))
+    xloc   = root_nc_posterior.createVariable('x_location', 'f8', ('x_location',))
+    yloc   = root_nc_posterior.createVariable('y_location', 'f8', ('y_location',))
+    zloc   = root_nc_posterior.createVariable('z_location', 'f8', ('z_location',))
 
-    # Convert the time unit to day, as required by DART's read_model_time() subroutine
-    if (time_unit.lower() == 's') or (time_unit.lower() == 'second'):
-        time.units = "day"
-        time[:] = last_time / 86400.
-    elif (time_unit.lower() == 'd') or (time_unit.lower() == 'day'):
-        time.units = "day"
-        time[:] = last_time
-    else:
-        raise Exception("Unknow time unit %s" % time_unit)
+    # Get the the center of the assimilation window in unit day, as required by DART's read_model_time() subroutine
+    time.units    = "day"
+    time[:]       = model_time+(assim_window-one_sec)/2.
+    # time[:]       = model_time+assim_window/2.
     time.calendar = 'none'
-
-    member[:] = ens
+    member[:]     = ens
 
     member.type, time.type = 'dimension_value', 'dimension_value'
     yloc.units, yloc.type  = 'm', 'dimension_value'

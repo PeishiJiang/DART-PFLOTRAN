@@ -50,12 +50,14 @@
     /
 
 &utility_file_nml
-    convert_nc_file          = '[utils_dir]/convert_nc.f90'
-    convert_nc_template_file = '[utils_dir]/convert_nc_template.f90'
-    csv_to_nc_file           = '[utils_dir]/csv2nc.py'
-    to_dartqty_file          = '[utils_dir]/list2dartqty.py'
-    prep_pflotran_input_file = '[utils_dir]/prepare_pflotran_input.py'
-    prep_convert_nc_file     = '[utils_dir]/prepare_convert_nc.py'
-    prep_prior_nc_file       = '[utils_dir]/prepare_prior_nc.py'
-    prep_inputnml_file       = '[utils_dir]/prepare_input_nml.py'
+    convert_nc_file            = '[utils_dir]/convert_nc.f90'
+    convert_nc_template_file   = '[utils_dir]/convert_nc_template.f90'
+    csv_to_nc_file             = '[utils_dir]/csv2nc.py'
+    to_dartqty_file            = '[utils_dir]/list2dartqty.py'
+    prep_pflotran_input_file   = '[utils_dir]/prepare_pflotran_input.py'
+    prep_convert_nc_file       = '[utils_dir]/prepare_convert_nc.py'
+    prep_prior_nc_file         = '[utils_dir]/prepare_prior_nc.py'
+    prep_inputnml_file         = '[utils_dir]/prepare_input_nml.py'
+    update_pflotran_input_file = '[utils_dir]/update_pflotran_input.py'
+    update_confignml_time_file = '[utils_dir]/update_confignml_time.py'
     /
