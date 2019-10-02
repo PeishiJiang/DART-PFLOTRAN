@@ -45,12 +45,14 @@ The main structure of this {PFLOTRAN-DART} repository is shown below:
 ```
 .
 +-- README.md         # The README file for a general introduction
-+-- Install_DART.md   # The procedures of installing and configuring DART
++-- INSTALL_DART.md   # The procedures of installing and configuring DART
 +-- model_mod.F90     # The interface for linking PFLOTRAN and DART
++-- file_paths.nml    # The namelist files containing the locations of all the required files/repositories
 |
 +-- obs_kind/         # The repository containing the DEFAULT_obs_kind_mod.F90 file
 +-- utils/            # The utility repository
 +-- work/             # The repository containing shell scripts and compiling files
++-- figs/             # The figure repository
 +-- applications/     # The application repository containing for running DART-PFLOTRAN
 ```
 
@@ -78,15 +80,9 @@ The following information are needed to configure the DART-PFLOTRAN for a specif
 - The temporal information (see below)
 - The data assimilation settings, which are configured through multiple [DART namelists](https://www.image.ucar.edu/DAReS/DART/Manhattan/documentation/index.html#Namelists) in the input.nml file (e.g., [filter_nml](https://www.image.ucar.edu/DAReS/DART/Manhattan/assimilation_code/modules/assimilation/filter_mod.html#Namelist) and [assim_tools_mod](https://www.image.ucar.edu/DAReS/DART/Manhattan/assimilation_code/modules/assimilation/assim_tools_mod.html#Namelist))
 
-For the temporal information, the model starts with time t=0, spinup for a duration tsp, and start to assimilate with fixed time window tau. Meanwhile, the actual observation time shoud be mapped to the model time settings.
+For the temporal information, the model first spinup for a given period of time. Once the spinup is done, the model restarts with time t0, and begins to assimilate with fixed time window tau. Meanwhile, the actual observation time should be mapped to the model time start time t0.
+![Model/Physical time domain](./figs/time_domain.png)
 
-​                                     Spinup                t0                t0+tau         t0+2tau          t0+3tau
-
-model time |----------------------------------|-----------------|-----------------|-----------------|.................................................|
-
-obs time      |-------v------------v--------v--|----v---------v-------------v--------------v----------|................................................|
-
-​                                          *Assimilation starts....*        (v: observation)
 
 
 
@@ -94,6 +90,7 @@ obs time      |-------v------------v--------v--|----v---------v-------------v---
 
 TO BE ADDED.
 
+![Workflow in UML activity diagram](./figs/ActivityDiagram_MDA.png)
 
 
 ## Contacts

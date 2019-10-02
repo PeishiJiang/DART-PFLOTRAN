@@ -20,11 +20,13 @@ configs         = f90nml.read(config_nml_file)
 
 
 ###############################
+# TODO
 # Update time in PFLOTRAN.in
 ###############################
 
 
 ###############################
+# TODO
 # Update the parameter values in
 # parameter_prior.h5 based on DART
 # posterior output
