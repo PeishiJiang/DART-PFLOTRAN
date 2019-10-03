@@ -11,6 +11,8 @@ import f90nml
 import numpy as np
 from netCDF4 import num2date, date2num, Dataset
 
+# TODO: A perturbation and a true value should be both generated based on the provided error.
+
 ###############################
 # Parameters
 ###############################
@@ -83,7 +85,7 @@ with open(dart_output_list, "w") as f:
 # Load the parameter.h5
 ###############################
 f_para = h5py.File(pflotran_para_file, "r")
-para_var_set = f_para.keys()
+para_pflotran_set = f_para.keys()
 
 
 ###############################
@@ -168,7 +170,7 @@ for i in range(nens):
     # TODO a more strict structure is required. For now, we assume only one value is
     # needed or the whole domain is isotropic.
     ###############################
-    for varn in para_var_set:
+    for varn in para_pflotran_set:
         if varn in pflotran_var_set:
             value = f_para[varn][:][i]
             dart_var_dict[varn] = {"value": value*np.ones([nx, ny, nz]),
@@ -192,7 +194,7 @@ for i in range(nens):
 
     # Create the variables
     time   = root_nc_prior.createVariable('time', 'f8', ('time',))
-    member = root_nc_prior.createVariable('member', 'f8', ('member',))
+    member = root_nc_prior.createVariable('member', 'i8', ('member',))
     xloc   = root_nc_prior.createVariable('x_location', 'f8', ('x_location',))
     yloc   = root_nc_prior.createVariable('y_location', 'f8', ('y_location',))
     zloc   = root_nc_prior.createVariable('z_location', 'f8', ('z_location',))
@@ -241,7 +243,7 @@ for i in range(nens):
 
     # Create the variables
     time   = root_nc_posterior.createVariable('time', 'f8', ('time',))
-    member = root_nc_posterior.createVariable('member', 'f8', ('member',))
+    member = root_nc_posterior.createVariable('member', 'i8', ('member',))
     xloc   = root_nc_posterior.createVariable('x_location', 'f8', ('x_location',))
     yloc   = root_nc_posterior.createVariable('y_location', 'f8', ('y_location',))
     zloc   = root_nc_posterior.createVariable('z_location', 'f8', ('z_location',))

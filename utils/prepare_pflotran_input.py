@@ -205,7 +205,7 @@ configs    = f90nml.read(config_nml)
 pflotran_in_file   = configs["file_cfg"]["pflotran_in_file"]
 pflotran_para_file = configs["file_cfg"]["pflotran_para_file"]
 obs_timestep       = float(configs["da_cfg"]["obs_reso"])  # unit:s, the time interval that temperatures are collected
-obs_error          = float(configs["da_cfg"]["obs_error"])  # If the error type is 'absolute', the error means the accuracy of temperature measurement with unit degree C. If the error type is 'relative', the error means the percentage of temperature measurement.
+# obs_error          = float(configs["da_cfg"]["obs_error"])  # If the error type is 'absolute', the error means the accuracy of temperature measurement with unit degree C. If the error type is 'relative', the error means the percentage of temperature measurement.
 nreaz              = int(configs["da_cfg"]["nens"])                # number of ensemble members
 spinup_length      = float(configs["time_cfg"]["spinup_length"]) #unit: day, spinup time
 spinup_done        = bool(configs["time_cfg"]["is_spinup_done"])
@@ -253,6 +253,7 @@ obs_length = 1.     # unit:day, length of observation data used for flux estimat
 # from temperature.csv
 therm_loc = [-0.01, -0.05, -0.65] # unit:m, location of thermistor, negative means below the riverbed
 obs_error_type = 'absolute'    # 'absolute' and 'relative'. 'absolute' means the absolute measurement error in degree C, 'relative' means a perentage of the observation value
+obs_error      = 0.1 # If the error type is 'absolute', the error means the accuracy of temperature measurement with unit degree C. If the error type is 'relative', the error means the percentage of temperature measurement.
 # Configure model domain and PFLOTRAN running environment
 hz = 0.64          # unit: m, height of the 1-D column
 

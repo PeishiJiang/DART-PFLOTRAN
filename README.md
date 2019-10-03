@@ -4,7 +4,7 @@ This is an interface package for integrating [PFLOTRAN](www.pflotran.org) and [D
 
 ## Prerequisites
 
-It requires the installation of PFLOTRAN, DART, and some Python pacakges.
+It requires the installation of PFLOTRAN, DART, and some Python packages.
 
 ### Install PFLOTRAN
 
@@ -16,9 +16,12 @@ Please refer [here](./INSTALL_DART.md) for DART installation.
 
 ### Install other packages
 
-- [HDF5](https://www.hdfgroup.org/solutions/hdf5/) and [NetCDF4](https://www.unidata.ucar.edu/software/netcdf/) are required.
-
-- The following Python pacakges are required:
+- a Fortran 90 compiler
+- [HDF5](https://www.hdfgroup.org/solutions/hdf5/) library 
+- [NetCDF4](https://www.unidata.ucar.edu/software/netcdf/) library including the F90 interfaces 
+- the C shell
+- (optional) an MPI library
+- The following Python pacakges:
 
 ```sh
 f90nml >= 1.1.2
@@ -33,7 +36,7 @@ netcdf4-python >= 1.5.1.2
 Put the PFLOTRAN-DART repository in DART-compliant models repository by:
 
 ```sh
-mv {PFLOTRAN-DART} {DART}/Manhattan/models/pflotran
+mv {PFLOTRAN-DART} {DART}/manhattan/models/pflotran
 ```
 
 
@@ -53,12 +56,12 @@ The main structure of this {PFLOTRAN-DART} repository is shown below:
 +-- utils/            # The utility repository
 +-- work/             # The repository containing shell scripts and compiling files
 +-- figs/             # The figure repository
-+-- applications/     # The application repository containing for running DART-PFLOTRAN
++-- applications/     # The application repository for running DART-PFLOTRAN
 ```
 
-- ```model_mod.F90```: This file provides the Fortran interfaces for a minimal implementation of shaping PFLOTRAN as a DART-compliant model. A detailed introduction of the introduced Fortran interfaces can be found [here](https://www.image.ucar.edu/DAReS/DART/Manhattan/models/template/model_mod.html).
+- ```model_mod.F90```: This file provides the Fortran interfaces for a minimal implementation of shaping PFLOTRAN as a DART-compliant model. A detailed introduction of the introduced Fortran interfaces can be found [here](https://www.image.ucar.edu/DAReS/DART/manhattan/models/template/model_mod.html).
 
-- ```work```: The folder provides a set of scripts for integrating PFLOTRAN and DART. It includes (1) shell scripts for running PFLOTRAN with DART (i.e., ```run_filter.csh``` and ```advance_model.csh```); (2) the template for input namelists file (i.e., ```input.nml.template```); (3) the shell script for converting NetCDF observation data to [DART format](https://www.image.ucar.edu/DAReS/DART/DART2_Observations.html#obs_seq_overview) (i.e., ```dart_seq_convert.csh```); (4) the shell script for [check](https://www.image.ucar.edu/DAReS/DART/Manhattan/assimilation_code/programs/model_mod_check/model_mod_check.html) ```model_mod.F90```  (i.e., ```check_model_mod.csh```); and (5) other mkmf files and path names files required by the previous shell scripts. 
+- ```work```: The folder provides a set of scripts for integrating PFLOTRAN and DART. It includes (1) shell scripts for running PFLOTRAN with DART (i.e., ```run_filter.csh``` and ```advance_model.csh```); (2) the template for input namelists file (i.e., ```input.nml.template```); (3) the shell script for converting NetCDF observation data to [DART format](https://www.image.ucar.edu/DAReS/DART/DART2_Observations.html#obs_seq_overview) (i.e., ```dart_seq_convert.csh```); (4) the shell script for [check](https://www.image.ucar.edu/DAReS/DART/manhattan/assimilation_code/programs/model_mod_check/model_mod_check.html) ```model_mod.F90```  (i.e., ```check_model_mod.csh```); and (5) other mkmf files and path names files required by the previous shell scripts. 
 
 - ```obs_kind```: The folder contains the ```DEFAULT_obs_kind_mod.F90``` defining a list of DART variable generic quantity, including PFLOTRAN's variables.
 
@@ -78,7 +81,7 @@ The following information are needed to configure the DART-PFLOTRAN for a specif
 - The application folder name
 - The observation data to be assimilated and the PFLOTRAN parameters to be analyzed in DART
 - The temporal information (see below)
-- The data assimilation settings, which are configured through multiple [DART namelists](https://www.image.ucar.edu/DAReS/DART/Manhattan/documentation/index.html#Namelists) in the input.nml file (e.g., [filter_nml](https://www.image.ucar.edu/DAReS/DART/Manhattan/assimilation_code/modules/assimilation/filter_mod.html#Namelist) and [assim_tools_mod](https://www.image.ucar.edu/DAReS/DART/Manhattan/assimilation_code/modules/assimilation/assim_tools_mod.html#Namelist))
+- The data assimilation settings, which are configured through multiple [DART namelists](https://www.image.ucar.edu/DAReS/DART/manhattan/documentation/index.html#Namelists) in the input.nml file (e.g., [filter_nml](https://www.image.ucar.edu/DAReS/DART/manhattan/assimilation_code/modules/assimilation/filter_mod.html#Namelist) and [assim_tools_mod](https://www.image.ucar.edu/DAReS/DART/manhattan/assimilation_code/modules/assimilation/assim_tools_mod.html#Namelist))
 
 For the temporal information, the model first spinup for a given period of time. Once the spinup is done, the model restarts with time t0, and begins to assimilate with fixed time window tau. Meanwhile, the actual observation time should be mapped to the model time start time t0.
 ![Model/Physical time domain](./figs/time_domain.png)

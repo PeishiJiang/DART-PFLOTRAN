@@ -52,6 +52,11 @@ integer :: obs_start_day,      &
 
 logical, parameter :: use_input_qc           = .false.
 
+! TODO: Fix the bug when the time update achieves the last observation time
+
+
+! TODO: Added another layer for the true observation (the observation is a perturbed value from the truth based on a predefined observation error)
+! TODO: Change num_copies from 1 to 2
 integer, parameter :: num_copies = 1,   &   ! number of copies in sequence
                       num_qc     = 1        ! number of QC entries
 
@@ -248,14 +253,11 @@ if ( file_exist ) then
 
 end if
 
+! TODO: Added another layer for the true observation (the observation is a perturbed value from the truth based on a predefined observation error)
 ! create a new one
 call init_obs_sequence(obs_seq, num_copies, num_qc, nvar*ntime*nloc)
-do i = 1, num_copies
-call set_copy_meta_data(obs_seq, i, 'observation')
-end do
-do i = 1, num_qc
-call set_qc_meta_data(obs_seq, i, 'Data QC')
-end do
+call set_copy_meta_data(obs_seq, 1, 'observations')
+call set_qc_meta_data(obs_seq, 1, 'Data QC')
 
 ! TODO get the observation error from the nc file
 oerr = 1.000_r8

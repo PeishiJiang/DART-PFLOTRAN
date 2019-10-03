@@ -29,6 +29,7 @@ endif
 # Set MATH alias - takes an arithmetic assignment statemen  as argument, e.g., newvar = var1 + var2
 # Separate all items and operators in the expression with blanks
 alias MATH 'echo "\!:1-$" | bc -l'
+alias PRINT 'echo "\!:1-$"'
 # Define a function for getting item value in either input.nml or config.nml
 alias GET_ITEM 'grep \!:1 \!:2 | sed -e "s#.*=\(\)#\1#" -e "s/['\'']//g" -e "s/[[:space:]]*//g"'
 #alias GET_ITEM 'set \!:1 = `grep \!:2 \!:3 | sed -e "s#.*=\(\)#\1#" -e "s/['\'']//g" -e "s/[[:space:]]*//g"`'
@@ -69,51 +70,122 @@ cd $APP_WORK_DIR
 
 
 ##########################################
+# Conduct the data assimilation at time t0
+##########################################
+echo ""
+echo ""
+echo "------------------------------------------------------------"
+echo "Start the first assimilation at the current model time $MODEL_TIME [day] ..."
+echo ""
+if ($NCORE_DA == 1) then
+  $FILTER_EXE  || exit 1
+# TODO parallel usage of DART filter
+else
+  $MPI_RUN -N $NCORE_DA $FILTER_EXE
+endif
+
+##########################################
+# Update the model time and observation start/end time
+##########################################
+echo ""
+echo ""
+echo "------------------------------------------------------------"
+echo "Move the time forward ..."
+echo ""
+python $UPDATE_CONFIGNML_TIME $CONFIG_NML $INPUT_NML  || exit 5
+set MODEL_TIME = `GET_ITEM current_model_time $CONFIG_NML`  || exit 6
+
+##########################################
 # Data assimilation workflow starts here!
 ##########################################
 # Continue the assimilation if MODEL_TIME is smaller than LAST_OBS_TIME
-@ WITHIN_OBS_TIME = `MATH $MODEL_TIME < $LAST_OBS_TIME`
-while ($WITHIN_OBS_TIME)
+#@ EXCEEDS_OBS_TIME = `MATH $MODEL_TIME >= $LAST_OBS_TIME`
+@ EXCEEDS_OBS_TIME = `echo "$MODEL_TIME >= $LAST_OBS_TIME" | bc -l`
+while ($EXCEEDS_OBS_TIME == 0)
+
+#  echo "---"
+#  echo $MODEL_TIME
+#  echo $LAST_OBS_TIME
+#  echo $EXCEEDS_OBS_TIME
+#  echo "---"
+
   ##########################################
-  # Step 1 -- Data Assimilation
+  # Step 1 -- Update PFLOTRAN input files
+  # based on DART posterior output
+  # It includes PFLOTRAN.in and parameter_prior.h5 files
   ##########################################
+  echo ""
+  echo ""
+  echo "------------------------------------------------------------"
+  echo "Update PFLOTRAN input files ..."
+  echo ""
+  python $UPDATE_PFLOTRAN_INPUT  $CONFIG_NML || exit 2
+
+  ##########################################
+  # Step 2 -- Conduct PFLOTRAN forward simulation
+  # by using PFLOTRAN.sh file
+  ##########################################
+  echo ""
+  echo ""
+  echo "------------------------------------------------------------"
+  echo "Conduct the ensemble forward simulation for PFLOTRAN ..."
+  echo ""
+  $PFLOTRAN_SH $CONFIG_NML  || exit 3
+
+  ##########################################
+  # Step 3 -- Convert the PFLOTRAN output to NetCDF format
+  ##########################################
+  echo ""
+  echo ""
+  echo "------------------------------------------------------------"
+  echo "Convert the PFLOTRAN HDF output to DART prior NetCDF data ..."
+  echo ""
+  python $PREP_PRIOR_NC $CONFIG_NML  || exit 4
+
+  ##########################################
+  # Step 4 -- Generate the DART data observation
+  # in the current assimilation window
+  ##########################################
+  echo ""
+  echo ""
+  echo "------------------------------------------------------------"
+  echo "Generate the DART data observations in the current assimilation window ..."
+  echo ""
+  $CONVERT_NC_EXE  || exit 7
+
+  ##########################################
+  # Step 5 -- Data Assimilation
+  ##########################################
+  echo ""
+  echo ""
+  echo "------------------------------------------------------------"
+  echo "Start the assimilation at the current model time $MODEL_TIME [day] ..."
+  echo ""
   if ($NCORE_DA == 1) then
-    $FILTER_EXE
+    $FILTER_EXE  || exit 1
   # TODO parallel usage of DART filter
   else
     $MPI_RUN -N $NCORE_DA $FILTER_EXE
   endif
 
   ##########################################
-  # TODO
-  # Step 2 -- Update PFLOTRAN input files
-  # based on DART posterior output
-  # It includes PFLOTRAN.in and parameter_prior.h5 files
-  ##########################################
-  python $UPDATE_PFLOTRAN_INPUT
-
-  ##########################################
-  # Step 3 -- Conduct PFLOTRAN forward simulation
-  # by using PFLOTRAN.sh file
-  ##########################################
-  $PFLOTRAN_SH $CONFIG_NML
-
-  ##########################################
-  # Step 4 -- Convert the PFLOTRAN output to NetCDF format
-  ##########################################
-  python $PREP_PRIOR_NC $CONFIG_NML
-
-  ##########################################
-  # Step 5 -- Update the model time and observation start/end time
+  # Step 6 -- Update the model time and observation start/end time
   # for the next assimilation window in the input namelist file
   ##########################################
-  python $UPDATE_CONFIGNML_TIME $CONFIG_NML $INPUT_NML
-  set MODEL_TIME = `GET_ITEM current_model_time $CONFIG_NML`
+  echo ""
+  echo ""
+  echo "------------------------------------------------------------"
+  echo "Move the time forward ..."
+  echo ""
+  python $UPDATE_CONFIGNML_TIME $CONFIG_NML $INPUT_NML  || exit 5
+  set MODEL_TIME = `GET_ITEM current_model_time $CONFIG_NML`  || exit 6
 
-  ##########################################
-  # Step 6 -- Generate the data observation
-  # in the current assimilation window
-  ##########################################
-  $CONVERT_NC_EXE
-
+#  @ EXCEEDS_OBS_TIME = `MATH $MODEL_TIME >= $LAST_OBS_TIME`  || exit 8
+  @ EXCEEDS_OBS_TIME = `echo "$MODEL_TIME >= $LAST_OBS_TIME" | bc -l`  || exit 8
 end
+
+echo ""
+echo ""
+echo "------------------------------------------------------------"
+echo "The entire data assimilation completes!"
+echo ""

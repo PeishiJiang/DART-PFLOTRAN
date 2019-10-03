@@ -26,11 +26,14 @@ ncore=`echo $ncore_str | sed -e 's#.*=\(\)#\1#' -e "s/[']//g" -e 's/[[:space:]]*
 #mpirun=$6
 #ncore=$7
 
+#echo $pflotranin
+#echo $nreaz
+
 if [ $ncore -eq 1 ]
 then
-    $exeprg -pflotranin $pflotranin -stochastic -num_realizations $nreaz -num_groups 1
+    $exeprg -pflotranin $pflotranin -stochastic -num_realizations $nreaz -num_groups 1 -screen_output off
 else
-    $mpirun -n $ncore $exeprg -pflotranin $pflotranin -stochastic -num_realizations $nreaz -num_groups 1
+    $mpirun -n $ncore $exeprg -pflotranin $pflotranin -stochastic -num_realizations $nreaz -num_groups 1 -screen_output off
 fi
 
 # Move the PFLOTRAN outputs files to output folder

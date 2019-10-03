@@ -6,6 +6,8 @@ assimilation window in the config.nml and input.nml"""
 import sys
 import f90nml
 
+# TODO: Fix the bug when the time update achieves the last observation time
+
 ###############################
 # Parameters
 ###############################
@@ -28,17 +30,17 @@ assim_window_seconds = configs["da_cfg"]["assim_window_seconds"]
 # Update the model time
 configs["time_cfg"]["current_model_time"] += assim_window_days + float(assim_window_seconds)/86400.
 
-print(configs["time_cfg"]["current_model_time"])
+# print(configs["time_cfg"]["current_model_time"])
 # Update the observation window time
 assim_start_days    += assim_window_days
 assim_start_seconds += assim_window_seconds
 assim_end_days      += assim_window_days
 assim_end_seconds   += assim_window_seconds
 
-configs["da_cfg"]["assim_start_days"]    = assim_window_days
-configs["da_cfg"]["assim_start_seconds"] = assim_window_seconds
-configs["da_cfg"]["assim_end_days"]      = assim_window_days
-configs["da_cfg"]["assim_end_seconds"]   = assim_window_seconds
+configs["da_cfg"]["assim_start_days"]    = assim_start_days
+configs["da_cfg"]["assim_start_seconds"] = assim_start_seconds
+configs["da_cfg"]["assim_end_days"]      = assim_end_days
+configs["da_cfg"]["assim_end_seconds"]   = assim_end_seconds
 
 ###############################
 # Update the obs window times in input.nml

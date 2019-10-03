@@ -10,7 +10,7 @@ Complete the [online form](https://www2.cisl.ucar.edu/software/dart/download) an
 
 ## Step 2: Configure Fortran and NetCDF in DART
 
-Once the DART package is downloaded, in your DART directory {DART}, open the make makefile template in ```{DART}/Manhattan/build_templates/mkmf.template```. Then, modify the following information:
+Once the DART package is downloaded, in your DART directory {DART}, open the make makefile template in ```{DART}/manhattan/build_templates/mkmf.template```. Then, modify the following information:
 
 - the locations of your Fortran compiler:
 
@@ -27,11 +27,20 @@ Once the DART package is downloaded, in your DART directory {DART}, open the mak
 
 
 
-## Step 3: Configure DART for PFLOTRAN-DART interface usage
+## Step 3: Allow the permission to execute some utility functions
+Enable the permission of using the following files by entering:
+```shell script
+chmod +x {DART}/manhattan/build_templates/mkmf
+chmod +x {DART}/manhattan/assimilation_code/modules/utilities/fixsystem
+```
+
+
+
+## Step 4: Configure DART for PFLOTRAN-DART interface usage
 
 Fix the following bugs in DART Manhattan version to allow the usage of the PFLOTRAN-DART interface:
 
-- Modify ```{DART}/Manhattan/observations/obs_converters/utilities/obs_utilities_mod.f90```, to allow the subroutine ```set_obs_def_location()``` to read cartesian 3D grids by replacing:
+- Modify ```{DART}/manhattan/observations/obs_converters/utilities/obs_utilities_mod.f90```, to allow the subroutine ```set_obs_def_location()``` to read cartesian 3D grids by replacing:
 
   ```fortran
   type(obs_def_type)    :: obs_def
@@ -55,7 +64,7 @@ Fix the following bugs in DART Manhattan version to allow the usage of the PFLOT
   call set_obs_def_type_of_obs(obs_def, okind)
   ```
 
-- Modify ```{DART}/Manhattan/assimilation_code/modules/utilities/types_mod.f90```, to increase the maximum allowed observation type name length by replacing:
+- Modify ```{DART}/manhattan/assimilation_code/modules/utilities/types_mod.f90```, to increase the maximum allowed observation type name length by replacing:
 
   ```fortran
   integer, parameter :: obstypelength    = 31
