@@ -67,12 +67,6 @@ yloc = root_nc.createVariable('y_location', 'f8', ('location',))
 zloc = root_nc.createVariable('z_location', 'f8', ('location',))
 # locs  = root_nc.createVariable('location', 'f8', ('location',3))
 
-# TODO
-# Add the units following the 'CF' conventions later on.
-# For example,
-# double time(time) ;
-#        time:units = "days since 1986-01-01 00:00:00" ;
-#        time:calendar = "gregorian" ;
 # Create the attributes
 zloc.units, zloc.type  = 'm', 'dimension_value'
 yloc.units, yloc.type  = 'm', 'dimension_value'
@@ -93,8 +87,8 @@ xloc[:] = np.zeros(nloc)
 yloc[:] = np.zeros(nloc)
 zloc[:] = z_set
 
-# TODO add missing_value
 # Write the variable information
+# Missing value is assigned as -99999 as the fill_value
 vargrp      = root_nc.createVariable(
                varname='TEMPERATURE',
                datatype='f8',

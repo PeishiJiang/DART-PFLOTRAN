@@ -123,7 +123,6 @@
    evaluate_these_obs_types   = ''
    /
 
-! TODO
 ! model_nml should be read from PFLOTRAN.in file.
 &model_nml
    nvar                = 2,
@@ -134,7 +133,6 @@
    var_qtynames        = 'QTY_LIQUID_SATURATION', 'QTY_LIQUID_PRESSURE'
    /
 
-! TODO
 ! grid_nml should be read from PFLOTRAN.in file.
 &grid_nml
    dx                  = 1,

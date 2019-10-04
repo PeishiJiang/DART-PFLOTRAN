@@ -30,23 +30,29 @@ dart_prior_template = configs["file_cfg"]["dart_prior_template_file"]
 obs_set             = configs["obspara_set_cfg"]["obs_set"]
 para_set            = configs["obspara_set_cfg"]["para_set"]
 model_time          = float(configs["time_cfg"]["current_model_time"])   # days
+model_time_list     = configs["time_cfg"]["model_time_list"]
 assim_window        = float(configs["da_cfg"]["assim_window_size"])         # days
 nens                = configs["da_cfg"]["nens"]
-# spinup_done         = configs["time_cfg"]["is_spinup_done"]
 
-one_sec             = 1./86400.  # one second in fractional days
-
+# Get the list of all required PFLOTRAN variables
 if isinstance(obs_set, str):
     obs_set = [obs_set]
 if isinstance(para_set, str):
     para_set = [para_set]
 pflotran_var_set  = obs_set + para_set
 
+# Convert the model_time_list to a list (model_time_list = 0 in the first model tim)
+if not isinstance(model_time_list, list):
+    model_time_list = [model_time_list]
+
+# Get some constants
+one_sec        = 1./86400.             # one second in fractional days
+ens_set        = np.arange(1, nens+1)  # the set of ensembles
+model_time_ind = len(model_time_list)  # the ith model step
+
 # Parse the PFLOTRAN variables to be updated/analyzed/assimilated
 p = re.compile('[A-Z_]+')
 pflotran_var_set = [p.search(v).group() for v in pflotran_var_set]
-
-ens_set = np.arange(1, nens+1)
 
 # Get the file names of all ensembles for PFLOTRAN output
 pflotran_out_file_set = [re.sub(r"\[ENS\]", str(ens), pflotran_out_file) for ens in ens_set]
@@ -57,8 +63,8 @@ for f in pflotran_out_file_set:
         raise Exception("The PFLOTRAN output file %s does not exits!" % f)
 
 # Get the file names of all ensembles for DART restart file
-dart_prior_file_set = [re.sub(r"\[ENS\]", str(ens)+"_time"+str(model_time), dart_prior_file) for ens in ens_set]
-dart_posterior_file_set = [re.sub(r"\[ENS\]", str(ens)+"_time"+str(model_time), dart_posterior_file) for ens in ens_set]
+dart_prior_file_set = [re.sub(r"\[ENS\]", str(ens)+"_time"+str(model_time_ind), dart_prior_file) for ens in ens_set]
+dart_posterior_file_set = [re.sub(r"\[ENS\]", str(ens)+"_time"+str(model_time_ind), dart_posterior_file) for ens in ens_set]
 
 
 ###############################

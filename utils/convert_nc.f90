@@ -49,6 +49,9 @@ integer :: obs_start_day,      &
 
 logical, parameter :: use_input_qc           = .false.
 
+! TODO: Fix the bug when the time update achieves the last observation time
+
+
 ! TODO: Added another layer for the true observation (the observation is a perturbed value from the truth based on a predefined observation error)
 ! TODO: Change num_copies from 1 to 2
 integer, parameter :: num_copies = 1,   &   ! number of copies in sequence

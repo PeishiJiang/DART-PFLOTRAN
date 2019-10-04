@@ -73,12 +73,6 @@ xloc = root_nc.createVariable('x_location', 'f8', ('x_location',))
 yloc = root_nc.createVariable('y_location', 'f8', ('y_location',))
 zloc = root_nc.createVariable('z_location', 'f8', ('z_location',))
 
-# TODO
-# Add the units following the 'CF' conventions later on.
-# For example,
-# double time(time) ;
-#        time:units = "days since 1986-01-01 00:00:00" ;
-#        time:calendar = "gregorian" ;
 # Create the attributes
 times.units = time_unit
 times.calendar = 'none'

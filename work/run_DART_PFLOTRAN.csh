@@ -59,7 +59,6 @@ set CONVERT_NC_EXE        = `GET_ITEM convert_nc_exe $CONFIG_NML`             # 
 set PREP_PFLOTRAN_INPUT   = `GET_ITEM prep_pflotran_input_file $CONFIG_NML`   # python script for preparing PFLOTRAN input files
 set PREP_PRIOR_NC         = `GET_ITEM prep_prior_nc $CONFIG_NML`  # python script for converting PFLOTRAN HDF 5 output to DART NetCDF prior data
 set UPDATE_CONFIGNML_TIME = `GET_ITEM update_confignml_time_file $CONFIG_NML` # python script for updating the time data in config.nml
-# TODO
 set UPDATE_PFLOTRAN_INPUT = `GET_ITEM update_pflotran_input_file $CONFIG_NML` # python script for updating PFLOTRAN input files
 
 
@@ -94,14 +93,16 @@ echo "Move the time forward ..."
 echo ""
 python $UPDATE_CONFIGNML_TIME $CONFIG_NML $INPUT_NML  || exit 5
 set MODEL_TIME = `GET_ITEM current_model_time $CONFIG_NML`  || exit 6
+set EXCEEDS_OBS_TIME = `GET_ITEM exceeds_obs_time $CONFIG_NML`  || exit 6
+
 
 ##########################################
 # Data assimilation workflow starts here!
 ##########################################
 # Continue the assimilation if MODEL_TIME is smaller than LAST_OBS_TIME
 #@ EXCEEDS_OBS_TIME = `MATH $MODEL_TIME >= $LAST_OBS_TIME`
-@ EXCEEDS_OBS_TIME = `echo "$MODEL_TIME >= $LAST_OBS_TIME" | bc -l`
-while ($EXCEEDS_OBS_TIME == 0)
+#@ EXCEEDS_OBS_TIME = `echo "$MODEL_TIME >= $LAST_OBS_TIME" | bc -l`
+while ($EXCEEDS_OBS_TIME == ".false.")
 
 #  echo "---"
 #  echo $MODEL_TIME
@@ -179,9 +180,8 @@ while ($EXCEEDS_OBS_TIME == 0)
   echo ""
   python $UPDATE_CONFIGNML_TIME $CONFIG_NML $INPUT_NML  || exit 5
   set MODEL_TIME = `GET_ITEM current_model_time $CONFIG_NML`  || exit 6
+  set EXCEEDS_OBS_TIME = `GET_ITEM exceeds_obs_time $CONFIG_NML`  || exit 6
 
-#  @ EXCEEDS_OBS_TIME = `MATH $MODEL_TIME >= $LAST_OBS_TIME`  || exit 8
-  @ EXCEEDS_OBS_TIME = `echo "$MODEL_TIME >= $LAST_OBS_TIME" | bc -l`  || exit 8
 end
 
 echo ""
