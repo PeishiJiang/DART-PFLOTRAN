@@ -21,7 +21,8 @@ use     utilities_mod, only : initialize_utilities, finalize_utilities, &
                              error_handler, E_ERR
 use  netcdf_utilities_mod, only : nc_open_file_readonly, nc_close_file
 use  time_manager_mod, only : time_type, set_calendar_type, set_date, &
-                              increment_time, get_time, operator(-), GREGORIAN, set_time
+                              increment_time, get_time, GREGORIAN, set_time, &
+                              operator(-), operator(>), operator(<)
 use  obs_sequence_mod, only : obs_sequence_type, obs_type, read_obs_seq, &
                               static_init_obs_sequence, init_obs, write_obs_seq, &
                               init_obs_sequence, get_num_obs, &
@@ -41,13 +42,22 @@ implicit none
 !character(len=256), parameter :: out_file    = '../data_files/obs_seq.pflotran'
 character(len=256) :: netcdf_file
 character(len=256) :: out_file
+integer :: obs_start_day,      &
+           obs_start_second,   &
+           obs_end_day,        &
+           obs_end_second
 
 logical, parameter :: use_input_qc           = .false.
 
+! TODO: Fix the bug when the time update achieves the last observation time
+
+
+! TODO: Added another layer for the true observation (the observation is a perturbed value from the truth based on a predefined observation error)
+! TODO: Change num_copies from 1 to 2
 integer, parameter :: num_copies = 1,   &   ! number of copies in sequence
                       num_qc     = 1        ! number of QC entries
 
-integer  :: ncid, ios, ivar, ntime, nloc
+integer  :: ncid, ncobsid, ncerrid, ios, ivar, ntime, nloc
 integer  :: n, i, oday, osec, nused, k, index
 logical  :: file_exist, first_obs
 
@@ -68,8 +78,10 @@ character(len=128), parameter :: revdate  = "$Date: 2019-09-17 08:48:00 -0700 (T
 character(len=512) :: string1, string2, string3
 
 real(r8), allocatable :: temperature_val(:,:)
+real(r8), allocatable :: temperature_err(:,:)
 
 real(r8) :: temperature_miss
+real(r8) :: temperature_err_miss
 
 integer, allocatable :: qc_temperature(:,:)
 
@@ -77,16 +89,21 @@ integer, parameter :: nvar=1
 
 namelist /convert_nc_nml/            &
     netcdf_file,                &
-    out_file
+    out_file,                   &
+    obs_start_day,              &
+    obs_start_second,              &
+    obs_end_day,              &
+    obs_end_second
 
 type(obs_sequence_type) :: obs_seq
 type(obs_type)          :: obs, prev_obs
-type(time_type)         :: comp_day0, time_obs, prev_time
+type(time_type)         :: comp_day0, time_obs, prev_time, start_time, end_time
 character(len=256)      :: file_calendar
 character(len=256)      :: unitstring
 integer                 :: second, minute, hour, day, month, year
 
 character(len=NF90_MAX_NAME) :: namelist(5)
+
 
 !------------
 ! start of executable code
@@ -95,10 +112,13 @@ character(len=NF90_MAX_NAME) :: namelist(5)
 call initialize_utilities('convert_nc')
 
 ! Read in the convert_nc_nml
-!call find_namelist_in_file("input.nml.convert_nc", "convert_nc_nml", iunit)
 call find_namelist_in_file("input.nml", "convert_nc_nml", iunit)
 read(iunit, nml = convert_nc_nml, iostat = io)
 call check_namelist_read(iunit, io, "convert_nc_nml")
+
+! Get the defined start and end of observation times
+start_time = set_time(obs_start_second, obs_start_day)
+end_time   = set_time(obs_end_second, obs_end_day)
 
 first_obs = .true.
 
@@ -120,6 +140,7 @@ if ( file_calendar == '' .or. file_calendar == 'None' ) then
    !> user has to supply their own read time routine.
 
    !comp_day0 = set_date(year, month, day, hour, minute, second)
+   ios = nf90_get_att(ncid, ivar, 'units', unitstring)
    comp_day0 = set_time(0, 0)
 
 else if ( file_calendar == 'GREGORIAN' .or. file_calendar == 'gregorian') then
@@ -177,6 +198,7 @@ allocate(zloc(nloc)) ; allocate(zlocu(nloc*ntime))
 allocate(tobs(ntime)); allocate(tobsu(nloc*ntime))
 
 allocate(temperature_val(ntime,nloc))
+allocate(temperature_err(ntime,nloc))
 allocate(qc_temperature(ntime,nloc))
 
 ! read in the data arrays
@@ -185,7 +207,9 @@ call    getvar_real(ncid, "x_location",  xloc) ! x location or easting
 call    getvar_real(ncid, "y_location",  yloc) ! y location or northing
 call    getvar_real(ncid, "z_location",  zloc) ! z location or latitude
 
+
 call getvar_real_2d(ncid, 'TEMPERATURE',temperature_val,temperature_miss)
+call getvar_real_2d(ncid, 'TEMPERATURE_ERR',temperature_err,temperature_err_miss)
 
 ! Define or get the quality control value for each observation variable
 if (use_input_qc) then
@@ -205,26 +229,23 @@ inquire(file=out_file, exist=file_exist)
 ! Or should I generate a separate converter for each case?
 if ( file_exist ) then
 
-  write(string1,*)'The DART observation file exists, with name', out_file
-  call error_handler(E_ERR, 'convert_nc:', string1, source, revision, revdate)
+  write(string1,*)'Deleting the existing the DART observation file, with name', out_file
+  open(unit=5, file=out_file, status="OLD")  ! root directory
+  close(unit=5, status="DELETE")
+  !call error_handler(E_ERR, 'convert_nc:', string1, source, revision, revdate)
   ! existing file found, append to it
   !call read_obs_seq(out_file, 0, 0, nvar*ntime*nloc, obs_seq)
 
-else
+end if
 
-  ! create a new one
-  call init_obs_sequence(obs_seq, num_copies, num_qc, nvar*ntime*nloc)
-  do i = 1, num_copies
-    call set_copy_meta_data(obs_seq, i, 'Observation')
-  end do
-  do i = 1, num_qc
-    call set_qc_meta_data(obs_seq, i, 'Data QC')
-  end do
-
-endif
+! TODO: Added another layer for the true observation (the observation is a perturbed value from the truth based on a predefined observation error)
+! create a new one
+call init_obs_sequence(obs_seq, num_copies, num_qc, nvar*ntime*nloc)
+call set_copy_meta_data(obs_seq, 1, 'observations')
+call set_qc_meta_data(obs_seq, 1, 'Data QC')
 
 ! TODO get the observation error from the nc file
-oerr = 1.000_r8
+!oerr = 1.000_r8
 
 ! TODO Should it be provided by users, rather than a constant?
 ! Set the DART data quality control.  Be consistent with NCEP codes;
@@ -234,10 +255,26 @@ qc = 1.0_r8
 timeloop: do n = 1, ntime
 
   ! compute time of observation
-  time_obs = increment_time(comp_day0, nint(tobs(n)))
+  if ( unitstring(1:3) == 'day') then
+      time_obs = increment_time(comp_day0, nint(tobs(n)*86400))
+  else if ( unitstring(1:6) == 'second') then
+      time_obs = increment_time(comp_day0, nint(tobs(n)))
+  end if
 
   ! extract actual time of observation in file into oday, osec.
   call get_time(time_obs, osec, oday)
+
+  ! If time_obs is not within the obs_start and obs_end times, do not record the observation
+  if ( (time_obs < start_time) .or. (time_obs > end_time)) then
+      cycle
+  end if
+  !if ( (oday < obs_start_day) .or. &
+       !(oday == obs_start_day .and. osec < obs_start_second) ) then
+       !continue
+  !else if ( (oday > obs_start_day) .or. &
+            !(oday == obs_start_day .and. osec > obs_start_second) ) then
+       !continue
+  !end if
 
 locloop: do k = 1, nloc
     do i = 1, nused
@@ -251,7 +288,7 @@ locloop: do k = 1, nloc
 ! Add each observation value here
 if ( &
   temperature_val(n,k) /= temperature_miss .and. qc_temperature(n,k) == 0) then
-   call create_3d_obs(xloc(k), yloc(k), zloc(k), 0, temperature_val(n,k), TEMPERATURE, oerr, oday, osec, qc, obs)
+   call create_3d_obs(xloc(k), yloc(k), zloc(k), 0, temperature_val(n,k), TEMPERATURE, temperature_err(n,k), oday, osec, qc, obs)
    call add_obs_to_seq(obs_seq, obs, time_obs, prev_obs, prev_time, first_obs)
 endif
 

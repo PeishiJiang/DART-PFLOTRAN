@@ -215,10 +215,10 @@ allocate(tobs(ntime)); allocate(tobsu(nloc*ntime))
 !$END
 
 ! read in the data arrays
-call    getvar_real(ncid, "time",  tobs      ) ! time index
-call    getvar_real(ncid, "x_location",  xloc) ! x location or easting
-call    getvar_real(ncid, "y_location",  yloc) ! y location or northing
-call    getvar_real(ncid, "z_location",  zloc) ! z location or latitude
+call getvar_real(ncid, "time",  tobs      ) ! time index
+call getvar_real(ncid, "x_location",  xloc) ! x location or easting
+call getvar_real(ncid, "y_location",  yloc) ! y location or northing
+call getvar_real(ncid, "z_location",  zloc) ! z location or latitude
 
 !$TODO Add here 7
 !call getvar_real_2d(ncid, "TEMPERATURE",  temp, temp_miss) ! temperature

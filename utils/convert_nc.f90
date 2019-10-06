@@ -78,8 +78,10 @@ character(len=128), parameter :: revdate  = "$Date: 2019-09-17 08:48:00 -0700 (T
 character(len=512) :: string1, string2, string3
 
 real(r8), allocatable :: temperature_val(:,:)
+real(r8), allocatable :: temperature_err(:,:)
 
 real(r8) :: temperature_miss
+real(r8) :: temperature_err_miss
 
 integer, allocatable :: qc_temperature(:,:)
 
@@ -196,15 +198,17 @@ allocate(zloc(nloc)) ; allocate(zlocu(nloc*ntime))
 allocate(tobs(ntime)); allocate(tobsu(nloc*ntime))
 
 allocate(temperature_val(ntime,nloc))
+allocate(temperature_err(ntime,nloc))
 allocate(qc_temperature(ntime,nloc))
 
 ! read in the data arrays
-call    getvar_real(ncid, "time",  tobs      ) ! time index
-call    getvar_real(ncid, "x_location",  xloc) ! x location or easting
-call    getvar_real(ncid, "y_location",  yloc) ! y location or northing
-call    getvar_real(ncid, "z_location",  zloc) ! z location or latitude
+call getvar_real(ncid, "time",  tobs      ) ! time index
+call getvar_real(ncid, "x_location",  xloc) ! x location or easting
+call getvar_real(ncid, "y_location",  yloc) ! y location or northing
+call getvar_real(ncid, "z_location",  zloc) ! z location or latitude
 
 call getvar_real_2d(ncid, 'TEMPERATURE',temperature_val,temperature_miss)
+call getvar_real_2d(ncid, 'TEMPERATURE_ERR',temperature_err,temperature_miss)
 
 ! Define or get the quality control value for each observation variable
 if (use_input_qc) then
@@ -283,7 +287,7 @@ locloop: do k = 1, nloc
 ! Add each observation value here
 if ( &
   temperature_val(n,k) /= temperature_miss .and. qc_temperature(n,k) == 0) then
-   call create_3d_obs(xloc(k), yloc(k), zloc(k), 0, temperature_val(n,k), TEMPERATURE, oerr, oday, osec, qc, obs)
+   call create_3d_obs(xloc(k), yloc(k), zloc(k), 0, temperature_val(n,k), TEMPERATURE, temperature_err(n,k), oday, osec, qc, obs)
    call add_obs_to_seq(obs_seq, obs, time_obs, prev_obs, prev_time, first_obs)
 endif
 

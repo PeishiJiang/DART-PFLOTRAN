@@ -48,8 +48,11 @@ n_line = len(data)
 
 added = 0
 var_abbr_set     = [v.lower()+"_val" for v in var_set]
+var_err_set      = [v.lower()+"_err" for v in var_set]
 var_abbr_def_set = [v.lower()+"_val(:,:)" for v in var_set]
+var_err_def_set  = [v.lower()+"_err(:,:)" for v in var_set]
 var_miss_set     = [v.lower()+"_miss" for v in var_set]
+var_err_miss_set = [v.lower()+"_err_miss" for v in var_set]
 var_qc_set       = ["qc_"+v.lower() for v in var_set]
 var_qc_def_set   = ["qc_"+v.lower()+"(:,:)" for v in var_set]
 nvar             = len(var_set)
@@ -68,9 +71,10 @@ with open(convert_file, 'w') as f:
             added = 0
             continue
 
-        # Add 2 -- definition for observation variables values
+        # Add 2 -- definition for observation variables values and their error terms
         if line.startswith("!$TODO Add here 2"):
             f.write("real(r8), allocatable :: "+",".join(var_abbr_def_set)+"\n")
+            f.write("real(r8), allocatable :: "+",".join(var_err_def_set)+"\n")
             added = 2
             continue
         elif added == 2 and not line.startswith("!$END"):
@@ -79,9 +83,10 @@ with open(convert_file, 'w') as f:
             added = 0
             continue
 
-        # Add 3 -- definition for observation variables missing values
+        # Add 3 -- definition for observation variables missing values and their error terms
         if line.startswith("!$TODO Add here 3"):
             f.write("real(r8) :: "+",".join(var_miss_set)+"\n")
+            f.write("real(r8) :: "+",".join(var_err_miss_set)+"\n")
             added = 3
             continue
         elif added == 3 and not line.startswith("!$END"):
@@ -116,6 +121,7 @@ with open(convert_file, 'w') as f:
         if line.startswith("!$TODO Add here 6"):
             for j in range(nvar):
                 f.write("allocate("+var_abbr_set[j]+"(ntime,nloc))\n")
+                f.write("allocate("+var_err_set[j]+"(ntime,nloc))\n")
                 f.write("allocate("+var_qc_set[j]+"(ntime,nloc))\n")
             added = 6
             continue
@@ -125,10 +131,11 @@ with open(convert_file, 'w') as f:
             added = 0
             continue
 
-        # Add 7 -- definition for number of variable
+        # Add 7 -- getting the observation data and the corresponding error values
         if line.startswith("!$TODO Add here 7"):
             for j in range(nvar):
                 f.write("call getvar_real_2d(ncid, '"+var_set[j]+"',"+var_abbr_set[j]+","+var_miss_set[j]+")\n")
+                f.write("call getvar_real_2d(ncid, '"+var_set[j]+"_ERR"+"',"+var_err_set[j]+","+var_miss_set[j]+")\n")
             added = 7
             continue
         elif added == 7 and not line.startswith("!$END"):
@@ -163,7 +170,7 @@ with open(convert_file, 'w') as f:
                 f.write("  "+var_abbr_set[j]+"(n,k) /= "+var_miss_set[j]+" .and. "+var_qc_set[j]+"(n,k) == 0 .and. &\n")
             f.write("  "+var_abbr_set[-1]+"(n,k) /= "+var_miss_set[-1]+" .and. "+var_qc_set[-1]+"(n,k) == 0) then\n")
             for j in range(nvar):
-                f.write("   call create_3d_obs(xloc(k), yloc(k), zloc(k), 0, "+var_abbr_set[j]+"(n,k), "+var_set[j]+", oerr, oday, osec, qc, obs)\n")
+                f.write("   call create_3d_obs(xloc(k), yloc(k), zloc(k), 0, "+var_abbr_set[j]+"(n,k), "+var_set[j]+", "+var_err_set[j]+"(n,k), oday, osec, qc, obs)\n")
                 f.write("   call add_obs_to_seq(obs_seq, obs, time_obs, prev_obs, prev_time, first_obs)\n")
             f.write("endif\n")
             added = 9

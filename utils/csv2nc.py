@@ -3,7 +3,7 @@
 # Author: Peishi Jiang
 
 # Note that the original observation data format is case by case.
-# Here, we consider csv file with and NetCDF format.
+# Here, we consider csv file and NetCDF format.
 
 import sys
 import f90nml
@@ -20,6 +20,9 @@ config_nml = sys.argv[1]
 configs    = f90nml.read(config_nml)
 
 obs_original = configs["file_cfg"]["obs_original_file"]        # The original observation file
+obs_nc       = configs["file_cfg"]["obs_nc_file"]        # The converted observation file
+obs_error    = configs["da_cfg"]["obs_error"]        # The observation error
+obs_error_type = configs["da_cfg"]["obs_error_type"]        # The observation type
 obs_nc       = configs["file_cfg"]["obs_nc_file"]        # The converted observation file
 # spinup_time  = float(configs["time_cfg"]["spinup_length"]) # The spinup time (day)
 assim_start_str = configs["time_cfg"]["assim_start"]     # The map between the start of observation and spinup time
@@ -45,8 +48,18 @@ dates_ref = [t-ref_time for t in dates]
 # dates_ref_values = [t.days+float(t.seconds)/86400.+spinup_time for t in dates_ref]
 dates_ref_values = [t.days+float(t.seconds)/86400. for t in dates_ref]
 
-# Get the temperature values
+# TODO: Get the true values based on the required spatial information
+# TODO: Here, we assume the observation errors are uncorrelated.
+# Get the true and perturbed temperature values
 temperature = obs_pd[obs_pd.keys()[1:]].values
+ntime,  nz  = temperature.shape
+if obs_error_type == "obsolute":
+    errors_var = obs_error * np.ones([ntime, nz])
+elif obs_error_type == "relative":
+    errors_var = obs_error * temperature
+else:
+    raise Exception("Unknown observation error type %s" % obs_type)
+
 # print(temperature.shape)
 
 ###############################
@@ -87,17 +100,29 @@ xloc[:] = np.zeros(nloc)
 yloc[:] = np.zeros(nloc)
 zloc[:] = z_set
 
-# Write the variable information
+# Write the perturbed observations of variable information
 # Missing value is assigned as -99999 as the fill_value
-vargrp      = root_nc.createVariable(
-               varname='TEMPERATURE',
-               datatype='f8',
-               # dimensions=('time','location'),
-               dimensions=('location', 'time'),
-               fill_value=-99999)
+vargrp  = root_nc.createVariable(
+    varname='TEMPERATURE',
+    datatype='f8',
+    # dimensions=('time','location'),
+    dimensions=('location', 'time'),
+    fill_value=-99999)
 vargrp.unit = 'C'
 vargrp[:]   = temperature.T
 vargrp.type = 'observation_value'
+
+# Write the true value of variable information
+# Missing value is assigned as -99999 as the fill_value
+vargrp  = root_nc.createVariable(
+    varname='TEMPERATURE_ERR',
+    datatype='f8',
+    # dimensions=('time','location'),
+    dimensions=('location', 'time'),
+    fill_value=-99999)
+vargrp.unit = 'C'
+vargrp[:]   = errors_var.T
+vargrp.type = 'observation_err_value'
 
 root_nc.close()
 
