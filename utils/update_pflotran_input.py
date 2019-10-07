@@ -43,7 +43,7 @@ with open(pflotran_in_file, 'r') as f:
 os.remove(pflotran_in_file)
 
 # Update the model run time based on the assimilation window
-with open(pflotran_in_file,'w') as f:
+with open(pflotran_in_file, 'w') as f:
     for i,s in enumerate(pflotranin):
         if "FINAL_TIME" in s:
             pflotranin[i] = "  FINAL_TIME {} sec".format(assim_window)+"\n"
@@ -75,6 +75,7 @@ if not os.path.isfile(pflotran_para_file):
     raise Exception("The file does not exist in the path: %s" % pflotran_para_file)
 f_para = h5py.File(pflotran_para_file, "r+")
 
+posterior = np.zeros([len(para_set), nens])
 for i in range(nens):   # For each ensemble...
     dart_posterior_file = dart_posterior_file_set[i]
     # Open the posterior data
@@ -86,15 +87,24 @@ for i in range(nens):   # For each ensemble...
     ens_num = int(nc_posterior.variables["member"][:])
     ens_ind = ens_num - 1
 
-    for varn in para_set:  # For each model parameter...
+    for j in range(len(para_set)):  # For each model parameter...
+        varn = para_set[j]
         # Read the posterior data of para_set
-        posterior_data = nc_posterior.variables[varn][:][0,0,0]
+        # posterior_data = nc_posterior.variables[varn][:][0, 0, 0]
+        posterior_data = np.mean(nc_posterior.variables[varn][:])
 
-        # Replace it with the values in f_para
-        f_para[varn][:][ens_ind] = posterior_data
+        posterior[j, i] = posterior_data
+        # # Replace it with the values in f_para
+        # f_para[varn][:][ens_ind] = posterior_data
 
     # Close the posterior NetCDF file
     nc_posterior.close()
+
+# Replace it with the values in f_para
+for j in range(len(para_set)):
+    varn = para_set[j]
+    f_para[varn][:] = posterior[j, :]
+    # f_para[varn][:] = posterior[j, :]
 
 # Close the parameter_prior.h5 file
 f_para.close()

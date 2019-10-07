@@ -5,8 +5,10 @@
 # Note that the original observation data format is case by case.
 # Here, we consider csv file and NetCDF format.
 
+import os
 import sys
 import f90nml
+import warnings
 import numpy as np
 import pandas as pd
 from netCDF4 import num2date, date2num, Dataset
@@ -19,17 +21,17 @@ from datetime import datetime, timedelta
 config_nml = sys.argv[1]
 configs    = f90nml.read(config_nml)
 
-obs_original = configs["file_cfg"]["obs_original_file"]        # The original observation file
-obs_nc       = configs["file_cfg"]["obs_nc_file"]        # The converted observation file
+obs_original = configs["file_cfg"]["obs_raw_file"]        # The original observation file
+obs_nc       = configs["file_cfg"]["obs_nc_original_file"]        # The converted observation file
 obs_error    = configs["da_cfg"]["obs_error"]        # The observation error
 obs_error_type = configs["da_cfg"]["obs_error_type"]        # The observation type
-obs_nc       = configs["file_cfg"]["obs_nc_file"]        # The converted observation file
-# spinup_time  = float(configs["time_cfg"]["spinup_length"]) # The spinup time (day)
 assim_start_str = configs["time_cfg"]["assim_start"]     # The map between the start of observation and spinup time
 
 # Get the reference time
 # ref_time = datetime.strptime(assim_start_str, "%Y-%m-%d %H:%M:%S")
 ref_time = datetime.strptime(assim_start_str, "%Y-%m-%d %H:%M:%S")
+
+missing_value = -99999
 
 ###############################
 # Read the csv file
@@ -65,65 +67,68 @@ else:
 ###############################
 # Write it into NetCDF format
 ###############################
-root_nc = Dataset(obs_nc, 'w')
+if os.path.isfile(obs_nc):
+    warnings.warn("The following file already exists: %s" % obs_nc)
+else:
+    root_nc = Dataset(obs_nc, 'w')
 
-# Create the dimension
-# Here, the data points are saved in two dimensions:
-#    -- time    -- location
-time = root_nc.createDimension('time', ntime)
-loc  = root_nc.createDimension('location', nloc)
+    # Create the dimension
+    # Here, the data points are saved in two dimensions:
+    #    -- time    -- location
+    time = root_nc.createDimension('time', ntime)
+    loc  = root_nc.createDimension('location', nloc)
 
-# Write the values
-times = root_nc.createVariable('time', 'f8', ('time',))
-xloc = root_nc.createVariable('x_location', 'f8', ('location',))
-yloc = root_nc.createVariable('y_location', 'f8', ('location',))
-zloc = root_nc.createVariable('z_location', 'f8', ('location',))
-# locs  = root_nc.createVariable('location', 'f8', ('location',3))
+    # Write the values
+    times = root_nc.createVariable('time', 'f8', ('time',))
+    xloc = root_nc.createVariable('x_location', 'f8', ('location',))
+    yloc = root_nc.createVariable('y_location', 'f8', ('location',))
+    zloc = root_nc.createVariable('z_location', 'f8', ('location',))
+    # locs  = root_nc.createVariable('location', 'f8', ('location',3))
 
-# Create the attributes
-zloc.units, zloc.type  = 'm', 'dimension_value'
-yloc.units, yloc.type  = 'm', 'dimension_value'
-xloc.units, xloc.type  = 'm', 'dimension_value'
-# times.units    = 'seconds since 2017-04-01 00:00:00'
-# times.units    = 'days since 2017-04-01 00:00:00'
-# times.calendar = 'gregorian'
-# times.type     = 'dimension_value'
-# times[:] = date2num(dates,units=times.units,calendar=times.calendar)
+    # Create the attributes
+    zloc.units, zloc.type  = 'm', 'dimension_value'
+    yloc.units, yloc.type  = 'm', 'dimension_value'
+    xloc.units, xloc.type  = 'm', 'dimension_value'
+    # times.units    = 'seconds since 2017-04-01 00:00:00'
+    # times.units    = 'days since 2017-04-01 00:00:00'
+    # times.calendar = 'gregorian'
+    # times.type     = 'dimension_value'
+    # times[:] = date2num(dates,units=times.units,calendar=times.calendar)
 
-times.calendar = 'None'
-times.units    = 'days'
-times.type     = 'dimension_value'
-times[:]       = dates_ref_values
+    times.calendar = 'None'
+    times.units    = 'days'
+    times.type     = 'dimension_value'
+    times[:]       = dates_ref_values
 
-# Write coordinates values
-xloc[:] = np.zeros(nloc)
-yloc[:] = np.zeros(nloc)
-zloc[:] = z_set
+    # Write coordinates values
+    xloc[:] = np.zeros(nloc)
+    yloc[:] = np.zeros(nloc)
+    zloc[:] = z_set
 
-# Write the perturbed observations of variable information
-# Missing value is assigned as -99999 as the fill_value
-vargrp  = root_nc.createVariable(
-    varname='TEMPERATURE',
-    datatype='f8',
-    # dimensions=('time','location'),
-    dimensions=('location', 'time'),
-    fill_value=-99999)
-vargrp.unit = 'C'
-vargrp[:]   = temperature.T
-vargrp.type = 'observation_value'
+    # Write the perturbed observations of variable information
+    # Missing value is assigned as -99999 as the fill_value
+    vargrp  = root_nc.createVariable(
+        varname='TEMPERATURE',
+        datatype='f8',
+        # dimensions=('time','location'),
+        dimensions=('location', 'time'),
+        fill_value=missing_value)
+    vargrp.unit = 'C'
+    vargrp[:]   = temperature.T
+    vargrp.type = 'observation_value'
 
-# Write the true value of variable information
-# Missing value is assigned as -99999 as the fill_value
-vargrp  = root_nc.createVariable(
-    varname='TEMPERATURE_ERR',
-    datatype='f8',
-    # dimensions=('time','location'),
-    dimensions=('location', 'time'),
-    fill_value=-99999)
-vargrp.unit = 'C'
-vargrp[:]   = errors_var.T
-vargrp.type = 'observation_err_value'
+    # Write the true value of variable information
+    # Missing value is assigned as -99999 as the fill_value
+    vargrp  = root_nc.createVariable(
+        varname='TEMPERATURE_ERR',
+        datatype='f8',
+        # dimensions=('time','location'),
+        dimensions=('location', 'time'),
+        fill_value=missing_value)
+    vargrp.unit = 'C'
+    vargrp[:]   = errors_var.T
+    vargrp.type = 'observation_err_value'
 
-root_nc.close()
+    root_nc.close()
 
-print("Finished converting raw observation in NetCDF format...")
+    print("Finished converting raw observation in NetCDF format...")

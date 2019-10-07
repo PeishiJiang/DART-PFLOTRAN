@@ -28,8 +28,9 @@
     /
 
 &data_file_nml
-    obs_original_file        = '[pflotran_in_dir]/temperature.csv'
-    obs_nc_file              = '[pflotran_in_dir]/obs_pflotran.nc'
+    obs_raw_file             = '[pflotran_in_dir]/temperature.csv'
+    obs_nc_original_file     = '[pflotran_in_dir]/obs_pflotran_original.nc'
+    obs_nc_file              = '[pflotran_in_dir]/obs_pflotran_clipped.nc'
     obs_dart_file            = '[dart_data_dir]/obs_seq_pflotran.out'
     dart_prior_nc_file       = '[dart_data_dir]/prior_ensemble_[ENS].nc'
     dart_posterior_nc_file   = '[dart_data_dir]/posterior_ensemble_[ENS].nc'
@@ -60,4 +61,6 @@
     prep_inputnml_file         = '[utils_dir]/prepare_input_nml.py'
     update_pflotran_input_file = '[utils_dir]/update_pflotran_input.py'
     update_confignml_time_file = '[utils_dir]/update_confignml_time.py'
+    plot_da_result_file        = '[utils_dir]/plot_da_result.py'
+    clip_obs_nc_file           = '[utils_dir]/clip_obs_nc.py'
     /
