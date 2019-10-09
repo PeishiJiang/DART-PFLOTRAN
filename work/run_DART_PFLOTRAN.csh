@@ -4,6 +4,7 @@
 # Author: Peishi Jiang
 
 # TODO Enabled the EnKS-MDA capability
+# TODO If there is no observation in one time window, continue running the model and move to the next time step without the data assimilation
 
 set INPUT_NML  = $1  # the input namelist file required by DART filter
 set CONFIG_NML = $2  # the configuration files

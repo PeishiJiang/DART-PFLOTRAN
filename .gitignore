@@ -11,6 +11,11 @@
 /work/dart_log.out
 /work/preprocess
 
+/applications/*
+!/applications/1dthermal
+!/applications/template
+!/applications/workflow_ipynb
+
 /applications/1dthermal/dart_inout/*
 !/applications/1dthermal/dart_inout/.gitignore
 /applications/1dthermal/pflotran_output/*

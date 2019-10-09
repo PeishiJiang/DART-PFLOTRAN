@@ -25,6 +25,9 @@ dart_output_list    = configs["file_cfg"]["dart_output_list_file"]
 para_set            = configs["obspara_set_cfg"]["para_set"]
 nens                = configs["da_cfg"]["nens"]
 
+if not isinstance(para_set, list):
+    para_set = [para_set]
+
 ###############################
 # Update the running time in PFLOTRAN.in
 ###############################

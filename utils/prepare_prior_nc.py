@@ -134,12 +134,17 @@ for i in range(nens):
 
     # Get the grids/coordinates of the domain
     coordinates = f_out["Coordinates"]
-    x_set = coordinates['X [m]'][:]
-    y_set = coordinates['Y [m]'][:]
-    z_set = coordinates['Z [m]'][:]
-    x_set = [(a + b) / 2 for a, b in zip(x_set[:-1], x_set[1:])]
-    y_set = [(a + b) / 2 for a, b in zip(y_set[:-1], y_set[1:])]
-    z_set = [(a + b) / 2 for a, b in zip(z_set[:-1], z_set[1:])]
+    # The following options are choosing the center of the grid
+    # x_set = coordinates['X [m]'][:]
+    # y_set = coordinates['Y [m]'][:]
+    # z_set = coordinates['Z [m]'][:]
+    # x_set = [(a + b) / 2 for a, b in zip(x_set[:-1], x_set[1:])]
+    # y_set = [(a + b) / 2 for a, b in zip(y_set[:-1], y_set[1:])]
+    # z_set = [(a + b) / 2 for a, b in zip(z_set[:-1], z_set[1:])]
+    # Choose the left boundary of the grid
+    x_set = coordinates['X [m]'][:-1]
+    y_set = coordinates['Y [m]'][:-1]
+    z_set = coordinates['Z [m]'][:-1]
     nx, ny, nz = len(x_set), len(y_set), len(z_set)
 
     # Get the last time step

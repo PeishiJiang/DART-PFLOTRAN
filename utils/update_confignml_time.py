@@ -35,7 +35,7 @@ last_obs_time = last_obs_time_days + float(last_obs_time_seconds) / 86400.
 # Check if the updated current_model_time exceeds the last_obs_time
 ###############################
 current_model_time += assim_window_days + float(assim_window_seconds)/86400.
-if current_model_time >= last_obs_time:
+if current_model_time >= (last_obs_time - 1e-8):
     configs["time_cfg"]["exceeds_obs_time"] = True
 
     ###############################
