@@ -36,7 +36,7 @@ then
 #    $exeprg -pflotranin $pflotranin -stochastic -num_realizations $nreaz -num_groups $ngroup
     $exeprg -pflotranin $pflotranin -stochastic -num_realizations $nreaz -num_groups $ngroup -screen_output off
 else
-    $mpirun -n $ncore $exeprg -pflotranin $pflotranin -stochastic -num_realizations $nreaz -num_groups $ngroup -screen_output off
+    $mpirun -np $ncore $exeprg -pflotranin $pflotranin -stochastic -num_realizations $nreaz -num_groups $ngroup -screen_output off
 fi
 
 # Move the PFLOTRAN outputs files to output folder

@@ -17,7 +17,8 @@
 # so this MUST be run first.
 #----------------------------------------------------------------------
 
-set app_work_dir = $1    # The application work folder
+set app_work_dir  = $1   # The application work folder
+#set mpisetting    = $2   # With or without mpi (i.e., -mpi or -nompi)
 set dart_work_dir = $PWD # The DART-PFLOTRAN work folder
 
 echo "---------------------------------------------------------------"
@@ -70,10 +71,10 @@ end
 
 \rm -f *.o *.mod input.nml*_default Makefile .cppdefs
 
-if ( $#argv == 1 && "$1" == "-mpi" ) then
+if ( $#argv == 2 && "$2" == "-mpi" ) then
   echo "Success: All single task DART programs compiled."
   echo "Script now compiling MPI parallel versions of the DART programs."
-else if ( $#argv == 1 && "$1" == "-nompi" ) then
+else if ( $#argv == 2 && "$2" == "-nompi" ) then
   echo "Success: All single task DART programs compiled."
   echo "Script is exiting without building the MPI version of the DART programs."
   exit 0
@@ -94,7 +95,9 @@ endif
 # with MPI all the time, remove or comment out the entire section above.
 #----------------------------------------------------------------------
 
-\rm -f filter wakeup_filter
+cd ${app_work_dir}
+\rm -f filter
+cd ${dart_work_dir}
 
 @ n = $n + 1
 echo
@@ -102,6 +105,8 @@ echo "---------------------------------------------------"
 echo "build number $n is mkmf_filter"
 csh   mkmf_filter -mpi
 make
+
+mv filter ${app_work_dir} || exit 6
 
 if ($status != 0) then
    echo
@@ -111,21 +116,14 @@ if ($status != 0) then
    exit $n
 endif
 
-@ n = $n + 1
-echo
-echo "---------------------------------------------------"
-echo "build number $n is mkmf_wakeup_filter"
-csh  mkmf_wakeup_filter -mpi
-make || exit $n
-
 \rm -f *.o *.mod input.nml*_default Makefile .cppdefs
 
-echo
-echo 'time to run filter here:'
-echo ' for lsf run "bsub < runme_filter"'
-echo ' for pbs run "qsub runme_filter"'
-echo ' for lam-mpi run "lamboot" once, then "runme_filter"'
-echo ' for mpich run "mpd" once, then "runme_filter"'
+#echo
+#echo 'time to run filter here:'
+#echo ' for lsf run "bsub < runme_filter"'
+#echo ' for pbs run "qsub runme_filter"'
+#echo ' for lam-mpi run "lamboot" once, then "runme_filter"'
+#echo ' for mpich run "mpd" once, then "runme_filter"'
 
 exit 0
 

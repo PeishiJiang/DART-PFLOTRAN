@@ -44,6 +44,7 @@ class DaResults(object):
         self.assim_start_time    = self.configs["time_cfg"]["assim_start"]
         self.model_time          = float(self.configs["time_cfg"]["current_model_time"])   # days
         self.model_time_list     = self.configs["time_cfg"]["model_time_list"]
+        self.model_time_list     = [self.model_time_list] if not isinstance(self.model_time_list, list) else self.model_time_list
         self.exceeds_obs_time    = self.configs["time_cfg"]["exceeds_obs_time"]
         self.assim_window        = float(self.configs["da_cfg"]["assim_window_size"])
         self.nens                = self.configs["da_cfg"]["nens"]

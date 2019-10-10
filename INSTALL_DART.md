@@ -12,9 +12,11 @@ Complete the [online form](https://www2.cisl.ucar.edu/software/dart/download) an
 
 Once the DART package is downloaded, in your DART directory {DART}, open the make makefile template in ```{DART}/manhattan/build_templates/mkmf.template```. Then, modify the following information:
 
-- the locations of your Fortran compiler:
+- the locations of your Fortran compiler (**Important:** You must make sure the ```MPIFC``` and ```MPILD``` should follow the same MPI system when you configure the MPI in PFLOTRAN.):
 
   ```sh
+  MPIFC = # the mpif90 utility
+  MPILD = # the mpif90 utility
   FC = # the Fortran compiler
   LC = # the name of the loader; typically, the same as the Fortran compiler
   ```
