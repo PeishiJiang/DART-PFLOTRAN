@@ -76,12 +76,19 @@ The main structure of this {PFLOTRAN-DART} repository is shown below:
 
 The following information are needed to configure the DART-PFLOTRAN for a specific application through the [jupyter notebook](./applications/workflow_ipynb/DART_PFLOTRAN_Integrate.ipynb):
 
-- The locations of PFLOTRAN executable and mpirun
-- The numbers of CPU cores used for PFLOTRAN and DART
-- The application folder name
-- The observation data to be assimilated and the PFLOTRAN parameters to be analyzed in DART
-- The temporal information (see below)
-- The data assimilation settings, which are configured through multiple [DART namelists](https://www.image.ucar.edu/DAReS/DART/manhattan/documentation/index.html#Namelists) in the input.nml file (e.g., [filter_nml](https://www.image.ucar.edu/DAReS/DART/manhattan/assimilation_code/modules/assimilation/filter_mod.html#Namelist) and [assim_tools_mod](https://www.image.ucar.edu/DAReS/DART/manhattan/assimilation_code/modules/assimilation/assim_tools_mod.html#Namelist))
+- General configuration
+    - The locations of PFLOTRAN executable and mpirun (**note that** the mpirun should be within the same MPI system as the mpi90 used in [DART mkmf.template](./INSTALL_DART.md))
+    - The numbers of CPU cores used for PFLOTRAN and DART
+    - The application folder name
+- The observation data and the model parameters
+    - The observation data to be assimilated and the PFLOTRAN parameters to be analyzed in DART
+    - The observation error and the associated types (i.e., relative and absolute errors)
+    - The statistics of the parameters: (1) the value range; (2) the mean and std for random sampling; and (3) the distribution to be sampled (i.e., normal, truncated normal, and uniform distributions).
+    - The list of parameters whose prior would be resampled based on the mean of the corresponding posterior at the previous time step.
+    - The spatial-temporal domain of the observation data to be assimilated (see below)
+- Other configurations
+    - The mapping between physical time and model time
+    - DART data assimilation settings (configured through multiple [DART namelists](https://www.image.ucar.edu/DAReS/DART/manhattan/documentation/index.html#Namelists) in the input.nml file (e.g., [filter_nml](https://www.image.ucar.edu/DAReS/DART/manhattan/assimilation_code/modules/assimilation/filter_mod.html#Namelist) and [assim_tools_mod](https://www.image.ucar.edu/DAReS/DART/manhattan/assimilation_code/modules/assimilation/assim_tools_mod.html#Namelist))
 
 For the temporal information, the model first spinup for a given period of time. Once the spinup is done, the model restarts with time t0, and begins to assimilate with fixed time window tau. Meanwhile, the actual observation time should be mapped to the model time start time t0.
 ![Model/Physical time domain](./figs/time_domain.png)
