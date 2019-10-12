@@ -25,6 +25,7 @@
     pflotran_in_file   = '[pflotran_in_dir]/pflotran.in'
     pflotran_para_file = '[pflotran_in_dir]/parameter_prior.h5'
     pflotran_out_file  = '[pflotran_out_dir]/pflotranR[ENS].h5'
+    pflotran_checkpoint_file = '[pflotran_out_dir]/pflotran-restart.chk'
     /
 
 &data_file_nml
@@ -55,7 +56,8 @@
     convert_nc_template_file   = '[utils_dir]/convert_nc_template.f90'
     csv_to_nc_file             = '[utils_dir]/csv2nc.py'
     to_dartqty_file            = '[utils_dir]/list2dartqty.py'
-    prep_pflotran_input_file   = '[utils_dir]/prepare_pflotran_input.py'
+    prep_pflotran_inputdeck_file = '[utils_dir]/prepare_pflotran_inputdeck.py'
+    prep_pflotran_para_file    = '[utils_dir]/prepare_pflotran_parameterprior.py'
     prep_convert_nc_file       = '[utils_dir]/prepare_convert_nc.py'
     prep_prior_nc_file         = '[utils_dir]/prepare_prior_nc.py'
     prep_inputnml_file         = '[utils_dir]/prepare_input_nml.py'

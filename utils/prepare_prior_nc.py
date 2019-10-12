@@ -11,8 +11,6 @@ import f90nml
 import numpy as np
 from netCDF4 import num2date, date2num, Dataset
 
-# TODO: A perturbation and a true value should be both generated based on the provided error.
-
 ###############################
 # Parameters
 ###############################

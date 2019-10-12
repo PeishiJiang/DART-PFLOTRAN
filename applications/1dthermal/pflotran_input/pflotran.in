@@ -5,6 +5,9 @@ SIMULATION
   PROCESS_MODELS
     SUBSURFACE_FLOW FLOW
       MODE TH
+        OPTIONS 
+            REVERT_PARAMETERS_ON_RESTART 
+        / 
 #      OPTIONS
 #	REVERT_PARAMETERS_ON_RESTART
 #      /
@@ -12,6 +15,11 @@ SIMULATION
   /
   CHECKPOINT
   /
+  RESTART 
+    FILENAME /Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/pflotran_output/pflotran-restart.chk 
+    REALIZATION_DEPENDENT 
+    RESET_TO_TIME_ZERO 
+  / 
 #  RESTART
 #    FILENAME 1dthermal-restart.chk
 #    REALIZATION_DEPENDENT
@@ -69,7 +77,7 @@ END
 #=========================== material properties ==============================
 MATERIAL_PROPERTY Alluvium
   ID 1
-  POROSITY DBASE_VALUE POROSITY
+  POROSITY 0.43
   TORTUOSITY 1.d0
   ROCK_DENSITY 2.65d3
   CHARACTERISTIC_CURVES default
@@ -78,7 +86,7 @@ MATERIAL_PROPERTY Alluvium
   /
   SPECIFIC_HEAT 9.20d2
   THERMAL_CONDUCTIVITY_DRY 0.7163971
-  THERMAL_CONDUCTIVITY_WET DBASE_VALUE THERMAL_CONDUCTIVITY
+  THERMAL_CONDUCTIVITY_WET 0.93
 END
 
 #=========================== characteristic curves ============================
@@ -97,10 +105,9 @@ OUTPUT
   /
 
 
- SNAPSHOT_FILE
-   PERIODIC TIME 259200 s
-   FORMAT HDF5 SINGLE_FILE
- /
+SNAPSHOT_FILE
+  FORMAT HDF5 SINGLE_FILE
+/
 
 
 #  OBSERVATION_FILE
@@ -181,7 +188,7 @@ FLOW_CONDITION initial
     TEMPERATURE dirichlet
   /
   PRESSURE 101325.d0
-  TEMPERATURE 5.508779d0
+  TEMPERATURE 2.6700865d0
 END
 
 

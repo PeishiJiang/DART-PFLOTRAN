@@ -46,8 +46,8 @@ set APP_WORK_DIR = `GET_ITEM app_work_dir $CONFIG_NML`   # the location of the e
 # Get the MPI information
 @ NCORE_DA = `GET_ITEM ncore_da $CONFIG_NML`   # the number of cores used in DA
 @ NCORE_PF = `GET_ITEM ncore_pf $CONFIG_NML`   # the number of cores used in PFLOTRAN simulation
-#set MPI_RUN = `GET_ITEM mpi_exe $CONFIG_NML`   # the location of the executable MPI
-set MPI_RUN = mpirun   # the location of the executable MPI
+set MPI_RUN = `GET_ITEM mpi_exe_da $CONFIG_NML`   # the location of the executable MPI
+#set MPI_RUN = mpirun   # the location of the executable MPI
 
 # Get the time information
 set MODEL_TIME    = `GET_ITEM current_model_time $CONFIG_NML`  # the current model time (day)
@@ -80,7 +80,6 @@ echo "Start the first assimilation at the current model time $MODEL_TIME [day] .
 echo ""
 if ($NCORE_DA == 1) then
   $FILTER_EXE  || exit 1
-# TODO parallel usage of DART filter
 else
 #  $MPI_RUN -np $NCORE_DA -nolocal $FILTER_EXE || exit 1
   $MPI_RUN -np $NCORE_DA $FILTER_EXE || exit 1
@@ -168,7 +167,6 @@ while ($EXCEEDS_OBS_TIME == ".false.")
   echo ""
   if ($NCORE_DA == 1) then
     $FILTER_EXE  || exit 1
-  # TODO parallel usage of DART filter
   else
     $MPI_RUN -np $NCORE_DA $FILTER_EXE || exit 1
     wait

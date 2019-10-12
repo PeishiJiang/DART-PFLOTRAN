@@ -3,10 +3,8 @@
 # Author: Peishi Jiang
 
 import os
-import re
 import sys
 import h5py
-import shutil
 import f90nml
 import numpy as np
 from netCDF4 import num2date, date2num, Dataset
@@ -20,16 +18,37 @@ configs         = f90nml.read(config_nml_file)
 
 pflotran_in_file    = configs["file_cfg"]["pflotran_in_file"]
 pflotran_para_file  = configs["file_cfg"]["pflotran_para_file"]
+pflotran_checkpoint_file = configs["file_cfg"]["pflotran_checkpoint_file"]
 dart_posterior_file = configs["file_cfg"]["dart_posterior_nc_file"]
 dart_output_list    = configs["file_cfg"]["dart_output_list_file"]
+model_time_list     = configs["time_cfg"]["model_time_list"]
+
+if not isinstance(model_time_list, list):
+    model_time_list = [model_time_list]
+
 para_set            = configs["obspara_set_cfg"]["para_set"]
+para_min_set        = configs["obspara_set_cfg"]["para_min_set"]
+para_max_set        = configs["obspara_set_cfg"]["para_max_set"]
+para_mean_set       = configs["obspara_set_cfg"]["para_mean_set"]
+para_std_set        = configs["obspara_set_cfg"]["para_std_set"]
+para_dist_set       = configs["obspara_set_cfg"]["para_dist_set"]
 nens                = configs["da_cfg"]["nens"]
 
 if not isinstance(para_set, list):
-    para_set = [para_set]
+    para_set      = [para_set]
+    para_min_set  = [para_min_set]
+    para_max_set  = [para_max_set]
+    para_mean_set = [para_mean_set]
+    para_std_set  = [para_std_set]
+    para_dist_set = [para_dist_set]
+
+# Check whether this is the first time to update pflotran input files
+first_time_update = True if len(model_time_list) <= 2 else False
 
 ###############################
-# Update the running time in PFLOTRAN.in
+# Update the following in PFLOTRAN.in
+# (1) The model running time
+# (2) The restart file config
 ###############################
 # Get the current model time and assimilation window from config.nml
 assim_window_days    = configs["da_cfg"]["assim_window_days"]
@@ -47,9 +66,20 @@ os.remove(pflotran_in_file)
 
 # Update the model run time based on the assimilation window
 with open(pflotran_in_file, 'w') as f:
-    for i,s in enumerate(pflotranin):
+    for i, s in enumerate(pflotranin):
         if "FINAL_TIME" in s:
             pflotranin[i] = "  FINAL_TIME {} sec".format(assim_window)+"\n"
+        if "SUBSURFACE_FLOW" in s and "MODE" in pflotranin[i+1] and first_time_update:
+            pflotranin.insert(i+2, "        OPTIONS \n")
+            pflotranin.insert(i+3, "            REVERT_PARAMETERS_ON_RESTART \n")
+            pflotranin.insert(i+4, "        / \n")
+        if "CHECKPOINT" in s and "/" in pflotranin[i+1] and first_time_update:
+            pflotranin.insert(i+2, "  RESTART \n")
+            pflotranin.insert(i+3, "    FILENAME " + pflotran_checkpoint_file + " \n")
+            pflotranin.insert(i+4, "    REALIZATION_DEPENDENT \n")
+            pflotranin.insert(i+5, "    RESET_TO_TIME_ZERO \n")
+            pflotranin.insert(i+6, "  / \n")
+
     f.writelines(pflotranin)
 
 

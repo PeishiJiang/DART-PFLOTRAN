@@ -3,7 +3,7 @@
 config_file=$1
 
 exeprg_str=`grep -A 50 exe_cfg $config_file | grep pflotran_exe`
-mpirun_str=`grep -A 50 exe_cfg $config_file | grep mpi_exe`
+mpirun_str=`grep -A 50 exe_cfg $config_file | grep mpi_exe_pf`
 ncore_str=`grep -A 50 exe_cfg $config_file | grep ncore_pf`
 pflotranin_str=`grep -A 50 file_cfg $config_file | grep pflotran_in_file`
 indir_str=`grep -A 50 other_dir_cfg $config_file | grep pflotran_in_dir`
@@ -20,14 +20,6 @@ mpirun=`echo $mpirun_str | sed -e 's#.*=\(\)#\1#' -e "s/[']//g" -e 's/[[:space:]
 ncore=`echo $ncore_str | sed -e 's#.*=\(\)#\1#' -e "s/[']//g" -e 's/[[:space:]]*//g'`
 ngroup=`echo $ngroup_str | sed -e 's#.*=\(\)#\1#' -e "s/[']//g" -e 's/[[:space:]]*//g'`
 
-#exeprg=$1
-#pflotranin=$2
-#indir=$3
-#outdir=$4
-#nreaz=$5
-#mpirun=$6
-#ncore=$7
-
 #echo $ngroup
 #echo $nreaz
 
@@ -36,6 +28,7 @@ then
 #    $exeprg -pflotranin $pflotranin -stochastic -num_realizations $nreaz -num_groups $ngroup
     $exeprg -pflotranin $pflotranin -stochastic -num_realizations $nreaz -num_groups $ngroup -screen_output off
 else
+#    $mpirun -np $ncore $exeprg -pflotranin $pflotranin -stochastic -num_realizations $nreaz -num_groups $ngroup
     $mpirun -np $ncore $exeprg -pflotranin $pflotranin -stochastic -num_realizations $nreaz -num_groups $ngroup -screen_output off
 fi
 

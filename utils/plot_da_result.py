@@ -14,10 +14,11 @@ from matplotlib import gridspec
 
 # TODO: A more sophisticated OOP architecture will be required in the future to avoid the many-lines coding.
 
+
 class DaResults(object):
 
     def __init__(self, config_nml):
-        """Initializaton: Read in the required configurations from config_nml."""
+        """Initialization: Read in the required configurations from config_nml."""
         # Parse the configuration in Fortran namelist
         if not os.path.isfile(config_nml):
             raise Exception(
@@ -50,7 +51,8 @@ class DaResults(object):
         self.nens                = self.configs["da_cfg"]["nens"]
         self.ntime               = len(self.model_time_list)
         self.model_start_time    = self.model_time_list[0]
-        self.model_end_time      = self.model_time_list[-1] + self.assim_window
+        self.model_end_time      = self.model_time_list[-1]
+        # self.model_end_time      = self.model_time_list[-1] + self.assim_window
 
         # Observation file in NetCDF
         self.obs_nc = self.configs["file_cfg"]["obs_nc_file"]

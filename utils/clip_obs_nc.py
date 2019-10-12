@@ -32,11 +32,13 @@ last_obs_time  = configs["time_cfg"]["last_obs_time_size"]
 
 def oned_clip(data, dmin, dmax):
     """A function for clipping 1D-array data based on dmin and dmax."""
-    if (dmin == -99999) and (dmax == -99999):
+    if dmin > dmax:
+        raise Exception('The lower bound %d should not be larger than the upper bound %d!' % (dmin, dmax))
+    if (dmin == -99999) and (dmax == 99999):
         clipped_ind = np.ones(len(data), dtype=bool)
-    elif (dmin == -99999) and (dmax != -99999):
+    elif (dmin == -99999) and (dmax != 99999):
         clipped_ind = data <= dmax
-    elif (dmin != -99999) and (dmax == -99999):
+    elif (dmin != -99999) and (dmax == 99999):
         clipped_ind = data >= dmin
     else:
         clipped_ind = (data >= dmin) & (data <= dmax)
