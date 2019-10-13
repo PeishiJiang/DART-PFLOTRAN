@@ -21,10 +21,10 @@ from datetime import datetime, timedelta
 config_nml = sys.argv[1]
 configs    = f90nml.read(config_nml)
 
-obs_original = configs["file_cfg"]["obs_raw_file"]        # The original observation file
-obs_nc       = configs["file_cfg"]["obs_nc_original_file"]        # The converted observation file
-obs_error    = configs["da_cfg"]["obs_error"]        # The observation error
-obs_error_type = configs["da_cfg"]["obs_error_type"]        # The observation type
+obs_original    = configs["file_cfg"]["obs_raw_file"]        # The original observation file
+obs_nc          = configs["file_cfg"]["obs_nc_original_file"]        # The converted observation file
+obs_error       = configs["da_cfg"]["obs_error"]        # The observation error
+obs_error_type  = configs["da_cfg"]["obs_error_type"]        # The observation type
 assim_start_str = configs["time_cfg"]["assim_start"]     # The map between the start of observation and spinup time
 
 # Get the reference time
@@ -60,7 +60,7 @@ if obs_error_type == "obsolute":
 elif obs_error_type == "relative":
     errors_var = obs_error * temperature
 else:
-    raise Exception("Unknown observation error type %s" % obs_type)
+    raise Exception("Unknown observation error type %s" % obs_error_type)
 
 # print(temperature.shape)
 

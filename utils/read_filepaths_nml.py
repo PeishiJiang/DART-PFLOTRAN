@@ -36,21 +36,29 @@ def read_filepaths_nml(app_dir, dart_pf_dir):
             continue
         for key, value in nml[nml_item].items():
             if "[obs_type_dir]" in value:
-                files_cfg[key] = value.replace("[obs_type_dir]", dirs_cfg["obs_type_dir"])
+                files_cfg[key] = value.replace("[obs_type_dir]",
+                                               dirs_cfg["obs_type_dir"])
             elif "[app_work_dir]" in value:
-                files_cfg[key] = value.replace("[app_work_dir]", dirs_cfg["app_work_dir"])
+                files_cfg[key] = value.replace("[app_work_dir]",
+                                               dirs_cfg["app_work_dir"])
             elif "[pflotran_in_dir]" in value:
-                files_cfg[key] = value.replace("[pflotran_in_dir]", dirs_cfg["pflotran_in_dir"])
+                files_cfg[key] = value.replace("[pflotran_in_dir]",
+                                               dirs_cfg["pflotran_in_dir"])
             elif "[pflotran_out_dir]" in value:
-                files_cfg[key] = value.replace("[pflotran_out_dir]", dirs_cfg["pflotran_out_dir"])
+                files_cfg[key] = value.replace("[pflotran_out_dir]",
+                                               dirs_cfg["pflotran_out_dir"])
             elif "[dart_data_dir]" in value:
-                files_cfg[key] = value.replace("[dart_data_dir]", dirs_cfg["dart_data_dir"])
+                files_cfg[key] = value.replace("[dart_data_dir]",
+                                               dirs_cfg["dart_data_dir"])
             elif "[obs_kind_dir]" in value:
-                files_cfg[key] = value.replace("[obs_kind_dir]", dirs_cfg["obs_kind_dir"])
+                files_cfg[key] = value.replace("[obs_kind_dir]",
+                                               dirs_cfg["obs_kind_dir"])
             elif "[utils_dir]" in value:
-                files_cfg[key] = value.replace("[utils_dir]", dirs_cfg["utils_dir"])
+                files_cfg[key] = value.replace("[utils_dir]",
+                                               dirs_cfg["utils_dir"])
             elif "[dart_work_dir]" in value:
-                files_cfg[key] = value.replace("[dart_work_dir]", dirs_cfg["dart_work_dir"])
+                files_cfg[key] = value.replace("[dart_work_dir]",
+                                               dirs_cfg["dart_work_dir"])
             else:
                 raise Exception("Unknown value: %s" % value)
 

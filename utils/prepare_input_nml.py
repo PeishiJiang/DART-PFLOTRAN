@@ -27,13 +27,11 @@ DART_DIR    = directories["dart_dir"]
 if not os.path.isfile(input_nml_template_file):
     raise Exception("The file %s does not exists!" % input_nml_template_file)
 
-
 ###############################
 # Read the namelist information
 ###############################
 # Get the input namelists
 added_namelist = input_nml_dict.keys()
-
 
 ###############################
 # Read the namelist information from
@@ -59,7 +57,7 @@ for name in added_namelist:
 for name in nml.keys():
     nml_ele = nml[name]
     for item, value in nml_ele.items():
-        if not isinstance(value,str):
+        if not isinstance(value, str):
             continue
         if "[app_dir]" in value:
             nml_ele[item] = value.replace("[app_dir]", APP_DIR)

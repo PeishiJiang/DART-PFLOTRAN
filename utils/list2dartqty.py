@@ -8,8 +8,10 @@ import sys
 import f90nml
 import numpy as np
 
+
 def intersection(lst1, lst2):
     return list(set(lst1) & set(lst2))
+
 
 ########################
 # Parameters
@@ -28,14 +30,14 @@ if isinstance(obs_set, str):
 if isinstance(para_set, str):
     para_set = [para_set]
 
-pflotran_set  = obs_set + para_set
+pflotran_set = obs_set + para_set
 
 # obs_kind_template = '../obs_kind/DEFAULT_obs_kind_mod_template.F90'
 
 # Parse the PFLOTRAN variables and get DART variable quantities
-p = re.compile('[A-Z_]+')
+p            = re.compile('[A-Z_]+')
 pflotran_set = [p.search(v).group() for v in pflotran_set]
-dart_set     = ['QTY_PFLOTRAN_'+v for v in pflotran_set]
+dart_set     = ['QTY_PFLOTRAN_' + v for v in pflotran_set]
 dart_ind_set = []
 
 ########################
@@ -49,7 +51,7 @@ os.remove(obs_kind_file)
 
 n_line = len(data)
 existing_dart_set = []
-dart_set_unique   = np.copy(dart_set)
+dart_set_unique = np.copy(dart_set)
 
 count = False
 finished_add = False
@@ -61,7 +63,8 @@ with open(obs_kind_file, 'w') as f:
         line = data[i]
 
         # Start to count the avaiable PFLOTRAN variables
-        if not finished_add and line.startswith("! PFLOTRAN -- Added by Peishi"):
+        if not finished_add and line.startswith(
+                "! PFLOTRAN -- Added by Peishi"):
             count = True
             f.write(line)
             continue
@@ -71,57 +74,64 @@ with open(obs_kind_file, 'w') as f:
             f.write(line)
             continue
         # Get the current available PFLOTRAN variables
-        elif count and not line.startswith("integer, parameter, public ::") and not line == "\n":
+        elif count and not line.startswith(
+                "integer, parameter, public ::") and not line == "\n":
             dart_var = line.split()[0]
             last_dartvar = dart_var
-            num_qty      = int(p2.search(line).group())
+            num_qty = int(p2.search(line).group())
             last_num_qty = num_qty
             existing_dart_set.append(dart_var)
-            if  (", &\n" not in line) and (not all(elem in existing_dart_set for elem in dart_set)):
-            # change the line of the last current PFLOTRAN variable, i.e., adding ', &\n'
+            if (", &\n" not in line) and (not all(elem in existing_dart_set
+                                                  for elem in dart_set)):
+                # change the line of the last current PFLOTRAN variable, i.e., adding ', &\n'
                 line = line[:-1] + ", &\n"
             f.write(line)
             continue
         # End of getting the current PFLOTRAN variables in DART and do the following
         elif count and line == "\n":
-        # Get the unique variables in our list
+            # Get the unique variables in our list
             dart_set_inters = intersection(dart_set, existing_dart_set)
-            dart_set_unique = list(set(dart_set)-set(dart_set_inters))
-        # Add these unique variables to our DEFAULT_obs_kind_mod.f90 file
+            dart_set_unique = list(set(dart_set) - set(dart_set_inters))
+            # Add these unique variables to our DEFAULT_obs_kind_mod.f90 file
             for j in range(len(dart_set_unique)):
                 num_qty = num_qty + 1
-                if j == len(dart_set_unique)-1:
-                    f.write("  "+dart_set_unique[j]+"  = "+str(num_qty)+"\n")
+                if j == len(dart_set_unique) - 1:
+                    f.write("  " + dart_set_unique[j] + "  = " + str(num_qty) +
+                            "\n")
                 else:
-                    f.write("  "+dart_set_unique[j]+"  = "+str(num_qty)+", &\n")
+                    f.write("  " + dart_set_unique[j] + "  = " + str(num_qty) +
+                            ", &\n")
                 dart_ind_set.append(num_qty)
             count = False
             f.write("\n")
             f.write("\n")
-            f.write("integer, parameter :: max_defined_quantities = "+str(num_qty)+"\n")
+            f.write("integer, parameter :: max_defined_quantities = " +
+                    str(num_qty) + "\n")
             finished_add = True
             count = False
             # print(last_dartvar)
             continue
 
         # Skip this line since it has already been written
-        if finished_add and line.startswith("integer, parameter :: max_defined_quantities"):
+        if finished_add and line.startswith(
+                "integer, parameter :: max_defined_quantities"):
             continue
 
         # Add the variable quantity definition
-        if finished_add and line.startswith("obs_kind_names("+str(last_num_qty)+")"):
+        if finished_add and line.startswith("obs_kind_names(" +
+                                            str(last_num_qty) + ")"):
             # print(line)
             f.write(line)
             for j in range(len(dart_set_unique)):
                 dt_ind = dart_ind_set[j]
                 dt_var = dart_set_unique[j]
-                f.write("obs_kind_names("+str(dt_ind)+")"+" = obs_kind_type("+dt_var+", '"+dt_var+"')\n")
+                f.write("obs_kind_names(" + str(dt_ind) + ")" +
+                        " = obs_kind_type(" + dt_var + ", '" + dt_var + "')\n")
             f.write("\n")
             continue
 
         # For other cases, just write the line
         f.write(line)
-
 
 if len(dart_ind_set) > 0:
     print("The added DART variable quantities names and indices are ...")
@@ -138,7 +148,8 @@ print("Finished generating the %s..." % obs_kind_file)
 with open(obs_type_file, 'w') as f:
     f.write('! BEGIN DART PREPROCESS KIND LIST\n')
     for i in range(len(dart_set)):
-        f.write("!"+pflotran_set[i]+",  "+dart_set[i]+", COMMON_CODE\n")
+        f.write("!" + pflotran_set[i] + ",  " + dart_set[i] +
+                ", COMMON_CODE\n")
     f.write('! END DART PREPROCESS KIND LIST\n')
 
 print("Finished generating the %s..." % obs_type_file)

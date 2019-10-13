@@ -6,7 +6,6 @@ assimilation window in the config.nml and input.nml"""
 import sys
 import f90nml
 
-
 ###############################
 # Parameters
 ###############################
@@ -30,11 +29,10 @@ assim_window_seconds  = configs["da_cfg"]["assim_window_seconds"]
 # Get the last_obs_time in days
 last_obs_time = last_obs_time_days + float(last_obs_time_seconds) / 86400.
 
-
 ###############################
 # Check if the updated current_model_time exceeds the last_obs_time
 ###############################
-current_model_time += assim_window_days + float(assim_window_seconds)/86400.
+current_model_time += assim_window_days + float(assim_window_seconds) / 86400.
 if current_model_time >= (last_obs_time - 1e-8):
     configs["time_cfg"]["exceeds_obs_time"] = True
 
@@ -42,7 +40,6 @@ if current_model_time >= (last_obs_time - 1e-8):
     # Save them
     ###############################
     configs.write(config_nml_file, force=True)
-
 
 else:
     ###############################

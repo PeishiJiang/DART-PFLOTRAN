@@ -1,6 +1,10 @@
 .DS_Store
 *.swp
 .ipynb_checkpoints
+.fortls*
+.vscode
+.idea
+*.code-workspace
 
 /work/*.o
 /work/*.mod

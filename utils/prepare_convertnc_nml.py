@@ -21,6 +21,6 @@ if os.path.exists(nml_file):
 
 with open(nml_file, "w") as f:
     f.write("&convert_nc_nml\n")
-    f.write("    netcdf_file = '"+nc_file+"'\n")
-    f.write("    out_file  = '"+dart_obs_file+"'\n")
+    f.write("    netcdf_file = '" + nc_file + "'\n")
+    f.write("    out_file  = '" + dart_obs_file + "'\n")
     f.write(" /\n")
