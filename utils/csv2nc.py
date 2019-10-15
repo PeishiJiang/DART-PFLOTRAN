@@ -69,66 +69,69 @@ else:
 ###############################
 if os.path.isfile(obs_nc):
     warnings.warn("The following file already exists: %s" % obs_nc)
-else:
-    root_nc = Dataset(obs_nc, 'w')
+    os.remove(obs_nc)
 
-    # Create the dimension
-    # Here, the data points are saved in two dimensions:
-    #    -- time    -- location
-    time = root_nc.createDimension('time', ntime)
-    loc  = root_nc.createDimension('location', nloc)
+root_nc = Dataset(obs_nc, 'w')
 
-    # Write the values
-    times = root_nc.createVariable('time', 'f8', ('time',))
-    xloc = root_nc.createVariable('x_location', 'f8', ('location',))
-    yloc = root_nc.createVariable('y_location', 'f8', ('location',))
-    zloc = root_nc.createVariable('z_location', 'f8', ('location',))
-    # locs  = root_nc.createVariable('location', 'f8', ('location',3))
+# Create the dimension
+# Here, the data points are saved in two dimensions:
+#    -- time    -- location
+time = root_nc.createDimension('time', ntime)
+loc  = root_nc.createDimension('location', nloc)
 
-    # Create the attributes
-    zloc.units, zloc.type  = 'm', 'dimension_value'
-    yloc.units, yloc.type  = 'm', 'dimension_value'
-    xloc.units, xloc.type  = 'm', 'dimension_value'
-    # times.units    = 'seconds since 2017-04-01 00:00:00'
-    # times.units    = 'days since 2017-04-01 00:00:00'
-    # times.calendar = 'gregorian'
-    # times.type     = 'dimension_value'
-    # times[:] = date2num(dates,units=times.units,calendar=times.calendar)
+# Write the values
+times = root_nc.createVariable('time', 'f8', ('time',))
+xloc = root_nc.createVariable('x_location', 'f8', ('location',))
+yloc = root_nc.createVariable('y_location', 'f8', ('location',))
+zloc = root_nc.createVariable('z_location', 'f8', ('location',))
+# locs  = root_nc.createVariable('location', 'f8', ('location',3))
 
-    times.calendar = 'None'
-    times.units    = 'days'
-    times.type     = 'dimension_value'
-    times[:]       = dates_ref_values
+# Create the attributes
+zloc.units, zloc.type  = 'm', 'dimension_value'
+yloc.units, yloc.type  = 'm', 'dimension_value'
+xloc.units, xloc.type  = 'm', 'dimension_value'
+# times.units    = 'seconds since 2017-04-01 00:00:00'
+# times.units    = 'days since 2017-04-01 00:00:00'
+# times.calendar = 'gregorian'
+# times.type     = 'dimension_value'
+# times[:] = date2num(dates,units=times.units,calendar=times.calendar)
 
-    # Write coordinates values
-    xloc[:] = np.zeros(nloc)
-    yloc[:] = np.zeros(nloc)
-    zloc[:] = z_set
+times.calendar = 'None'
+times.units    = 'days'
+times.type     = 'dimension_value'
+times[:]       = dates_ref_values
 
-    # Write the perturbed observations of variable information
-    # Missing value is assigned as -99999 as the fill_value
-    vargrp  = root_nc.createVariable(
-        varname='TEMPERATURE',
-        datatype='f8',
-        # dimensions=('time','location'),
-        dimensions=('location', 'time'),
-        fill_value=missing_value)
-    vargrp.unit = 'C'
-    vargrp[:]   = temperature.T
-    vargrp.type = 'observation_value'
+print(times[:])
 
-    # Write the true value of variable information
-    # Missing value is assigned as -99999 as the fill_value
-    vargrp  = root_nc.createVariable(
-        varname='TEMPERATURE_ERR',
-        datatype='f8',
-        # dimensions=('time','location'),
-        dimensions=('location', 'time'),
-        fill_value=missing_value)
-    vargrp.unit = 'C'
-    vargrp[:]   = errors_var.T
-    vargrp.type = 'observation_err_value'
+# Write coordinates values
+xloc[:] = np.zeros(nloc)
+yloc[:] = np.zeros(nloc)
+zloc[:] = z_set
 
-    root_nc.close()
+# Write the perturbed observations of variable information
+# Missing value is assigned as -99999 as the fill_value
+vargrp  = root_nc.createVariable(
+    varname='TEMPERATURE',
+    datatype='f8',
+    # dimensions=('time','location'),
+    dimensions=('location', 'time'),
+    fill_value=missing_value)
+vargrp.unit = 'C'
+vargrp[:]   = temperature.T
+vargrp.type = 'observation_value'
 
-    print("Finished converting raw observation in NetCDF format...")
+# Write the true value of variable information
+# Missing value is assigned as -99999 as the fill_value
+vargrp  = root_nc.createVariable(
+    varname='TEMPERATURE_ERR',
+    datatype='f8',
+    # dimensions=('time','location'),
+    dimensions=('location', 'time'),
+    fill_value=missing_value)
+vargrp.unit = 'C'
+vargrp[:]   = errors_var.T
+vargrp.type = 'observation_err_value'
+
+root_nc.close()
+
+print("Finished converting raw observation in NetCDF format...")

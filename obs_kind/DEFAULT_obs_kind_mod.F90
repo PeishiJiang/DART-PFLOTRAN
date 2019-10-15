@@ -483,10 +483,51 @@ integer, parameter, public :: &
   QTY_PFLOTRAN_POROSITY  = 369, &
   QTY_PFLOTRAN_LIQUID_SATURATION  = 370, &
   QTY_PFLOTRAN_LIQUID_PRESSURE  = 371, &
-  QTY_PFLOTRAN_FLOW_FLUX  = 372
+  QTY_PFLOTRAN_FLOW_FLUX  = 372, &
+  QTY_PFLOTRAN_THERMAL_CONDUCTIVITY  = 373
 
 
-integer, parameter :: max_defined_quantities = 372
+integer, parameter :: max_defined_quantities = 373
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -917,6 +958,47 @@ obs_kind_names(369) = obs_kind_type(QTY_PFLOTRAN_POROSITY, 'QTY_PFLOTRAN_POROSIT
 obs_kind_names(370) = obs_kind_type(QTY_PFLOTRAN_LIQUID_SATURATION, 'QTY_PFLOTRAN_LIQUID_SATURATION')
 obs_kind_names(371) = obs_kind_type(QTY_PFLOTRAN_LIQUID_PRESSURE, 'QTY_PFLOTRAN_LIQUID_PRESSURE')
 obs_kind_names(372) = obs_kind_type(QTY_PFLOTRAN_FLOW_FLUX, 'QTY_PFLOTRAN_FLOW_FLUX')
+obs_kind_names(373) = obs_kind_type(QTY_PFLOTRAN_THERMAL_CONDUCTIVITY, 'QTY_PFLOTRAN_THERMAL_CONDUCTIVITY')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

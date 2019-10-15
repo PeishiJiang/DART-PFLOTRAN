@@ -18,7 +18,6 @@ SIMULATION
   RESTART 
     FILENAME /Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/pflotran_output/pflotran-restart.chk 
     REALIZATION_DEPENDENT 
-    RESET_TO_TIME_ZERO 
   / 
 #  RESTART
 #    FILENAME 1dthermal-restart.chk
@@ -107,6 +106,7 @@ OUTPUT
 
 SNAPSHOT_FILE
   FORMAT HDF5 SINGLE_FILE
+  PERIODIC TIME 300.0d0 sec
 /
 
 
@@ -124,7 +124,7 @@ END
 
 #=========================== times ============================================
 TIME
-  FINAL_TIME 1200 sec
+  FINAL_TIME 61200.0 sec
   INITIAL_TIMESTEP_SIZE 6.0d1  min
   MAXIMUM_TIMESTEP_SIZE 6.0d1 min
   MINIMUM_TIMESTEP_SIZE 1.0d-2 sec

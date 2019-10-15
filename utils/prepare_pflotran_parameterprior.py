@@ -25,6 +25,7 @@ para_max_set       = configs["obspara_set_cfg"]["para_max_set"]
 para_mean_set      = configs["obspara_set_cfg"]["para_mean_set"]
 para_std_set       = configs["obspara_set_cfg"]["para_std_set"]
 para_dist_set      = configs["obspara_set_cfg"]["para_dist_set"]
+para_resampled_set = configs["obspara_set_cfg"]["para_resampled_set"]
 nens               = configs["da_cfg"]["nens"]
 
 if not isinstance(para_set, list):
@@ -34,6 +35,9 @@ if not isinstance(para_set, list):
     para_mean_set = [para_mean_set]
     para_std_set  = [para_std_set]
     para_dist_set = [para_dist_set]
+
+if not isinstance(para_resampled_set, list):
+    para_resampled_set = [para_resampled_set]
 
 ###############################
 # Generate ensemble parameters

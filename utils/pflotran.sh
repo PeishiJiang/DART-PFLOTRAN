@@ -23,8 +23,7 @@ ngroup=`echo $ngroup_str | sed -e 's#.*=\(\)#\1#' -e "s/[']//g" -e 's/[[:space:]
 #echo $ngroup
 #echo $nreaz
 
-if [ $ncore -eq 1 ]
-then
+if [ $ncore -eq 1 ]; then
 #    $exeprg -pflotranin $pflotranin -stochastic -num_realizations $nreaz -num_groups $ngroup
     $exeprg -pflotranin $pflotranin -stochastic -num_realizations $nreaz -num_groups $ngroup -screen_output off
 else
