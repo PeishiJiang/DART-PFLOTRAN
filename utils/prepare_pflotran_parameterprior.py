@@ -72,6 +72,12 @@ for i in range(len(para_set)):
     else:
         raise Exception("unknown distribution %s" % dist)
 
+    # Exclude those values outside of [minv, maxv]
+    if minv != -99999:
+        values[values < minv] = minv
+    if maxv != 99999:
+        values[values > maxv] = maxv
+
     h5dset = h5file.create_dataset(varn, data=values)
 
 h5file.close()

@@ -124,7 +124,7 @@ END
 
 #=========================== times ============================================
 TIME
-  FINAL_TIME 61200.0 sec
+  FINAL_TIME 403199.99999999953 sec
   INITIAL_TIMESTEP_SIZE 6.0d1  min
   MAXIMUM_TIMESTEP_SIZE 6.0d1 min
   MINIMUM_TIMESTEP_SIZE 1.0d-2 sec

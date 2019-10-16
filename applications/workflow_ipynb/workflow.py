@@ -1,17 +1,5 @@
 # To add a new cell, type '#%%'
 # To add a new markdown cell, type '#%% [markdown]'
-#%% Change working directory from the workspace root to the ipynb file location. Turn this addition off with the DataScience.changeDirOnImportExport setting
-# ms-python.python added
-import os
-# try:
-# 	os.chdir(os.path.join(os.getcwd(), '../../../../var/folders/8s/jpsxsy6n4wz7wpq0x6l1jdq1366v7q/T'))
-# 	print(os.getcwd())
-# except:
-# 	pass
-#%%
-# from IPython import get_ipython
-import subprocess
-
 #%% [markdown]
 # # Overview
 # The **objective** of this notebook is to present the workflow of conducting data assimilation on [PFLOTRAN](https://www.pflotran.org/) by using [DART](https://www.image.ucar.edu/DAReS/DART/). Briefly, the procedures are as follows:
@@ -35,6 +23,7 @@ import time
 import shutil
 import pickle
 import f90nml
+import subprocess
 from math import floor
 from datetime import datetime, timedelta
 # get_ipython().run_line_magic('load_ext', 'autoreload')
@@ -50,20 +39,25 @@ from datetime import datetime, timedelta
 
 #%%
 # MPI settings
-mpi_exe_da  = 'srun'  # The location of mpirun
-mpi_exe_pf  = 'srun'
-ncore_da = 40                       # The number of MPI cores used by DART
-ncore_pf = 40                       # The number of MPI cores used by PFLOTRAN
-ngroup_pf= 40                       # The number of group used by stochastic running in PFLOTRAN
+mpi_exe_da  = '/usr/local/bin/mpirun'  # The location of mpirun
+mpi_exe_pf  = '/Users/jian449/Codes/petsc/arch-darwin-c-opt/bin/mpirun'
+ncore_da = 4                       # The number of MPI cores used by DART
+ncore_pf = 4                       # The number of MPI cores used by PFLOTRAN
+ngroup_pf= 4                       # The number of group used by stochastic running in PFLOTRAN
 
 # PFLOTRAN executable
-pflotran_exe  = '/global/project/projectdirs/m1800/pin/pflotran-haswell/src/pflotran/pflotran'
+# pflotran_exe  = '/global/project/projectdirs/m1800/pin/pflotran-haswell/src/pflotran/pflotran'
+pflotran_exe  = '/Users/jian449/Codes/pflotran/src/pflotran/pflotran'
 
 # Main directory names
-temp_app_dir = "/global/cscratch1/sd/peishi89/DART_PFLOTRAN_APP/applications/template"          # The template for application folder
-app_dir      = "/global/cscratch1/sd/peishi89/DART_PFLOTRAN_APP/applications/1dthermal"          # The application folder name
-dart_dir     = "/global/homes/p/peishi89/DART/manhattan"
-dart_pf_dir  = "/global/homes/p/peishi89/DART/manhattan/models/pflotran"     # The dart pflotran utitlity folder name
+temp_app_dir = "/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/template"          # The template for application folder
+app_dir      = "/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal_1var"          # The application folder name
+dart_dir     = "/Users/jian449/Codes/DART/manhattan"
+dart_pf_dir  = "/Users/jian449/Codes/DART/manhattan/models/pflotran"     # The dart pflotran utitlity folder name
+# temp_app_dir = "/global/cscratch1/sd/peishi89/DART_PFLOTRAN_APP/applications/template"          # The template for application folder
+# app_dir      = "/global/cscratch1/sd/peishi89/DART_PFLOTRAN_APP/applications/1dthermal"          # The application folder name
+# dart_dir     = "/global/homes/p/peishi89/DART/manhattan"
+# dart_pf_dir  = "/global/homes/p/peishi89/DART/manhattan/models/pflotran"     # The dart pflotran utitlity folder name
 #temp_app_dir = os.path.abspath("../template" )          # The template for application folder
 #app_dir      = os.path.abspath("../1dthermal/")          # The application folder name
 #dart_dir     = os.path.abspath("../../../../")
@@ -119,13 +113,19 @@ para_set = ['FLOW_FLUX']
 
 # The statistics of the parameters
 # The index order follows para_set
-para_min_set  = [-5.0]  # The minimum values (-99999 means no lower bound limit)
-para_max_set  = [5.0]  # The maximum values (99999 means no upper bound limit)
+# para_min_set  = [-10.0, 0.01, 0.5]  # The minimum values (-99999 means no lower bound limit)
+# para_max_set  = [10.0, 0.7, 2.5]  # The maximum values (99999 means no upper bound limit)
+# para_mean_set = [0.0, 0.3, 1.5]  # The mean values
+# para_std_set  = [0.5, 0.1, 0.5]  # The standard deviation values
+# para_dist_set = ["normal", "normal", "normal"]  # The assumed distribution to be sampled
+para_min_set  = [-10.0]  # The minimum values (-99999 means no lower bound limit)
+para_max_set  = [10.0]  # The maximum values (99999 means no upper bound limit)
 para_mean_set = [0.0]  # The mean values
 para_std_set  = [0.5]  # The standard deviation values
-para_dist_set = ["uniform"]  # The assumed distribution to be sampled
+para_dist_set = ["normal"]  # The assumed distribution to be sampled
 
 para_resampled_set = ['FLOW_FLUX']   # The parameters to be resampled at each time step
+# para_resampled_set = ['']   # The parameters to be resampled at each time step
 
 configs["obspara_set_cfg"] = {"obs_set": obs_set, "para_set": para_set,
                               "para_min_set": para_min_set, "para_max_set": para_max_set,
@@ -165,7 +165,8 @@ time_cfg["current_model_time"] = 0.     # model start time zero (after spinup)
 time_cfg["model_time_list"]    = [0.]   # the list of model time
 
 # Map between assimilation start time and model start time
-assim_start = datetime(2017,4,1,0,0,0)
+obs_start   = datetime(2017,4,1,0,0,0) 
+assim_start = obs_start + timedelta(days=time_cfg["spinup_length"]) # assimilation time should be after the model spinup
 time_cfg["assim_start"] = assim_start.strftime("%Y-%m-%d %H:%M:%S")
 
 # The maximum time for observation
@@ -173,7 +174,7 @@ time_cfg["first_obs_time_days"]    = 0
 time_cfg["first_obs_time_seconds"] = 0
 time_cfg["first_obs_time_size"] = time_cfg["first_obs_time_days"]+float(time_cfg["first_obs_time_seconds"])/86400. # day
 time_cfg["last_obs_time_days"]    = 0
-time_cfg["last_obs_time_seconds"] = 1200*10
+time_cfg["last_obs_time_seconds"] = 3600*100
 time_cfg["last_obs_time_size"] = time_cfg["last_obs_time_days"]+float(time_cfg["last_obs_time_seconds"])/86400. # day
 
 # Whether the model time exceeds the last observation
@@ -191,14 +192,14 @@ da_cfg = {}
 # More need to be added...
 # And later on, these DA setting can be saved in a txt or pickel file for further loading
 da_cfg["obs_reso"]  = 300.0      # observation resolution (second)
-da_cfg["nens"]      = 40         # number of ensembles
-da_cfg["obs_error"] = 0.01       # the observation error
+da_cfg["nens"]      = 100         # number of ensembles
+da_cfg["obs_error"] = 0.02       # the observation error
 da_cfg["obs_error_type"] = "relative" # the type of observation error (i.e., relative and absolute)
 
 # Assimilation time window time_step_days+time_step_seconds
 # Assimilation window
 da_cfg["assim_window_days"]    = 0     # assimilation time window/step (day)
-da_cfg["assim_window_seconds"] = 1200  # assimilation time window/step  (second)
+da_cfg["assim_window_seconds"] = 3600  # assimilation time window/step  (second)
 da_cfg["assim_window_size"] = da_cfg["assim_window_days"]+float(da_cfg["assim_window_seconds"])/86400. # day
 
 # Assimilation start and end time
@@ -216,9 +217,23 @@ configs["da_cfg"] = da_cfg
 # **Save all the configurations in pickle**
 
 #%%
+configs.write(config_file, force=True)
+
+#%% [markdown]
+# ****************
+# **Clean up the work, PFLOTRAN output, and DART in/out directories**
+shutil.rmtree(dirs_cfg["dart_data_dir"], ignore_errors=True)
+shutil.rmtree(dirs_cfg["pflotran_out_dir"], ignore_errors=True)
+shutil.rmtree(dirs_cfg["app_work_dir"], ignore_errors=True)
+os.mkdir(dirs_cfg["dart_data_dir"])
+os.mkdir(dirs_cfg["pflotran_out_dir"])
+os.mkdir(dirs_cfg["app_work_dir"])
+# subprocess.run("rm -f {}/*".format(dirs_cfg["dart_data_dir"]), shell=True, check=True)
+# subprocess.run("rm -f {}/*".format(dirs_cfg["pflotran_out_dir"]), shell=True, check=True)
+# subprocess.run("rm -f {}/*".format(dirs_cfg["app_work_dir"]), shell=True, check=True)
+
+#%%
 # Save it in a temperory pickle file or namelist???
-# with open(config_file, 'wb') as f:
-#     pickle.dump(configs, f)
 configs.write(config_file, force=True)
 
 #%% [markdown]
@@ -595,8 +610,6 @@ quickbuild = files_cfg["quickbuild_csh"]
 
 
 #%%
-# cd $1
-# csh $2 $3 -mpi
 print("\n")
 print("------------------------------------------------------------")
 print("Generate all the executables...")

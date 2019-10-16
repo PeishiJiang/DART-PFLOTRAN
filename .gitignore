@@ -30,4 +30,5 @@
 
 /applications/workflow_ipynb/*.png
 
+/utils/__pycache__/*
 /utils/__pycache__

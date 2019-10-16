@@ -174,10 +174,17 @@ for j in range(len(para_set)):
         else:
             raise Exception("unknown distribution %s" % var_dist)
 
-    else:
-        if var_dist.lower() == 'uniform' or var_dist.lower() == 'truncated_normal':
+        # Exclude those values outside of [minv, maxv]
+        if var_min != -99999:
             posterior[j, :][posterior[j, :] < var_min] = var_min
+        if var_max != 99999:
             posterior[j, :][posterior[j, :] > var_max] = var_max
+
+    else:
+        # Exclude those values outside of [minv, maxv]
+        # if var_dist.lower() == 'uniform' or var_dist.lower() == 'truncated_normal':
+        posterior[j, :][posterior[j, :] < var_min] = var_min
+        posterior[j, :][posterior[j, :] > var_max] = var_max
 
     f_para[varn][:] = posterior[j, :]
     # f_para[varn][:] = posterior[j, :]

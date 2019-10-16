@@ -37,7 +37,7 @@ if not isinstance(para_set, list):
 
 #TODO should it be read from the observation file?
 # from temperature.csv
-therm_loc = [-0.01, -0.05, -0.65]  # unit:m, location of thermistor, negative means below the riverbed
+# therm_loc = [-0.01, -0.05, -0.65]  # unit:m, location of thermistor, negative means below the riverbed
 # Configure model domain and PFLOTRAN running environment
 hz = 0.64  # unit: m, height of the 1-D column
 
