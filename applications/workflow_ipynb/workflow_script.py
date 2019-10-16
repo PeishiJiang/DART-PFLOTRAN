@@ -3,13 +3,14 @@
 #%% Change working directory from the workspace root to the ipynb file location. Turn this addition off with the DataScience.changeDirOnImportExport setting
 # ms-python.python added
 import os
-try:
-	os.chdir(os.path.join(os.getcwd(), '../../../../var/folders/8s/jpsxsy6n4wz7wpq0x6l1jdq1366v7q/T'))
-	print(os.getcwd())
-except:
-	pass
+# try:
+# 	os.chdir(os.path.join(os.getcwd(), '../../../../var/folders/8s/jpsxsy6n4wz7wpq0x6l1jdq1366v7q/T'))
+# 	print(os.getcwd())
+# except:
+# 	pass
 #%%
-from IPython import get_ipython
+# from IPython import get_ipython
+import subprocess
 
 #%% [markdown]
 # # Overview
@@ -36,8 +37,8 @@ import pickle
 import f90nml
 from math import floor
 from datetime import datetime, timedelta
-get_ipython().run_line_magic('load_ext', 'autoreload')
-get_ipython().run_line_magic('autoreload', '2')
+# get_ipython().run_line_magic('load_ext', 'autoreload')
+# get_ipython().run_line_magic('autoreload', '2')
 
 #%% [markdown]
 # ****************
@@ -49,21 +50,24 @@ get_ipython().run_line_magic('autoreload', '2')
 
 #%%
 # MPI settings
-mpi_exe_da  = '/usr/local/bin/mpirun'  # The location of mpirun
-# mpi_exe_da  = '/Users/jian449/Codes/petsc/arch-darwin-c-opt/bin/mpirun'
-mpi_exe_pf  = '/Users/jian449/Codes/petsc/arch-darwin-c-opt/bin/mpirun'
-ncore_da = 4                        # The number of MPI cores used by DART
-ncore_pf = 4                        # The number of MPI cores used by PFLOTRAN
-ngroup_pf= 4                        # The number of group used by stochastic running in PFLOTRAN
+mpi_exe_da  = 'srun'  # The location of mpirun
+mpi_exe_pf  = 'srun'
+ncore_da = 40                       # The number of MPI cores used by DART
+ncore_pf = 40                       # The number of MPI cores used by PFLOTRAN
+ngroup_pf= 40                       # The number of group used by stochastic running in PFLOTRAN
 
 # PFLOTRAN executable
-pflotran_exe  = '/Users/jian449/Codes/pflotran/src/pflotran/pflotran'
+pflotran_exe  = '/global/project/projectdirs/m1800/pin/pflotran-haswell/src/pflotran/pflotran'
 
 # Main directory names
-temp_app_dir = os.path.abspath("../template" )          # The template for application folder
-app_dir      = os.path.abspath("../1dthermal/")          # The application folder name
-dart_dir     = os.path.abspath("../../../../")
-dart_pf_dir  = os.path.join(dart_dir, "models/pflotran")     # The dart pflotran utitlity folder name
+temp_app_dir = "/global/cscratch1/sd/peishi89/DART_PFLOTRAN_APP/applications/template"          # The template for application folder
+app_dir      = "/global/cscratch1/sd/peishi89/DART_PFLOTRAN_APP/applications/1dthermal"          # The application folder name
+dart_dir     = "/global/homes/p/peishi89/DART/manhattan"
+dart_pf_dir  = "/global/homes/p/peishi89/DART/manhattan/models/pflotran"     # The dart pflotran utitlity folder name
+#temp_app_dir = os.path.abspath("../template" )          # The template for application folder
+#app_dir      = os.path.abspath("../1dthermal/")          # The application folder name
+#dart_dir     = os.path.abspath("../../../../")
+#dart_pf_dir  = os.path.join(dart_dir, "models/pflotran")     # The dart pflotran utitlity folder name
 
 # configs = {}
 configs = f90nml.namelist.Namelist()
@@ -244,7 +248,11 @@ prep_pflotran_parameterprior = files_cfg["prep_pflotran_para_file"]
 #     - <span style="background-color:lightgreen">obs_resolution, obs_error, nens, spinup_length, spinup</span>: data assimilation settings (i.e., observation timestep, observation error, number of ensemble, whether it is spinup, **to be revised**)
 
 #%%
-get_ipython().run_cell_magic('script', 'bash -s "$prep_pflotran_parameterprior" "$config_file"', 'python $1 $2')
+# get_ipython().run_cell_magic('script', 'bash -s "$prep_pflotran_parameterprior" "$config_file"', 'python $1 $2')
+print("\n")
+print("------------------------------------------------------------")
+print("Prepare PFLOTRAN ensemble parameter values...")
+subprocess.run("python {} {}".format(prep_pflotran_parameterprior, config_file), shell=True, check=True)
 
 #%% [markdown]
 # ****************
@@ -258,11 +266,15 @@ get_ipython().run_cell_magic('script', 'bash -s "$prep_pflotran_parameterprior" 
 #     - <span style="background-color:lightgreen">obs_resolution, obs_error, nens, spinup_length, spinup</span>: data assimilation settings (i.e., observation timestep, observation error, number of ensemble, whether it is spinup, **to be revised**)
 
 #%%
-get_ipython().run_cell_magic('script', 'bash -s "$prep_pflotran_inputdeck" "$config_file"', 'python $1 $2')
+# get_ipython().run_cell_magic('script', 'bash -s "$prep_pflotran_inputdeck" "$config_file"', 'python $1 $2')
+print("\n")
+print("------------------------------------------------------------")
+print("Prepare PFLOTRAN input deck...")
+subprocess.run("python {} {}".format(prep_pflotran_inputdeck, config_file), shell=True, check=True)
 
 
 #%%
-get_ipython().run_cell_magic('script', 'bash -s "$pflotran_in"', 'cat $1')
+# get_ipython().run_cell_magic('script', 'bash -s "$pflotran_in"', 'cat $1')
 
 #%% [markdown]
 # <a id='pflotran_spinup'></a>
@@ -283,7 +295,10 @@ pflotran_sh, pflotran_out_dir = files_cfg["pflotran_sh_file"], dirs_cfg["pflotra
 
 
 #%%
-get_ipython().run_cell_magic('script', 'bash -s "$pflotran_sh" "$config_file"', '$1 $2\n# %%script bash -s "$pflotran_sh" "$pflotran_exe" "$pflotran_in" "$pflotran_in_dir" "$pflotran_out_dir" "$nens" "$mpi_exe" "$ncore_pf"\n# $1 $2 $3 $4 $5 $6 $7 $8')
+print("\n")
+print("------------------------------------------------------------")
+print("Model spinup and run the forward simulation in the first assimilation time window...")
+subprocess.run("{} {}".format(pflotran_sh, config_file), shell=True, check=True)
 
 #%% [markdown]
 # ****************
@@ -324,11 +339,15 @@ to_dartqty, obs_type_file = files_cfg["to_dartqty_file"], files_cfg["obs_type_fi
 
 
 #%%
-get_ipython().run_cell_magic('script', 'bash -s "$to_dartqty" "$config_file"', 'python $1 $2 $3 $4')
+# get_ipython().run_cell_magic('script', 'bash -s "$to_dartqty" "$config_file"', 'python $1 $2 $3 $4')
+print("\n")
+print("------------------------------------------------------------")
+print("Add PFLOTRAN variables to DEFAULT_obs_kind_mod.F90 if necessary...")
+subprocess.run("python {} {}".format(to_dartqty, config_file), shell=True, check=True)
 
 
 #%%
-get_ipython().run_cell_magic('script', 'bash -s "$obs_type_file"', 'cat $1')
+# get_ipython().run_cell_magic('script', 'bash -s "$obs_type_file"', 'cat $1')
 
 #%% [markdown]
 # ## Generate  DART input namelists in ```input.nml```
@@ -417,7 +436,11 @@ prep_inputnml = files_cfg["prep_inputnml_file"]
 
 
 #%%
-get_ipython().run_cell_magic('script', 'bash -s  "$prep_inputnml" "$config_file"', 'python $1 $2')
+# get_ipython().run_cell_magic('script', 'bash -s  "$prep_inputnml" "$config_file"', 'python $1 $2')
+print("\n")
+print("------------------------------------------------------------")
+print("Generate input.nml file...")
+subprocess.run("python {} {}".format(prep_inputnml, config_file), shell=True, check=True)
 
 #%% [markdown]
 # ## Convert the model output to DART prior NetCDF and  generate the preliminary DART posterior NetCDF file
@@ -457,11 +480,16 @@ prep_prior_nc, dart_prior_template = files_cfg["prep_prior_nc_file"], files_cfg[
 
 
 #%%
-get_ipython().run_cell_magic('script', 'bash -s "$prep_prior_nc" "$config_file"', 'python $1 $2')
+# get_ipython().run_cell_magic('script', 'bash -s "$prep_prior_nc" "$config_file"', 'python $1 $2')
+print("\n")
+print("------------------------------------------------------------")
+print("Convert PFLOTRAN ensemble outputs and parameters to DART prior NetCDF file...")
+subprocess.run("python {} {}".format(prep_prior_nc, config_file), shell=True, check=True)
 
 
 #%%
-get_ipython().run_cell_magic('script', 'bash -s "$dart_prior_template"', 'ncdump -h $1')
+# get_ipython().run_cell_magic('script', 'bash -s "$dart_prior_template"', 'ncdump -h $1')
+
 
 #%% [markdown]
 # <a id='observationconvertion'></a>
@@ -490,11 +518,16 @@ csv_to_nc, obs_nc_original = files_cfg["csv_to_nc_file"], files_cfg["obs_nc_orig
 
 
 #%%
-get_ipython().run_cell_magic('script', 'bash -s "$csv_to_nc" "$config_file"', 'python $1 $2')
+# get_ipython().run_cell_magic('script', 'bash -s "$csv_to_nc" "$config_file"', 'python $1 $2')
+print("\n")
+print("------------------------------------------------------------")
+print("Convert raw observation data to NetCDF file...")
+subprocess.run("python {} {}".format(csv_to_nc, config_file), shell=True, check=True)
 
 
 #%%
-get_ipython().run_cell_magic('script', 'bash -s "$obs_nc_original"', 'ncdump -h $1')
+# get_ipython().run_cell_magic('script', 'bash -s "$obs_nc_original"', 'ncdump -h $1')
+
 
 #%% [markdown]
 # ***************
@@ -508,11 +541,16 @@ clip_obs_nc, obs_nc = files_cfg["clip_obs_nc_file"], files_cfg["obs_nc_file"]
 
 
 #%%
-get_ipython().run_cell_magic('script', 'bash -s "$clip_obs_nc" "$config_file"', 'python $1 $2')
+# get_ipython().run_cell_magic('script', 'bash -s "$clip_obs_nc" "$config_file"', 'python $1 $2')
+print("\n")
+print("------------------------------------------------------------")
+print("Clip the NetCDF file based on the defined spatial and temporal domains...")
+subprocess.run("python {} {}".format(clip_obs_nc, config_file), shell=True, check=True)
 
 
 #%%
-get_ipython().run_cell_magic('script', 'bash -s "$obs_nc"', 'ncdump -h $1')
+# get_ipython().run_cell_magic('script', 'bash -s "$obs_nc"', 'ncdump -h $1')
+
 
 #%% [markdown]
 # ***************
@@ -526,11 +564,16 @@ prep_convert_nc, convert_nc_file = files_cfg["prep_convert_nc_file"], files_cfg[
 
 
 #%%
-get_ipython().run_cell_magic('script', 'bash -s "$prep_convert_nc" "$config_file"', 'python $1 $2')
+# get_ipython().run_cell_magic('script', 'bash -s "$prep_convert_nc" "$config_file"', 'python $1 $2')
+print("\n")
+print("------------------------------------------------------------")
+print("Prepare the convert_nc.f90 based on the list of observation variables to be assimilated...")
+subprocess.run("python {} {}".format(prep_convert_nc, config_file), shell=True, check=True)
 
 
 #%%
-get_ipython().run_cell_magic('script', 'bash -s "$convert_nc_file"', 'head $1')
+# get_ipython().run_cell_magic('script', 'bash -s "$convert_nc_file"', 'head $1')
+
 
 #%% [markdown]
 # <a id='dart_executables'></a>
@@ -554,6 +597,10 @@ quickbuild = files_cfg["quickbuild_csh"]
 #%%
 # cd $1
 # csh $2 $3 -mpi
+print("\n")
+print("------------------------------------------------------------")
+print("Generate all the executables...")
+subprocess.run("cd {}; csh {} {} -mpi".format(dart_work_dir, quickbuild, app_work_dir), shell=True, check=True)
 
 #%% [markdown]
 # ## Convert the observation file in NetCDF to DART format
@@ -564,11 +611,15 @@ convert_nc, obs_dart = files_cfg["convert_nc_exe"], files_cfg["obs_dart_file"]
 
 
 #%%
-get_ipython().run_cell_magic('script', 'bash -s "$app_work_dir" "$convert_nc"', 'cd $1\n$2')
+# get_ipython().run_cell_magic('script', 'bash -s "$app_work_dir" "$convert_nc"', 'cd $1\n$2')
+print("\n")
+print("------------------------------------------------------------")
+print("Conver the NetCDF observation files to DART format...")
+subprocess.run("cd {}; {}".format(app_work_dir, convert_nc), shell=True, check=True)
 
 
 #%%
-get_ipython().run_cell_magic('script', 'bash -s "$obs_dart"', 'head -n100 $1')
+# get_ipython().run_cell_magic('script', 'bash -s "$obs_dart"', 'head -n100 $1')
 
 #%% [markdown]
 # ## Check ```model_mod.F90``` interface file
@@ -579,7 +630,8 @@ model_mod_check = files_cfg["model_mod_check_exe"]
 
 
 #%%
-get_ipython().run_cell_magic('script', 'bash -s "$app_work_dir" "$model_mod_check"', 'cd $1\n$2')
+# get_ipython().run_cell_magic('script', 'bash -s "$app_work_dir" "$model_mod_check"', 'cd $1\n$2')
+
 
 #%% [markdown]
 # <a id='run_dart_pflotran'></a>
@@ -587,13 +639,18 @@ get_ipython().run_cell_magic('script', 'bash -s "$app_work_dir" "$model_mod_chec
 # In this section, run the shell script to couple DART and PFLOTRAN
 
 #%%
-dart_work_dir = dirs_cfg["dart_work_dir"]
-inputnml_file = files_cfg["input_nml_file"]
-start_time = time.time()
+dart_work_dir     = dirs_cfg["dart_work_dir"]
+run_DART_PFLOTRAN = files_cfg["run_filter_csh"]
+inputnml_file     = files_cfg["input_nml_file"]
+start_time        = time.time()
 
 
 #%%
-get_ipython().run_cell_magic('script', 'bash -s "$dart_work_dir" "$inputnml_file" "$config_file"', 'cd $1\ncsh run_DART_PFLOTRAN.csh $2 $3')
+# get_ipython().run_cell_magic('script', 'bash -s "$dart_work_dir" "$inputnml_file" "$config_file"', 'cd $1\ncsh run_DART_PFLOTRAN.csh $2 $3')
+print("\n")
+print("------------------------------------------------------------")
+print("Assimilation starts here...")
+subprocess.run("cd {}; csh {} {} {}".format(dart_work_dir, run_DART_PFLOTRAN, inputnml_file, config_file), shell=True, check=True)
 
 
 #%%

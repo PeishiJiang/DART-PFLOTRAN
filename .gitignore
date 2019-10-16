@@ -29,3 +29,5 @@
 !/applications/1dthermal/work/.gitignore
 
 /applications/workflow_ipynb/*.png
+
+/utils/__pycache__

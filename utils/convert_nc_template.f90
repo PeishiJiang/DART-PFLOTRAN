@@ -267,6 +267,8 @@ oerr = 1.000_r8
 ! 0 is 'must use', 1 is good, no reason not to use it.
 qc = 1.0_r8
 
+nused = 0
+
 timeloop: do n = 1, ntime
 
   ! compute time of observation
@@ -292,13 +294,16 @@ timeloop: do n = 1, ntime
   !end if
 
 locloop: do k = 1, nloc
-    do i = 1, nused
-        ! Check for duplicate observations
-      if ( xloc(k)  == xlocu(i) .and. &
-           yloc(k)  == ylocu(i) .and. &
-           zloc(k)  == zlocu(i) .and. &
-           tobs(n)  == tobsu(i) ) cycle locloop
-    end do
+
+   ! Check for duplicate observations
+   if ( nused > 0 ) then
+      do i = 1, nused
+         if ( xloc(k)  == xlocu(i) .and. &
+            yloc(k)  == ylocu(i) .and. &
+            zloc(k)  == zlocu(i) .and. &
+            tobs(n)  == tobsu(i) ) cycle locloop
+      end do
+   end if
 
 !$TODO Add here 9
 ! Add each observation value

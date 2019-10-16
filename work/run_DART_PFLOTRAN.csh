@@ -81,8 +81,8 @@ echo ""
 if ($NCORE_DA == 1) then
   $FILTER_EXE  || exit 1
 else
-#  $MPI_RUN -np $NCORE_DA -nolocal $FILTER_EXE || exit 1
-  $MPI_RUN -np $NCORE_DA $FILTER_EXE || exit 1
+#  $MPI_RUN -n $NCORE_DA -nolocal $FILTER_EXE || exit 1
+  $MPI_RUN -n $NCORE_DA $FILTER_EXE || exit 1
   wait
 endif
 
@@ -168,7 +168,7 @@ while ($EXCEEDS_OBS_TIME == ".false.")
   if ($NCORE_DA == 1) then
     $FILTER_EXE  || exit 1
   else
-    $MPI_RUN -np $NCORE_DA $FILTER_EXE || exit 1
+    $MPI_RUN -n $NCORE_DA $FILTER_EXE || exit 1
     wait
   endif
 

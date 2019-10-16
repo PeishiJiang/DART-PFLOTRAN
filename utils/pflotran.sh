@@ -28,7 +28,12 @@ if [ $ncore -eq 1 ]; then
     $exeprg -pflotranin $pflotranin -stochastic -num_realizations $nreaz -num_groups $ngroup -screen_output off
 else
 #    $mpirun -np $ncore $exeprg -pflotranin $pflotranin -stochastic -num_realizations $nreaz -num_groups $ngroup
-    $mpirun -np $ncore $exeprg -pflotranin $pflotranin -stochastic -num_realizations $nreaz -num_groups $ngroup -screen_output off
+    $mpirun -n $ncore $exeprg -pflotranin $pflotranin -stochastic -num_realizations $nreaz -num_groups $ngroup -screen_output off
+fi
+
+echo $?
+if [ $? -ne 0 ]; then
+    exit $?
 fi
 
 # Move the PFLOTRAN outputs files to output folder
