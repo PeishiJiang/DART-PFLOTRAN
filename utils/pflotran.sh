@@ -36,6 +36,12 @@ if [ $? -ne 0 ]; then
     exit $?
 fi
 
+# Remove the original PFLOTRAN outputs files in output folder
+cd $outdir
+rm pflotran*.h5
+rm pflotran*.chk
+rm pflotran*.out
+
 # Move the PFLOTRAN outputs files to output folder
 cd $indir
 mv pflotran*.h5 $outdir

@@ -81,10 +81,10 @@ with open(pflotran_in_file, 'w') as f:
             pflotranin[i + 6] = "  TEMPERATURE " + str(np.mean(
                 obs_data[0, :])) + "d0" + "\n"
         if 'THERMAL_CONDUCTIVITY_WET' in s:
-            if 'thermal conductivity' in para_set:
+            if 'THERMAL_CONDUCTIVITY' in para_set:
                 pflotranin[i] = "  THERMAL_CONDUCTIVITY_WET DBASE_VALUE THERMAL_CONDUCTIVITY" + "\n"
         if 'POROSITY' in s:
-            if 'porosity' in para_set:
+            if 'POROSITY' in para_set:
                 pflotranin[i] = "  POROSITY DBASE_VALUE POROSITY" + "\n"
         # if "FILENAME 1dthermal" in s:
         #     pflotranin[i-1] = "  RESTART"+"\n"

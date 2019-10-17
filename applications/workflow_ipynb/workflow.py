@@ -24,7 +24,8 @@ import shutil
 import pickle
 import f90nml
 import subprocess
-from math import floor
+import numpy as np
+from math import floor, ceil
 from datetime import datetime, timedelta
 # get_ipython().run_line_magic('load_ext', 'autoreload')
 # get_ipython().run_line_magic('autoreload', '2')
@@ -41,9 +42,9 @@ from datetime import datetime, timedelta
 # MPI settings
 mpi_exe_da  = '/usr/local/bin/mpirun'  # The location of mpirun
 mpi_exe_pf  = '/Users/jian449/Codes/petsc/arch-darwin-c-opt/bin/mpirun'
-ncore_da = 4                       # The number of MPI cores used by DART
-ncore_pf = 4                       # The number of MPI cores used by PFLOTRAN
-ngroup_pf= 4                       # The number of group used by stochastic running in PFLOTRAN
+ncore_da = 2                       # The number of MPI cores used by DART
+ncore_pf = 10                      # The number of MPI cores used by PFLOTRAN
+ngroup_pf= 10                       # The number of group used by stochastic running in PFLOTRAN
 
 # PFLOTRAN executable
 # pflotran_exe  = '/global/project/projectdirs/m1800/pin/pflotran-haswell/src/pflotran/pflotran'
@@ -51,7 +52,7 @@ pflotran_exe  = '/Users/jian449/Codes/pflotran/src/pflotran/pflotran'
 
 # Main directory names
 temp_app_dir = "/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/template"          # The template for application folder
-app_dir      = "/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal_1var"          # The application folder name
+app_dir      = "/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal"          # The application folder name
 dart_dir     = "/Users/jian449/Codes/DART/manhattan"
 dart_pf_dir  = "/Users/jian449/Codes/DART/manhattan/models/pflotran"     # The dart pflotran utitlity folder name
 # temp_app_dir = "/global/cscratch1/sd/peishi89/DART_PFLOTRAN_APP/applications/template"          # The template for application folder
@@ -174,7 +175,7 @@ time_cfg["first_obs_time_days"]    = 0
 time_cfg["first_obs_time_seconds"] = 0
 time_cfg["first_obs_time_size"] = time_cfg["first_obs_time_days"]+float(time_cfg["first_obs_time_seconds"])/86400. # day
 time_cfg["last_obs_time_days"]    = 0
-time_cfg["last_obs_time_seconds"] = 3600*100
+time_cfg["last_obs_time_seconds"] = 3600*5
 time_cfg["last_obs_time_size"] = time_cfg["last_obs_time_days"]+float(time_cfg["last_obs_time_seconds"])/86400. # day
 
 # Whether the model time exceeds the last observation
@@ -208,6 +209,10 @@ da_cfg["assim_start_seconds"] = int((time_cfg["current_model_time"] - da_cfg["as
 da_cfg["assim_end_days"]      = int(floor(time_cfg["current_model_time"]+da_cfg["assim_window_size"]))
 da_cfg["assim_end_seconds"]   = int((time_cfg["current_model_time"]+da_cfg["assim_window_size"] - 
                                      da_cfg["assim_end_days"])*86400-1)
+
+# Compute the number of time steps
+# print(np.ceil((time_cfg["last_obs_time_size"] - time_cfg["first_obs_time_size"]) / da_cfg["assim_window_size"]))
+da_cfg["ntimestep"] = ceil((time_cfg["last_obs_time_size"] - time_cfg["first_obs_time_size"]) / da_cfg["assim_window_size"])
 
 # Save them to configs
 configs["da_cfg"] = da_cfg
@@ -649,11 +654,12 @@ model_mod_check = files_cfg["model_mod_check_exe"]
 #%% [markdown]
 # <a id='run_dart_pflotran'></a>
 # # Step 6: Run DART and PFLOTRAN
-# In this section, run the shell script to couple DART and PFLOTRAN
+# In this section, run the shell script to couple DART and PFLOTRAN.
 
 #%%
 dart_work_dir     = dirs_cfg["dart_work_dir"]
 run_DART_PFLOTRAN = files_cfg["run_filter_csh"]
+concatenate_output = files_cfg["concatenate_dart_output_file"]
 inputnml_file     = files_cfg["input_nml_file"]
 start_time        = time.time()
 
@@ -665,6 +671,13 @@ print("------------------------------------------------------------")
 print("Assimilation starts here...")
 subprocess.run("cd {}; csh {} {} {}".format(dart_work_dir, run_DART_PFLOTRAN, inputnml_file, config_file), shell=True, check=True)
 
+
+#%%
+# get_ipython().run_cell_magic('script', 'bash -s "$dart_work_dir" "$inputnml_file" "$config_file"', 'cd $1\ncsh run_DART_PFLOTRAN.csh $2 $3')
+print("\n")
+print("------------------------------------------------------------")
+print("Concatenate the prior and posterior at all times ...")
+subprocess.run("python {} {}".format(concatenate_output, config_file), shell=True, check=True)
 
 #%%
 end_time = time.time()

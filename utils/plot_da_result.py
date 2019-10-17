@@ -27,9 +27,11 @@ class DaResults(object):
         self.configs    = f90nml.read(config_nml)
 
         # DART prior and posterior files
-        self.dart_posterior_file = self.configs["file_cfg"]["dart_posterior_nc_file"]
-        self.dart_prior_file     = self.configs["file_cfg"]["dart_prior_nc_file"]
-        self.dart_prior_template = self.configs["file_cfg"]["dart_prior_template_file"]
+        self.dart_posterior_file     = self.configs["file_cfg"]["dart_posterior_nc_file"]
+        self.dart_prior_file         = self.configs["file_cfg"]["dart_prior_nc_file"]
+        self.dart_posterior_all_file = self.configs["file_cfg"]["dart_posterior_nc_all_file"]
+        self.dart_prior_all_file     = self.configs["file_cfg"]["dart_prior_nc_all_file"]
+        self.dart_prior_template     = self.configs["file_cfg"]["dart_prior_template_file"]
 
         # Variables
         self.obs_set  = self.configs["obspara_set_cfg"]["obs_set"]
@@ -69,7 +71,7 @@ class DaResults(object):
         self.nx, self.ny, self.nz = len(self.x_loc), len(self.y_loc), len(self.z_loc)
         root_template.close()
 
-    def setup(self):
+    def setup(self, from_concatenated=False):
         """Read in the observation, prior, and posterior data"""
         # Get the parameters
         nvar, nens, ntime = self.nvar, self.nens, self.ntime
@@ -81,37 +83,61 @@ class DaResults(object):
         model_start_time = self.model_start_time
         model_end_time   = self.model_end_time
 
-        dart_prior_file, dart_posterior_file = self.dart_prior_file, self.dart_posterior_file
+        dart_prior_file , dart_posterior_file = self.dart_prior_file, self.dart_posterior_file
+        if from_concatenated: 
+            dart_prior_all_file, dart_posterior_all_file = self.dart_prior_all_file, self.dart_posterior_all_file
 
         # Read in the prior and posterior data
         prior = np.zeros([nvar, nens, ntime, nz, ny, nx])
         posterior = np.zeros([nvar, nens, ntime, nz, ny, nx])
+
         for i in range(nens):
             ens = i + 1
-            for j in range(ntime):
-                model_time_ind = j + 1
+
+            if from_concatenated:
                 # Prior data
-                prior_nc_file = re.sub(
-                    r"\[ENS\]",
-                    str(ens) + "_time" + str(model_time_ind), dart_prior_file)
-                root_prior = Dataset(prior_nc_file, 'r')
+                dart_prior_all = re.sub(r"\[ENS\]", str(ens), dart_prior_all_file)
+                root_prior     = Dataset(dart_prior_all, 'r')
                 for k in range(nvar):
-                    varn = pflotran_var_set[k]
+                    varn      = pflotran_var_set[k]
                     prior_var = root_prior.variables[varn][:]
-                    # print(prior_var.shape, nz, ny, nx)
-                    prior[k, i, j, :, :, :] = prior_var
+                    prior[k, i, :, :, :, :] = prior_var
                 root_prior.close()
+
                 # Posterior data
-                posterior_nc_file = re.sub(
-                    r"\[ENS\]",
-                    str(ens) + "_time" + str(model_time_ind),
-                    dart_posterior_file)
-                root_posterior = Dataset(posterior_nc_file, 'r')
+                dart_posterior_all = re.sub(r"\[ENS\]", str(ens), dart_posterior_all_file)
+                root_posterior     = Dataset(dart_posterior_all, 'r')
                 for k in range(nvar):
-                    varn = pflotran_var_set[k]
+                    varn      = pflotran_var_set[k]
                     posterior_var = root_posterior.variables[varn][:]
-                    posterior[k, i, j, :, :, :] = posterior_var
+                    posterior[k, i, :, :, :, :] = posterior_var
                 root_posterior.close()
+
+            else:
+                for j in range(ntime):
+                    model_time_ind = j + 1
+                    # Prior data
+                    prior_nc_file = re.sub(
+                        r"\[ENS\]",
+                        str(ens) + "_time" + str(model_time_ind), dart_prior_file)
+                    root_prior = Dataset(prior_nc_file, 'r')
+                    for k in range(nvar):
+                        varn = pflotran_var_set[k]
+                        prior_var = root_prior.variables[varn][:]
+                        # print(prior_var.shape, nz, ny, nx)
+                        prior[k, i, j, :, :, :] = prior_var
+                    root_prior.close()
+                    # Posterior data
+                    posterior_nc_file = re.sub(
+                        r"\[ENS\]",
+                        str(ens) + "_time" + str(model_time_ind),
+                        dart_posterior_file)
+                    root_posterior = Dataset(posterior_nc_file, 'r')
+                    for k in range(nvar):
+                        varn = pflotran_var_set[k]
+                        posterior_var = root_posterior.variables[varn][:]
+                        posterior[k, i, j, :, :, :] = posterior_var
+                    root_posterior.close()
 
         # TODO: Get the true time data
         # Read in the observation data

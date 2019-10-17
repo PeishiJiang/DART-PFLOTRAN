@@ -9,6 +9,7 @@ import h5py
 import shutil
 import f90nml
 import numpy as np
+from math import ceil, log10
 from netCDF4 import num2date, date2num, Dataset
 
 ###############################
@@ -29,8 +30,12 @@ obs_set             = configs["obspara_set_cfg"]["obs_set"]
 para_set            = configs["obspara_set_cfg"]["para_set"]
 model_time          = float(configs["time_cfg"]["current_model_time"])  # days
 model_time_list     = configs["time_cfg"]["model_time_list"]
+ntimestep           = int(configs["da_cfg"]["ntimestep"])
 assim_window        = float(configs["da_cfg"]["assim_window_size"])  # days
 nens                = configs["da_cfg"]["nens"]
+
+# ndigit = np.ceil(np.log10(ntimestep), dtype=int)
+ndigit = int(ceil(log10(ntimestep)))
 
 # Get the list of all required PFLOTRAN variables
 if isinstance(obs_set, str):
@@ -63,13 +68,24 @@ for f in pflotran_out_file_set:
         raise Exception("The PFLOTRAN output file %s does not exits!" % f)
 
 # Get the file names of all ensembles for DART restart file
+# dart_prior_file_set, dart_posterior_file_set = [], []
 dart_prior_file_set = [
-    re.sub(r"\[ENS\]", str(ens) + "_time" + str(model_time_ind), dart_prior_file)
+    # re.sub(r"\[ENS\]", str(ens) + "_time" + str(model_time_ind), dart_prior_file)
+    re.sub(r"\[ENS\]", str(ens), dart_prior_file)
+    for ens in ens_set
+]
+dart_prior_file_set = [
+    re.sub(r"\[TIME\]", str(model_time_ind).zfill(ndigit), dart_prior_file_each)
+    for dart_prior_file_each in dart_prior_file_set
+]
+dart_posterior_file_set = [
+    # re.sub(r"\[ENS\]", str(ens) + "_time" + str(model_time_ind), dart_posterior_file)
+    re.sub(r"\[ENS\]", str(ens), dart_posterior_file)
     for ens in ens_set
 ]
 dart_posterior_file_set = [
-    re.sub(r"\[ENS\]", str(ens) + "_time" + str(model_time_ind), dart_posterior_file)
-    for ens in ens_set
+    re.sub(r"\[TIME\]", str(model_time_ind).zfill(ndigit), dart_posterior_file_each)
+    for dart_posterior_file_each in dart_posterior_file_set
 ]
 
 ###############################
@@ -204,7 +220,7 @@ for i in range(nens):
     xloc_d   = root_nc_prior.createDimension('x_location', nx)
     yloc_d   = root_nc_prior.createDimension('y_location', ny)
     zloc_d   = root_nc_prior.createDimension('z_location', nz)
-    time_d   = root_nc_prior.createDimension('time', 1)
+    time_d   = root_nc_prior.createDimension('time', None)
     member_d = root_nc_prior.createDimension('member', 1)
 
     # Create the variables
@@ -236,7 +252,7 @@ for i in range(nens):
                 % varn)
             continue
         vargrp = root_nc_prior.createVariable(
-            varn, 'f8', ('z_location', 'y_location', 'x_location'))
+            varn, 'f8', ('time', 'z_location', 'y_location', 'x_location'))
         vargrp.type = 'observation_value'
         vargrp.unit = dart_var_dict[varn]["unit"]
         vargrp[:] = dart_var_dict[varn]["value"]
@@ -256,7 +272,7 @@ for i in range(nens):
     xloc_d   = root_nc_posterior.createDimension('x_location', nx)
     yloc_d   = root_nc_posterior.createDimension('y_location', ny)
     zloc_d   = root_nc_posterior.createDimension('z_location', nz)
-    time_d   = root_nc_posterior.createDimension('time', 1)
+    time_d   = root_nc_posterior.createDimension('time', None)
     member_d = root_nc_posterior.createDimension('member', 1)
 
     # Create the variables
@@ -289,7 +305,7 @@ for i in range(nens):
                 % varn)
             continue
         vargrp = root_nc_posterior.createVariable(
-            varn, 'f8', ('z_location', 'y_location', 'x_location'))
+            varn, 'f8', ('time', 'z_location', 'y_location', 'x_location'))
         vargrp.type = 'observation_value'
         vargrp.unit = dart_var_dict[varn]["unit"]
 
