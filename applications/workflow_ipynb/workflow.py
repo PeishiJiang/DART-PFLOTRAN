@@ -3,7 +3,7 @@
 #%% [markdown]
 # # Overview
 # The **objective** of this notebook is to present the workflow of conducting data assimilation on [PFLOTRAN](https://www.pflotran.org/) by using [DART](https://www.image.ucar.edu/DAReS/DART/). Briefly, the procedures are as follows:
-# 1. [x] [Configuration](#parameter): define directories, file locations, and other parameters
+# - [x] [Configuration](#parameter): define directories, file locations, and other parameters
 # - [x] [PFLOTRAN preparation](#pflotran_prepare): generate PFLOTRAN input files
 # - [x] [PFLOTRAN model spin-up](#pflotran_spinup): conduct model spin-up
 # - [x] [DART files preparation](#dart_prepare): add new DART quantities, prepare DART input namelists, prepare DART prior data, prepare observations in DART format, and check ```model_mod``` interface
@@ -52,7 +52,7 @@ pflotran_exe  = '/Users/jian449/Codes/pflotran/src/pflotran/pflotran'
 
 # Main directory names
 temp_app_dir = "/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/template"          # The template for application folder
-app_dir      = "/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal"          # The application folder name
+app_dir      = "/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal_flux_1month_2"          # The application folder name
 dart_dir     = "/Users/jian449/Codes/DART/manhattan"
 dart_pf_dir  = "/Users/jian449/Codes/DART/manhattan/models/pflotran"     # The dart pflotran utitlity folder name
 # temp_app_dir = "/global/cscratch1/sd/peishi89/DART_PFLOTRAN_APP/applications/template"          # The template for application folder
@@ -175,7 +175,7 @@ time_cfg["first_obs_time_days"]    = 0
 time_cfg["first_obs_time_seconds"] = 0
 time_cfg["first_obs_time_size"] = time_cfg["first_obs_time_days"]+float(time_cfg["first_obs_time_seconds"])/86400. # day
 time_cfg["last_obs_time_days"]    = 0
-time_cfg["last_obs_time_seconds"] = 3600*5
+time_cfg["last_obs_time_seconds"] = 3600*24*29
 time_cfg["last_obs_time_size"] = time_cfg["last_obs_time_days"]+float(time_cfg["last_obs_time_seconds"])/86400. # day
 
 # Whether the model time exceeds the last observation

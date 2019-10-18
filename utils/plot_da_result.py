@@ -8,6 +8,7 @@ import sys
 import f90nml
 import warnings
 import numpy as np
+from math import ceil, log10
 from netCDF4 import Dataset
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
@@ -56,6 +57,7 @@ class DaResults(object):
         self.model_start_time = self.model_time_list[0]
         self.model_end_time   = self.model_time_list[-1]
         # self.model_end_time   = self.model_time_list[-1] + self.assim_window
+        self.ndigit = int(ceil(log10(self.ntime)))
 
         # Observation file in NetCDF
         self.obs_nc = self.configs["file_cfg"]["obs_nc_file"]
@@ -82,6 +84,7 @@ class DaResults(object):
         pflotran_var_set = self.pflotran_var_set
         model_start_time = self.model_start_time
         model_end_time   = self.model_end_time
+        ndigit           = self.ndigit
 
         dart_prior_file , dart_posterior_file = self.dart_prior_file, self.dart_posterior_file
         if from_concatenated: 
@@ -117,9 +120,11 @@ class DaResults(object):
                 for j in range(ntime):
                     model_time_ind = j + 1
                     # Prior data
-                    prior_nc_file = re.sub(
-                        r"\[ENS\]",
-                        str(ens) + "_time" + str(model_time_ind), dart_prior_file)
+                    prior_nc_file = re.sub(r"\[ENS\]", str(ens), dart_prior_file)
+                    prior_nc_file = re.sub(r"\[TIME\]", str(model_time_ind).zfill(ndigit), prior_nc_file)
+                    # prior_nc_file = re.sub(
+                    #     r"\[ENS\]",
+                    #     str(ens) + "_time" + str(model_time_ind), dart_prior_file)
                     root_prior = Dataset(prior_nc_file, 'r')
                     for k in range(nvar):
                         varn = pflotran_var_set[k]
@@ -127,11 +132,14 @@ class DaResults(object):
                         # print(prior_var.shape, nz, ny, nx)
                         prior[k, i, j, :, :, :] = prior_var
                     root_prior.close()
+
                     # Posterior data
-                    posterior_nc_file = re.sub(
-                        r"\[ENS\]",
-                        str(ens) + "_time" + str(model_time_ind),
-                        dart_posterior_file)
+                    posterior_nc_file = re.sub(r"\[ENS\]", str(ens), dart_posterior_file)
+                    posterior_nc_file = re.sub(r"\[TIME\]", str(model_time_ind).zfill(ndigit), posterior_nc_file)
+                    # posterior_nc_file = re.sub(
+                    #     r"\[ENS\]",
+                    #     str(ens) + "_time" + str(model_time_ind),
+                    #     dart_posterior_file)
                     root_posterior = Dataset(posterior_nc_file, 'r')
                     for k in range(nvar):
                         varn = pflotran_var_set[k]

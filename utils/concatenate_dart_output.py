@@ -15,6 +15,7 @@ import numpy as np
 config_nml = sys.argv[1]
 configs = f90nml.read(config_nml)
 
+app_dir                 = configs["main_dir_cfg"]["app_dir"]
 dart_prior_file         = configs["file_cfg"]["dart_prior_nc_file"]
 dart_posterior_file     = configs["file_cfg"]["dart_posterior_nc_file"]
 dart_prior_all_file     = configs["file_cfg"]["dart_prior_nc_all_file"]
@@ -23,11 +24,15 @@ ntimestep               = int(configs["da_cfg"]["ntimestep"])
 model_time_list         = configs["time_cfg"]["model_time_list"]
 nens                    = configs["da_cfg"]["nens"]
 
+dart_inout_dir = os.path.join(app_dir, "dart_inout")
+
 # ndigit = np.ceil(np.log10(ntimestep), dtype=int)
 ndigit = int(ceil(log10(ntimestep)))
 # Use the real number of time steps here
 ntimestep = len(model_time_list)
 
+# Go to the directory
+os.chdir(dart_inout_dir)
 
 ###############################
 # Concatenate all the time steps per ensemble
@@ -37,23 +42,43 @@ for i in range(nens):
 
     # Get the first prior and posterior files
     dart_prior_first     = re.sub(r"\[ENS\]", str(ens), dart_prior_file)
-    dart_prior_first     = re.sub(r"\[TIME\]", str(1).zfill(ndigit), dart_prior_first)
+    dart_prior_first     = re.sub(r"\[TIME\]", "'" + "." * ndigit + "'", dart_prior_first)
     dart_posterior_first = re.sub(r"\[ENS\]", str(ens), dart_posterior_file)
-    dart_posterior_first = re.sub(r"\[TIME\]", str(1).zfill(ndigit), dart_posterior_first)
+    dart_posterior_first = re.sub(r"\[TIME\]", "'" + "." * ndigit + "'", dart_posterior_first)
+
+    dart_prior_first     = os.path.basename(dart_prior_first)
+    dart_posterior_first = os.path.basename(dart_posterior_first)
 
     dart_prior_all     = re.sub(r"\[ENS\]", str(ens), dart_prior_all_file)
     dart_posterior_all = re.sub(r"\[ENS\]", str(ens), dart_posterior_all_file)
 
     # Concatanate the prior data
-    subprocess.run("ncrcat -n {},{},1 {} {}".format(ntimestep, ndigit,
-                                                    dart_prior_first,
-                                                    dart_prior_all),
-                   shell=True,
-                   check=True)
+    # subprocess.run("ls | grep {}".format(dart_prior_first), shell=True, check=True)
+    subprocess.run("ls | grep {} | ncrcat -o {}".format(dart_prior_first, dart_prior_all), shell=True, check=True)
 
     # Concatanate the posterior data
-    subprocess.run("ncrcat -n {},{},1 {} {}".format(ntimestep, ndigit,
-                                                    dart_posterior_first,
-                                                    dart_posterior_all),
-                   shell=True,
-                   check=True)
+    subprocess.run("ls | grep {} | ncrcat -o {}".format(dart_posterior_first, dart_posterior_all), shell=True, check=True)
+
+
+    # # Get the first prior and posterior files
+    # dart_prior_first     = re.sub(r"\[ENS\]", str(ens), dart_prior_file)
+    # dart_prior_first     = re.sub(r"\[TIME\]", str(1).zfill(ndigit), dart_prior_first)
+    # dart_posterior_first = re.sub(r"\[ENS\]", str(ens), dart_posterior_file)
+    # dart_posterior_first = re.sub(r"\[TIME\]", str(1).zfill(ndigit), dart_posterior_first)
+
+    # dart_prior_all     = re.sub(r"\[ENS\]", str(ens), dart_prior_all_file)
+    # dart_posterior_all = re.sub(r"\[ENS\]", str(ens), dart_posterior_all_file)
+
+    # # Concatanate the prior data
+    # subprocess.run("ncrcat -n {},{},1 {} {}".format(ntimestep, ndigit,
+    #                                                 dart_prior_first,
+    #                                                 dart_prior_all),
+    #                shell=True,
+    #                check=True)
+
+    # # Concatanate the posterior data
+    # subprocess.run("ncrcat -n {},{},1 {} {}".format(ntimestep, ndigit,
+    #                                                 dart_posterior_first,
+    #                                                 dart_posterior_all),
+    #                shell=True,
+    #                check=True)
