@@ -47,12 +47,14 @@ pflotran_in_path = dirname(os.path.abspath(pflotran_in_file))
 # print(os.getcwd())
 # print(dirname(os.path.abspath(__file__)))
 
-model_run_time = (spinup_length + assim_window) * 86400.
+# model_run_time = (spinup_length + assim_window) * 86400.
+model_run_time = spinup_length * 86400.
 
 ########################################################
-# Obtain the time information
+# Obtain the boundary information
 ########################################################
 obs_data = np.loadtxt(os.path.join(pflotran_in_path, 'obs_data.dat'), skiprows=1)
+obs_data = obs_data[:, 1]
 
 ########################################################
 # Write the PFLOTRAN input card file
@@ -77,9 +79,9 @@ with open(pflotran_in_file, 'w') as f:
             pflotranin[i + 5] = "\n"
             pflotranin[i + 6] = "  FLUX DBASE_VALUE FLOW_FLUX m/day" + "\n"
         if 'FLOW_CONDITION initial' in s and "TYPE" in pflotranin[i + 1]:
-            # pflotranin[i+6] = "  TEMPERATURE " + str(np.mean(obs.value[0, :])) + "d0" + "\n"
-            pflotranin[i + 6] = "  TEMPERATURE " + str(np.mean(
-                obs_data[0, :])) + "d0" + "\n"
+            # pflotranin[i + 6] = "  TEMPERATURE " + str(np.mean(
+            #     obs_data)) + "d0" + "\n"
+            pflotranin[i + 6] = "  TEMPERATURE 5.444327d0\n"
         if 'THERMAL_CONDUCTIVITY_WET' in s:
             if 'THERMAL_CONDUCTIVITY' in para_set:
                 pflotranin[i] = "  THERMAL_CONDUCTIVITY_WET DBASE_VALUE THERMAL_CONDUCTIVITY" + "\n"

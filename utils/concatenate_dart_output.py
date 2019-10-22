@@ -26,6 +26,10 @@ nens                    = configs["da_cfg"]["nens"]
 
 dart_inout_dir = os.path.join(app_dir, "dart_inout")
 
+# Convert the model_time_list to a list (model_time_list = 0 in the first model tim)
+if not isinstance(model_time_list, list):
+    model_time_list = [model_time_list]
+
 # ndigit = np.ceil(np.log10(ntimestep), dtype=int)
 ndigit = int(ceil(log10(ntimestep)))
 # Use the real number of time steps here
@@ -51,6 +55,10 @@ for i in range(nens):
 
     dart_prior_all     = re.sub(r"\[ENS\]", str(ens), dart_prior_all_file)
     dart_posterior_all = re.sub(r"\[ENS\]", str(ens), dart_posterior_all_file)
+
+    # Remove them first if exists
+    subprocess.run("rm {}".format(dart_prior_all), shell=True) 
+    subprocess.run("rm {}".format(dart_posterior_all), shell=True)
 
     # Concatanate the prior data
     # subprocess.run("ls | grep {}".format(dart_prior_first), shell=True, check=True)

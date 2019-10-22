@@ -3,7 +3,6 @@
 #
 # Author: Peishi Jiang
 
-# TODO Enabled the EnKS-MDA capability
 # TODO If there is no observation in one time window, continue running the model and move to the next time step without the data assimilation
 
 set INPUT_NML  = $1  # the input namelist file required by DART filter
@@ -55,13 +54,19 @@ set LAST_OBS_TIME = `GET_ITEM last_obs_time_size $CONFIG_NML`  # the last observ
 set ASSIM_WINDOW  = `GET_ITEM assim_window_size $CONFIG_NML`   # the assimilation window (day)
 
 # Get the locations of a bunch of files
-set PFLOTRAN_SH           = `GET_ITEM pflotran_sh_file $CONFIG_NML`           # shell script for running PFLOTRAN
-set FILTER_EXE            = `GET_ITEM filter_exe $CONFIG_NML`                 # the executable filter file
-set CONVERT_NC_EXE        = `GET_ITEM convert_nc_exe $CONFIG_NML`             # the executable for generating DART obs
-set PREP_PFLOTRAN_INPUT   = `GET_ITEM prep_pflotran_input_file $CONFIG_NML`   # python script for preparing PFLOTRAN input files
-set PREP_PRIOR_NC         = `GET_ITEM prep_prior_nc $CONFIG_NML`  # python script for converting PFLOTRAN HDF 5 output to DART NetCDF prior data
-set UPDATE_CONFIGNML_TIME = `GET_ITEM update_confignml_time_file $CONFIG_NML` # python script for updating the time data in config.nml
-set UPDATE_PFLOTRAN_INPUT = `GET_ITEM update_pflotran_input_file $CONFIG_NML` # python script for updating PFLOTRAN input files
+set PFLOTRAN_SH                = `GET_ITEM pflotran_sh_file $CONFIG_NML`           # shell script for running PFLOTRAN
+set RUN_PFLOTRAN               = `GET_ITEM run_pflotran_file $CONFIG_NML`           # shell script for running PFLOTRAN
+set FILTER_EXE                 = `GET_ITEM filter_exe $CONFIG_NML`                 # the executable filter file
+set CONVERT_NC_EXE             = `GET_ITEM convert_nc_exe $CONFIG_NML`             # the executable for generating DART obs
+set PREP_PFLOTRAN_INPUT        = `GET_ITEM prep_pflotran_input_file $CONFIG_NML`   # python script for preparing PFLOTRAN input files
+set PREP_PRIOR_NC              = `GET_ITEM prep_prior_nc $CONFIG_NML`  # python script for converting PFLOTRAN HDF 5 output to DART NetCDF prior data
+set UPDATE_DART_OBS_INFLATION  = `GET_ITEM update_dart_obs_inflation_file $CONFIG_NML`  # python script for converting PFLOTRAN HDF 5 output to DART NetCDF prior data
+set UPDATE_CONFIGNML_TIME      = `GET_ITEM update_confignml_time_file $CONFIG_NML` # python script for updating the time data in config.nml
+set UPDATE_PFLOTRAN_INPUT      = `GET_ITEM update_pflotran_input_file $CONFIG_NML` # python script for updating PFLOTRAN input files
+
+# Get the EnKS-MDA iteration step information
+@ ENKSMDA_TOTAL_ITERATIONS   = `GET_ITEM enks_mda_total_iterations $CONFIG_NML` # the total iterations required by EnKS-MDA in each time step
+@ ENKSMDA_CURRENT_ITERATION = `GET_ITEM enks_mda_iteration_step $CONFIG_NML` # the current iteration
 
 
 ##########################################
@@ -70,107 +75,212 @@ set UPDATE_PFLOTRAN_INPUT = `GET_ITEM update_pflotran_input_file $CONFIG_NML` # 
 cd $APP_WORK_DIR
 
 
-##########################################
-# Conduct the data assimilation at time t0
-##########################################
-echo ""
-echo ""
-echo "------------------------------------------------------------"
-echo "Start the first assimilation at the current model time $MODEL_TIME [day] ..."
-echo ""
-if ($NCORE_DA == 1) then
-  $FILTER_EXE  || exit 1
-else
-#  $MPI_RUN -n $NCORE_DA -nolocal $FILTER_EXE || exit 1
-  $MPI_RUN -n $NCORE_DA $FILTER_EXE || exit 1
-  wait
-endif
+# ##########################################
+# # Conduct the data assimilation at time t0
+# ##########################################
+# echo ""
+# echo "------------------------------------------------------------"
+# echo "------------------------------------------------------------"
+# echo "Start the first assimilation at the current model time $MODEL_TIME [day] ..."
+# echo ""
+# if ($NCORE_DA == 1) then
+#   $FILTER_EXE  || exit 1
+# else
+# #  $MPI_RUN -n $NCORE_DA -nolocal $FILTER_EXE || exit 1
+#   $MPI_RUN -n $NCORE_DA $FILTER_EXE || exit 1
+#   wait
+# endif
 
-##########################################
-# Update the model time and observation start/end time
-##########################################
-echo ""
-echo ""
-echo "------------------------------------------------------------"
-echo "Move the time forward ..."
-echo ""
-python $UPDATE_CONFIGNML_TIME $CONFIG_NML $INPUT_NML  || exit 5
-set MODEL_TIME = `GET_ITEM current_model_time $CONFIG_NML`  || exit 6
-set EXCEEDS_OBS_TIME = `GET_ITEM exceeds_obs_time $CONFIG_NML`  || exit 6
+# ##########################################
+# # Continue the rest of MDA at time t0
+# ##########################################
+# while ($ENKSMDA_CURRENT_ITERATION < $ENKSMDA_TOTAL_ITERATIONS)
+
+#   ##########################################
+#   # Step 1 -- Update the inflation in DART observation
+#   ##########################################
+#   echo ""
+#   echo ""
+#   echo "------------------------------------------------------------"
+#   echo "Update the inflation coefficient in DART observation ..."
+#   echo ""
+#   python $UPDATE_DART_OBS_INFLATION $CONFIG_NML  || exit 1
+
+#   ##########################################
+#   # Step 2 -- Update PFLOTRAN input files
+#   # based on DART posterior output
+#   # It includes PFLOTRAN.in and parameter_prior.h5 files
+#   ##########################################
+#   echo ""
+#   echo ""
+#   echo "------------------------------------------------------------"
+#   echo "Update PFLOTRAN input files ..."
+#   echo ""
+#   python $UPDATE_PFLOTRAN_INPUT  $CONFIG_NML || exit 2
+
+#   ##########################################
+#   # Step 3-- Conduct PFLOTRAN forward simulation
+#   # by using PFLOTRAN.sh file
+#   ##########################################
+#   echo ""
+#   echo ""
+#   echo "------------------------------------------------------------"
+#   echo "Conduct the ensemble forward simulation for PFLOTRAN ..."
+#   echo ""
+#   $PFLOTRAN_SH $CONFIG_NML  || exit 3
+
+#   ##########################################
+#   # Step 4 -- Convert the PFLOTRAN output to NetCDF format
+#   ##########################################
+#   echo ""
+#   echo ""
+#   echo "------------------------------------------------------------"
+#   echo "Convert the PFLOTRAN HDF output to DART prior NetCDF data ..."
+#   echo ""
+#   python $PREP_PRIOR_NC $CONFIG_NML  || exit 4
+
+#   ##########################################
+#   # Step 5 -- Data Assimilation
+#   ##########################################
+#   echo ""
+#   echo ""
+#   echo "------------------------------------------------------------"
+#   echo "Start the assimilation at the current model time $MODEL_TIME [day] ..."
+#   echo ""
+#   if ($NCORE_DA == 1) then
+#     $FILTER_EXE  || exit 1
+#   else
+#     $MPI_RUN -n $NCORE_DA $FILTER_EXE || exit 1
+#     wait
+#   endif
+
+#   ##########################################
+#   # Step 6 -- Get the updated current iteraction step
+#   ##########################################
+#   @ ENKSMDA_CURRENT_ITERATION = `GET_ITEM enks_mda_iteration_step $CONFIG_NML`
+
+
+
+
+# ##########################################
+# # Update the model time and observation start/end time
+# ##########################################
+# echo ""
+# echo ""
+# echo "------------------------------------------------------------"
+# echo "Move the time forward ..."
+# echo ""
+# python $UPDATE_CONFIGNML_TIME $CONFIG_NML $INPUT_NML  || exit 5
+# set MODEL_TIME = `GET_ITEM current_model_time $CONFIG_NML`  || exit 6
+# set EXCEEDS_OBS_TIME = `GET_ITEM exceeds_obs_time $CONFIG_NML`  || exit 7
+# @ ENKSMDA_CURRENT_ITERATION = `GET_ITEM enks_mda_iteration_step $CONFIG_NML`  || exit 8
 
 
 ##########################################
 # Data assimilation workflow starts here!
 ##########################################
+set MODEL_TIME = `GET_ITEM current_model_time $CONFIG_NML`  || exit 6
+set EXCEEDS_OBS_TIME = `GET_ITEM exceeds_obs_time $CONFIG_NML`  || exit 7
+
+echo ""
+echo ""
+echo "------------------------------------------------------------"
+echo "Continue data assimilation at the rest of time steps ..."
+echo ""
 # Continue the assimilation if MODEL_TIME is smaller than LAST_OBS_TIME
 #@ EXCEEDS_OBS_TIME = `MATH $MODEL_TIME >= $LAST_OBS_TIME`
 #@ EXCEEDS_OBS_TIME = `echo "$MODEL_TIME >= $LAST_OBS_TIME" | bc -l`
 while ($EXCEEDS_OBS_TIME == ".false.")
 
-#  echo "---"
-#  echo $MODEL_TIME
-#  echo $LAST_OBS_TIME
-#  echo $EXCEEDS_OBS_TIME
-#  echo "---"
-
-  ##########################################
-  # Step 1 -- Update PFLOTRAN input files
-  # based on DART posterior output
-  # It includes PFLOTRAN.in and parameter_prior.h5 files
-  ##########################################
-  echo ""
   echo ""
   echo "------------------------------------------------------------"
-  echo "Update PFLOTRAN input files ..."
-  echo ""
-  python $UPDATE_PFLOTRAN_INPUT  $CONFIG_NML || exit 2
-
-  ##########################################
-  # Step 2 -- Conduct PFLOTRAN forward simulation
-  # by using PFLOTRAN.sh file
-  ##########################################
-  echo ""
-  echo ""
-  echo "------------------------------------------------------------"
-  echo "Conduct the ensemble forward simulation for PFLOTRAN ..."
-  echo ""
-  $PFLOTRAN_SH $CONFIG_NML  || exit 3
-
-  ##########################################
-  # Step 3 -- Convert the PFLOTRAN output to NetCDF format
-  ##########################################
-  echo ""
-  echo ""
-  echo "------------------------------------------------------------"
-  echo "Convert the PFLOTRAN HDF output to DART prior NetCDF data ..."
-  echo ""
-  python $PREP_PRIOR_NC $CONFIG_NML  || exit 4
-
-  ##########################################
-  # Step 4 -- Generate the DART data observation
-  # in the current assimilation window
-  ##########################################
-  echo ""
-  echo ""
-  echo "------------------------------------------------------------"
-  echo "Generate the DART data observations in the current assimilation window ..."
-  echo ""
-  $CONVERT_NC_EXE  || exit 7
-
-  ##########################################
-  # Step 5 -- Data Assimilation
-  ##########################################
-  echo ""
-  echo ""
   echo "------------------------------------------------------------"
   echo "Start the assimilation at the current model time $MODEL_TIME [day] ..."
   echo ""
-  if ($NCORE_DA == 1) then
-    $FILTER_EXE  || exit 1
-  else
-    $MPI_RUN -n $NCORE_DA $FILTER_EXE || exit 1
-    wait
-  endif
+
+  while ($ENKSMDA_CURRENT_ITERATION <= $ENKSMDA_TOTAL_ITERATIONS)
+
+    echo ""
+    echo ""
+    echo "------------------------------------------------------------"
+    echo "Iteration number: $ENKSMDA_CURRENT_ITERATION ..."
+    echo ""
+
+    ##########################################
+    # Step 2 -- Update PFLOTRAN input files
+    # based on DART posterior output
+    # It includes PFLOTRAN.in and parameter_prior.h5 files
+    ##########################################
+    echo ""
+    echo ""
+    echo "------------------------------------------------------------"
+    echo "Update PFLOTRAN input files ..."
+    echo ""
+    python $UPDATE_PFLOTRAN_INPUT  $CONFIG_NML || exit 2
+
+    ##########################################
+    # Step 3 -- Conduct PFLOTRAN forward simulation
+    # by using PFLOTRAN.sh file
+    ##########################################
+    echo ""
+    echo ""
+    echo "------------------------------------------------------------"
+    echo "Conduct the ensemble forward simulation for PFLOTRAN ..."
+    echo ""
+    # $PFLOTRAN_SH $CONFIG_NML  || exit 3
+    python $RUN_PFLOTRAN $CONFIG_NML  || exit 3
+
+    ##########################################
+    # Step 4 -- Convert the PFLOTRAN output to NetCDF format
+    ##########################################
+    echo ""
+    echo ""
+    echo "------------------------------------------------------------"
+    echo "Convert the PFLOTRAN HDF output to DART prior NetCDF data ..."
+    echo ""
+    python $PREP_PRIOR_NC $CONFIG_NML  || exit 4
+
+    # ##########################################
+    # # Step 5 -- Generate the DART data observation
+    # # in the current assimilation window
+    # ##########################################
+    # echo ""
+    # echo ""
+    # echo "------------------------------------------------------------"
+    # echo "generate the dart data observations in the current assimilation window ..."
+    # echo ""
+    # $convert_nc_exe  || exit 7
+
+    ##########################################
+    # Step 1 -- Get DART observation with the current inflation coefficient
+    # and update the iteration step
+    ##########################################
+    echo ""
+    echo ""
+    echo "------------------------------------------------------------"
+    echo "Get the DART observation with the current inflation coefficient ..."
+    echo ""
+    python $UPDATE_DART_OBS_INFLATION $CONFIG_NML  || exit 1
+
+    ##########################################
+    # Step 5 -- Data Assimilation
+    ##########################################
+    echo ""
+    echo ""
+    echo "------------------------------------------------------------"
+    echo "Conduct the data assimilation..."
+    echo ""
+    if ($NCORE_DA == 1) then
+      $FILTER_EXE  || exit 1
+    else
+      $MPI_RUN -n $NCORE_DA $FILTER_EXE || exit 1
+      wait
+    endif
+
+    # Get the current iteration
+    @ ENKSMDA_CURRENT_ITERATION = `GET_ITEM enks_mda_iteration_step $CONFIG_NML`  || exit 8
+
+  end
 
   ##########################################
   # Step 6 -- Update the model time and observation start/end time
@@ -183,7 +293,8 @@ while ($EXCEEDS_OBS_TIME == ".false.")
   echo ""
   python $UPDATE_CONFIGNML_TIME $CONFIG_NML $INPUT_NML  || exit 5
   set MODEL_TIME = `GET_ITEM current_model_time $CONFIG_NML`  || exit 6
-  set EXCEEDS_OBS_TIME = `GET_ITEM exceeds_obs_time $CONFIG_NML`  || exit 6
+  set EXCEEDS_OBS_TIME = `GET_ITEM exceeds_obs_time $CONFIG_NML`  || exit 7
+  @ ENKSMDA_CURRENT_ITERATION = `GET_ITEM enks_mda_iteration_step $CONFIG_NML`  || exit 8
 
 end
 

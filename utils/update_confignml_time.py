@@ -1,5 +1,6 @@
 """Update the model/obs window times one based on the
-assimilation window in the config.nml and input.nml"""
+assimilation window in the config.nml and input.nml, and
+change the MDA iteration to 1 again."""
 
 # Author: Peishi Jiang
 
@@ -14,20 +15,31 @@ config_nml_file = sys.argv[1]
 configs         = f90nml.read(config_nml_file)
 
 # Read in the required configurations
-current_model_time    = configs["time_cfg"]["current_model_time"]
-model_time_list       = configs["time_cfg"]["model_time_list"]
-last_obs_time_days    = configs["time_cfg"]["last_obs_time_days"]
-last_obs_time_seconds = configs["time_cfg"]["last_obs_time_seconds"]
-exceeds_obs_time      = configs["time_cfg"]["exceeds_obs_time"]
-assim_start_days      = configs["da_cfg"]["assim_start_days"]
-assim_start_seconds   = configs["da_cfg"]["assim_start_seconds"]
-assim_end_days        = configs["da_cfg"]["assim_end_days"]
-assim_end_seconds     = configs["da_cfg"]["assim_end_seconds"]
-assim_window_days     = configs["da_cfg"]["assim_window_days"]
-assim_window_seconds  = configs["da_cfg"]["assim_window_seconds"]
+current_model_time        = configs["time_cfg"]["current_model_time"]
+model_time_list           = configs["time_cfg"]["model_time_list"]
+last_obs_time_days        = configs["time_cfg"]["last_obs_time_days"]
+last_obs_time_seconds     = configs["time_cfg"]["last_obs_time_seconds"]
+exceeds_obs_time          = configs["time_cfg"]["exceeds_obs_time"]
+assim_start_days          = configs["da_cfg"]["assim_start_days"]
+assim_start_seconds       = configs["da_cfg"]["assim_start_seconds"]
+assim_end_days            = configs["da_cfg"]["assim_end_days"]
+assim_end_seconds         = configs["da_cfg"]["assim_end_seconds"]
+assim_window_days         = configs["da_cfg"]["assim_window_days"]
+assim_window_seconds      = configs["da_cfg"]["assim_window_seconds"]
+enks_mda_iteration_step   = configs["da_cfg"]["enks_mda_iteration_step"]
+enks_mda_total_iterations = configs["da_cfg"]["enks_mda_total_iterations"]
 
 # Get the last_obs_time in days
 last_obs_time = last_obs_time_days + float(last_obs_time_seconds) / 86400.
+
+
+###############################
+# Change the EnKS-MDA iteration step back to 1
+###############################
+if enks_mda_iteration_step - 1 != enks_mda_total_iterations:
+    raise Exception("The current iteration step {} is not the same as the total iterations {}".format(enks_mda_iteration_step, enks_mda_total_iterations))
+configs["da_cfg"]["enks_mda_iteration_step"] = 1
+
 
 ###############################
 # Check if the updated current_model_time exceeds the last_obs_time

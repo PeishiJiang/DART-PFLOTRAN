@@ -24,8 +24,11 @@ pflotran_para_file       = configs["file_cfg"]["pflotran_para_file"]
 pflotran_checkpoint_file = configs["file_cfg"]["pflotran_checkpoint_file"]
 dart_posterior_file      = configs["file_cfg"]["dart_posterior_nc_file"]
 dart_output_list         = configs["file_cfg"]["dart_output_list_file"]
-model_time_list          = configs["time_cfg"]["model_time_list"]
 spinup_length            = configs["time_cfg"]["spinup_length"]
+model_time_list          = configs["time_cfg"]["model_time_list"]
+current_model_time       = configs["time_cfg"]["current_model_time"]
+enks_mda_iteration_step  = configs["da_cfg"]["enks_mda_iteration_step"]
+
 
 if not isinstance(model_time_list, list):
     model_time_list = [model_time_list]
@@ -54,7 +57,8 @@ if not isinstance(para_set, list):
     para_dist_set = [para_dist_set]
 
 # Check whether this is the first time to update pflotran input files
-first_time_update = True if len(model_time_list) <= 2 else False
+first_time_update = True if len(model_time_list) == 1 else False
+
 
 ###############################
 # Update the following in PFLOTRAN.in
@@ -66,33 +70,43 @@ assim_window_days    = configs["da_cfg"]["assim_window_days"]
 assim_window_seconds = configs["da_cfg"]["assim_window_seconds"]
 assim_window         = assim_window_seconds + assim_window_days * 86400  # seconds
 
-# Read the current PFLOTRAN.in information
-if not os.path.isfile(pflotran_in_file):
-    raise Exception("The pflotran in file does not exist in the path: %s" %
-                    pflotran_in_file)
-with open(pflotran_in_file, 'r') as f:
-    pflotranin = f.readlines()
+# If it is the first iteration, revise the pflotran.in file
+if enks_mda_iteration_step == 1:
+    # Read the current PFLOTRAN.in information
+    if not os.path.isfile(pflotran_in_file):
+        raise Exception("The pflotran in file does not exist in the path: %s" %
+                        pflotran_in_file)
+    with open(pflotran_in_file, 'r') as f:
+        pflotranin = f.readlines()
 
-# Delete the current file
-os.remove(pflotran_in_file)
+    # Delete the current file
+    os.remove(pflotran_in_file)
 
-# Update the model run time based on the assimilation window
-with open(pflotran_in_file, 'w') as f:
-    for i, s in enumerate(pflotranin):
-        if "FINAL_TIME" in s:
-            pflotranin[i] = "  FINAL_TIME {} sec".format(spinup_length_sec + current_model_time_sec + assim_window) + "\n"
-        if "SUBSURFACE_FLOW" in s and "MODE" in pflotranin[i + 1] and first_time_update:
-            pflotranin.insert(i + 2, "        OPTIONS \n")
-            pflotranin.insert(i + 3, "            REVERT_PARAMETERS_ON_RESTART \n")
-            pflotranin.insert(i + 4, "        / \n")
-        if "CHECKPOINT" in s and "/" in pflotranin[i + 1] and first_time_update:
-            pflotranin.insert(i + 2, "  RESTART \n")
-            pflotranin.insert(i + 3, "    FILENAME " + pflotran_checkpoint_file + " \n")
-            pflotranin.insert(i + 4, "    REALIZATION_DEPENDENT \n")
-            # pflotranin.insert(i + 5, "    RESET_TO_TIME_ZERO \n")
-            pflotranin.insert(i + 5, "  / \n")
+    # Update the model run time based on the assimilation window
+    with open(pflotran_in_file, 'w') as f:
+        for i, s in enumerate(pflotranin):
+            if "FINAL_TIME" in s:
+                pflotranin[i] = "  FINAL_TIME {} sec".format(spinup_length_sec + current_model_time_sec + assim_window) + "\n"
+            if "SUBSURFACE_FLOW" in s and "MODE" in pflotranin[i + 1] and first_time_update:
+                pflotranin.insert(i + 2, "        OPTIONS \n")
+                pflotranin.insert(i + 3, "            REVERT_PARAMETERS_ON_RESTART \n")
+                pflotranin.insert(i + 4, "        / \n")
+            if "CHECKPOINT" in s and "/" in pflotranin[i + 1] and first_time_update:
+                pflotranin.insert(i + 2, "  RESTART \n")
+                pflotranin.insert(i + 3, "    FILENAME " + pflotran_checkpoint_file + " \n")
+                pflotranin.insert(i + 4, "    REALIZATION_DEPENDENT \n")
+                # pflotranin.insert(i + 5, "    RESET_TO_TIME_ZERO \n")
+                pflotranin.insert(i + 5, "  / \n")
 
-    f.writelines(pflotranin)
+        f.writelines(pflotranin)
+
+
+###############################
+# If it is the first iteration at the initial model time. No further posterior data is required.
+###############################
+if current_model_time == 0 and enks_mda_iteration_step == 1:
+    print("It is the first iteration at the initial model time. No further conversion from DART posterior is needed.")
+    exit()
 
 ###############################
 # Get the list of DART posterior files

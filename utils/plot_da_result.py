@@ -8,13 +8,17 @@ import sys
 import f90nml
 import warnings
 import numpy as np
+import pandas as pd
+from datetime import datetime
 from math import ceil, log10
-from netCDF4 import Dataset
+from netCDF4 import Dataset, num2date
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 
 # TODO: A more sophisticated OOP architecture will be required in the future to avoid the many-lines coding.
 
+calendar     = 'gregorian'
+tunits_begin = 'days since '
 
 class DaResults(object):
     def __init__(self, config_nml):
@@ -59,6 +63,10 @@ class DaResults(object):
         # self.model_end_time   = self.model_time_list[-1] + self.assim_window
         self.ndigit = int(ceil(log10(self.ntime)))
 
+        # Convert the model time to time units
+        self.tunits                = tunits_begin + self.assim_start_time
+        self.model_time_dates_list = num2date(self.model_time_list, self.tunits, calendar)
+
         # Observation file in NetCDF
         self.obs_nc = self.configs["file_cfg"]["obs_nc_file"]
 
@@ -84,6 +92,7 @@ class DaResults(object):
         pflotran_var_set = self.pflotran_var_set
         model_start_time = self.model_start_time
         model_end_time   = self.model_end_time
+        tunits           = self.tunits
         ndigit           = self.ndigit
 
         dart_prior_file , dart_posterior_file = self.dart_prior_file, self.dart_posterior_file
@@ -154,6 +163,7 @@ class DaResults(object):
         root_obs           = Dataset(obs_nc, 'r')
         # Time in observation
         obs_time_set = root_obs.variables['time'][:]
+        obs_time_dates_set = num2date(obs_time_set, tunits, calendar)
         obs_used_ind = (obs_time_set >= model_start_time) & (obs_time_set <= model_end_time)
         obs_time_set_used = obs_time_set[obs_used_ind]
         # Locations in observation
@@ -176,16 +186,19 @@ class DaResults(object):
     def plot_spatial_average(self,
                              figsize=None,
                              constrained_layout=True,
-                             ylim=None):
+                             ylim=None,
+                             plot_averaged_obs=False):
         """Plot the spatial averaged DA results"""
         # Get the parameter
         nvar, nens, ntime = self.nvar, self.nens, self.ntime
-        obs_set = self.obs_set
-        pflotran_var_set = self.pflotran_var_set
-        model_time_list = self.model_time_list
         prior, posterior = self.prior, self.posterior
-        obs_time_set_used = self.obs_time_set_used
-        obs_value_set_used = self.obs_value_set_used
+
+        obs_set               = self.obs_set
+        pflotran_var_set      = self.pflotran_var_set
+        model_time_list       = self.model_time_list
+        model_time_dates_list = self.model_time_dates_list
+        obs_time_set_used     = self.obs_time_set_used
+        obs_value_set_used    = self.obs_value_set_used
 
         # Plot
         if figsize is not None:
@@ -219,14 +232,14 @@ class DaResults(object):
             line2, = ax1.plot(model_time_list,
                               prior_mean,
                               color='red',
-                              linewidth=2,
+                              linewidth=1,
                               label='mean')
-            if varn in obs_set:
+            if varn in obs_set and plot_averaged_obs:
                 obs_used_mean = np.mean(obs_value_set_used[varn], axis=0)
                 line3, = ax1.plot(obs_time_set_used,
                                   obs_used_mean,
                                   color='black',
-                                  linewidth=2,
+                                  linewidth=1,
                                   label='obs')
 
             # Plot the posterior
@@ -246,14 +259,14 @@ class DaResults(object):
             ax2.plot(model_time_list,
                      posterior_mean,
                      color='red',
-                     linewidth=2,
+                     linewidth=1,
                      label='mean')
-            if varn in obs_set:
+            if varn in obs_set and plot_averaged_obs:
                 obs_used_mean = np.mean(obs_value_set_used[varn], axis=0)
                 ax2.plot(obs_time_set_used,
                          obs_used_mean,
                          color='black',
-                         linewidth=2,
+                         linewidth=1,
                          label='obs')
             ax2.set_ylim(ylim)
 
@@ -270,11 +283,18 @@ class DaResults(object):
         axes[0, 1].set_title("Posterior")
 
         # Plot the legends
-        plt.legend((line1, line2, line3), ('ensemble', 'mean', 'obs'),
-                   frameon=False,
-                   ncol=3,
-                   loc="center",
-                   bbox_to_anchor=(0.0, -0.2))
+        if plot_averaged_obs:
+            plt.legend((line1, line2, line3), ('ensemble', 'mean', 'obs'),
+                    frameon=False,
+                    ncol=3,
+                    loc="center",
+                    bbox_to_anchor=(0.0, -0.5))
+        else:
+            plt.legend((line1, line2), ('ensemble', 'mean'),
+                    frameon=False,
+                    ncol=3,
+                    loc="center",
+                    bbox_to_anchor=(0.0, -0.5))
 
     def plot_oned_obs(self,
                       obs_name,
@@ -289,12 +309,13 @@ class DaResults(object):
         nens , ntime     = self.nens,  self.ntime
         prior, posterior = self.prior, self.posterior
 
-        obs_set            = self.obs_set
-        pflotran_var_set   = self.pflotran_var_set
-        model_time_list    = self.model_time_list
-        obs_time_set_used  = self.obs_time_set_used
-        obs_value_set_used = self.obs_value_set_used
-        obs_loc_set        = self.obs_loc_set
+        obs_set               = self.obs_set
+        pflotran_var_set      = self.pflotran_var_set
+        model_time_list       = self.model_time_list
+        model_time_dates_list = self.model_time_dates_list
+        obs_time_set_used     = self.obs_time_set_used
+        obs_value_set_used    = self.obs_value_set_used
+        obs_loc_set           = self.obs_loc_set
 
         xloc_set, yloc_set, zloc_set = self.x_loc, self.y_loc, self.z_loc
 
@@ -388,13 +409,13 @@ class DaResults(object):
             line2, = ax1.plot(model_time_list,
                               prior_mean,
                               color='red',
-                              linewidth=2,
+                              linewidth=1,
                               label='mean')
             obs_used = obs_value_set_used[obs_name][i, :]
             line3, = ax1.plot(obs_time_set_used,
                               obs_used,
                               color='black',
-                              linewidth=2,
+                              linewidth=1,
                               label='obs')
             # for k in range(ntime):
             #     ax1.axvline(x=model_time_list[k], color='k', ls='--')
@@ -414,16 +435,16 @@ class DaResults(object):
             ax2.plot(model_time_list,
                      posterior_mean,
                      color='red',
-                     linewidth=2,
+                     linewidth=1,
                      label='mean')
             obs_used = obs_value_set_used[obs_name][i, :]
             ax2.plot(obs_time_set_used,
                      obs_used,
                      color='black',
-                     linewidth=2,
+                     linewidth=1,
                      label='obs')
             # for k in range(ntime):
-            #     ax2.axvline(x=model_time_list[k], color='k', ls='--')
+            #     ax2.axvline(x=model_time_dates_list[k], color='k', ls='--')
             ax2.set_ylim(ylim)
 
             axes[i + 1, :] = [ax1, ax2]
@@ -445,3 +466,117 @@ class DaResults(object):
         for i in range(nloc):
             axes[i + 1, 0].set_ylabel("Dimension %s: \n %.2f (m)" %
                                       (dim_str, obs_loc_set[dim, i]))
+
+    def compare_univar_spatial_average(self, var_name, file_name, figsize=None, constrained_layout=True, ylim=None):
+        """Plot the temporal evolution of a spatial averaged analyzed variable against the true values from other source.
+           Note that the file_name has to be a csv file with two columns (the first for time and the second for the values)
+        """
+        # Get the parameter
+        nens , ntime     = self.nens,  self.ntime
+        prior, posterior = self.prior, self.posterior
+
+        assim_start_str       = self.assim_start_time
+        pflotran_var_set      = self.pflotran_var_set
+        model_time_list       = self.model_time_list
+        model_time_dates_list = self.model_time_dates_list
+        model_start_time      = self.model_start_time
+        model_end_time        = self.model_end_time
+        tunits                = self.tunits
+
+        if var_name not in pflotran_var_set:
+            raise Exception('Unknown analyzed variable name %s' % var_name)
+
+        # Get the reference, start and end dates
+        ref_time = datetime.strptime(assim_start_str, "%Y-%m-%d %H:%M:%S")
+        # model_start_date, model_end_date = model_time_dates_list[0], model_time_dates_list[-1]
+
+        # Read the true value from file_name
+        true_set           = pd.read_csv(file_name)
+        true_set_raw_time  = true_set.iloc[:, 0].values
+        true_set_dates     = [datetime.strptime(t, '%m/%d/%Y %H:%M') for t in true_set_raw_time]
+        dates_ref          = [t-ref_time for t in true_set_dates]
+        true_set_time      = np.array([t.days+float(t.seconds)/86400. for t in dates_ref])
+        true               = true_set.iloc[:, 1].values
+        true_set_used_ind  = (true_set_time >= model_start_time) & (true_set_time <= model_end_time)
+        true_set_time_used = true_set_time[true_set_used_ind]
+        true_set_used      = true[true_set_used_ind]
+
+        # Get the spatially averaged analyzed variable (prior and posterior)
+        var_ind                = pflotran_var_set.index(var_name)
+        analyzed_prior_ens     = np.mean(prior[var_ind, :, :, :, :, :], axis=(2, 3, 4))
+        analyzed_posterior_ens = np.mean(posterior[var_ind, :, :, :, :, :], axis=(2, 3, 4))
+
+        # Define axes array
+        # axes = np.empty([2], dtype=object)
+
+        # Set up the plotting grids
+        if figsize is not None:
+            fig = plt.figure(num=1,
+                             dpi=150,
+                             figsize=figsize,
+                             constrained_layout=constrained_layout)
+        else:
+            fig = plt.figure(num=1,
+                             dpi=150,
+                             figsize=(12, 6),
+                             constrained_layout=constrained_layout)
+        gs = gridspec.GridSpec(1, 2, width_ratios=[1, 1])
+
+        # Plot the prior
+        ax1 = plt.subplot(gs[0, 0])
+        for j in range(nens):
+            prior_ens = analyzed_prior_ens[j, :]
+            line1, = ax1.plot(model_time_list,
+                                prior_ens,
+                                color='grey',
+                                linewidth=0.5,
+                                linestyle=':',
+                                label='ensemble')
+        prior_mean = np.mean(analyzed_prior_ens, axis=(0))
+        line2, = ax1.plot(model_time_list,
+                            prior_mean,
+                            color='red',
+                            linewidth=1,
+                            label='mean')
+        line3, = ax1.plot(true_set_time_used,
+                            true_set_used,
+                            color='black',
+                            linewidth=1,
+                            label='obs')
+
+        # Plot the posterior
+        ax2 = plt.subplot(gs[0, 1])
+        for j in range(nens):
+            posterior_ens = analyzed_posterior_ens[j, :]
+            line1, = ax2.plot(model_time_list,
+                                posterior_ens,
+                                color='grey',
+                                linewidth=0.5,
+                                linestyle=':',
+                                label='ensemble')
+        posterior_mean = np.mean(analyzed_posterior_ens, axis=(0))
+        line2, = ax2.plot(model_time_list,
+                            posterior_mean,
+                            color='red',
+                            linewidth=1,
+                            label='mean')
+        line3, = ax2.plot(true_set_time_used,
+                            true_set_used,
+                            color='black',
+                            linewidth=1,
+                            label='obs')
+
+        # Plot the legends
+        plt.legend((line1, line2, line3), ('ensemble', 'mean', 'obs'),
+                   frameon=False,
+                   ncol=3,
+                   loc="center",
+                   bbox_to_anchor=(0.0, -0.5))
+
+        # Plot the labels and titles
+        ax1.set_title("Prior ({})".format(var_name))
+        ax2.set_title("Posterior ({})".format(var_name))
+        ax1.set_xlabel("Time (day)")
+        ax2.set_xlabel("Time (day)")
+        ax1.set_ylim(ylim)
+        ax2.set_ylim(ylim)

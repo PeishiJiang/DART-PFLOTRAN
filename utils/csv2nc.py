@@ -56,9 +56,9 @@ dates_ref_values = [t.days+float(t.seconds)/86400. for t in dates_ref]
 temperature = obs_pd[obs_pd.keys()[1:]].values
 ntime,  nz  = temperature.shape
 if obs_error_type == "obsolute":
-    errors_var = obs_error * np.ones([ntime, nz])
+    errors_var = obs_error / 3. * np.ones([ntime, nz])
 elif obs_error_type == "relative":
-    errors_var = obs_error * temperature
+    errors_var = obs_error / 3. * temperature
 else:
     raise Exception("Unknown observation error type %s" % obs_error_type)
 
@@ -101,7 +101,7 @@ times.units    = 'days'
 times.type     = 'dimension_value'
 times[:]       = dates_ref_values
 
-print(times[:])
+# print(times[:])
 
 # Write coordinates values
 xloc[:] = np.zeros(nloc)

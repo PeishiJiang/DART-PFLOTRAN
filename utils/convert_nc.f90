@@ -46,6 +46,7 @@ integer :: obs_start_day,      &
            obs_start_second,   &
            obs_end_day,        &
            obs_end_second
+real(r8) :: inflation_alpha, inflation_coefficient   ! the observation inflation coefficient
 
 logical, parameter :: use_input_qc           = .false.
 
@@ -93,7 +94,8 @@ namelist /convert_nc_nml/            &
     obs_start_day,              &
     obs_start_second,              &
     obs_end_day,              &
-    obs_end_second
+    obs_end_second,           &
+    inflation_alpha
 
 type(obs_sequence_type) :: obs_seq
 type(obs_type)          :: obs, prev_obs
@@ -115,6 +117,9 @@ call initialize_utilities('convert_nc')
 call find_namelist_in_file("input.nml", "convert_nc_nml", iunit)
 read(iunit, nml = convert_nc_nml, iostat = io)
 call check_namelist_read(iunit, io, "convert_nc_nml")
+
+! Get the inflation coefficient from the inflation alpha
+inflation_coefficient = sqrt(inflation_alpha)
 
 ! Get the defined start and end of observation times
 start_time = set_time(obs_start_second, obs_start_day)
@@ -292,7 +297,7 @@ locloop: do k = 1, nloc
 ! Add each observation value here
 if ( &
   temperature_val(n,k) /= temperature_miss .and. qc_temperature(n,k) == 0) then
-   call create_3d_obs(xloc(k), yloc(k), zloc(k), 0, temperature_val(n,k), TEMPERATURE, temperature_err(n,k), oday, osec, qc, obs)
+   call create_3d_obs(xloc(k), yloc(k), zloc(k), 0, temperature_val(n,k), TEMPERATURE, temperature_err(n,k)*inflation_coefficient, oday, osec, qc, obs)
    call add_obs_to_seq(obs_seq, obs, time_obs, prev_obs, prev_time, first_obs)
 endif
 

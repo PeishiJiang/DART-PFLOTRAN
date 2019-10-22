@@ -118,7 +118,6 @@ para_pflotran_set = f_para.keys()
 dart_var_dict = dict.fromkeys(pflotran_var_set)
 
 ###############################
-# TODO Perhaps save the outputs at all times in one NetCDF file?
 # Convert the prior state/parameter information to NetCDF file and
 # Create an empty NetCDF file for each posterior ensemble
 ###############################
@@ -126,7 +125,7 @@ for i in range(nens):
 
     ens = ens_set[i]
 
-    print("Converting state/parameter into NetCDF file for ensemble %d..." % ens)
+    # print("Converting state/parameter into NetCDF file for ensemble %d..." % ens)
 
     nc_fname_prior     = dart_prior_file_set[i]
     nc_fname_posterior = dart_posterior_file_set[i]

@@ -184,7 +184,7 @@ with open(convert_file, 'w') as f:
                 f.write(
                     "   call create_3d_obs(xloc(k), yloc(k), zloc(k), 0, " +
                     var_abbr_set[j] + "(n,k), " + var_set[j] + ", " +
-                    var_err_set[j] + "(n,k), oday, osec, qc, obs)\n")
+                    var_err_set[j] + "(n,k)*inflation_coefficient, oday, osec, qc, obs)\n")
                 f.write(
                     "   call add_obs_to_seq(obs_seq, obs, time_obs, prev_obs, prev_time, first_obs)\n"
                 )
