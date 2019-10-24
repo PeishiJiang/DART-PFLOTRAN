@@ -35,7 +35,8 @@ assim_window        = float(configs["da_cfg"]["assim_window_size"])  # days
 nens                = configs["da_cfg"]["nens"]
 
 # ndigit = np.ceil(np.log10(ntimestep), dtype=int)
-ndigit = int(ceil(log10(ntimestep)))
+ndigit_time = int(ceil(log10(ntimestep)))
+ndigit_ens = int(ceil(log10(nens))) + 1
 
 # Get the list of all required PFLOTRAN variables
 if isinstance(obs_set, str):
@@ -71,20 +72,20 @@ for f in pflotran_out_file_set:
 # dart_prior_file_set, dart_posterior_file_set = [], []
 dart_prior_file_set = [
     # re.sub(r"\[ENS\]", str(ens) + "_time" + str(model_time_ind), dart_prior_file)
-    re.sub(r"\[ENS\]", str(ens), dart_prior_file)
+    re.sub(r"\[ENS\]", str(ens).zfill(ndigit_ens), dart_prior_file)
     for ens in ens_set
 ]
 dart_prior_file_set = [
-    re.sub(r"\[TIME\]", str(model_time_ind).zfill(ndigit), dart_prior_file_each)
+    re.sub(r"\[TIME\]", str(model_time_ind).zfill(ndigit_time), dart_prior_file_each)
     for dart_prior_file_each in dart_prior_file_set
 ]
 dart_posterior_file_set = [
     # re.sub(r"\[ENS\]", str(ens) + "_time" + str(model_time_ind), dart_posterior_file)
-    re.sub(r"\[ENS\]", str(ens), dart_posterior_file)
+    re.sub(r"\[ENS\]", str(ens).zfill(ndigit_ens), dart_posterior_file)
     for ens in ens_set
 ]
 dart_posterior_file_set = [
-    re.sub(r"\[TIME\]", str(model_time_ind).zfill(ndigit), dart_posterior_file_each)
+    re.sub(r"\[TIME\]", str(model_time_ind).zfill(ndigit_time), dart_posterior_file_each)
     for dart_posterior_file_each in dart_posterior_file_set
 ]
 

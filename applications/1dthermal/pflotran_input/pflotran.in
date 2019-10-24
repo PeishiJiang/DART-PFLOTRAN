@@ -5,6 +5,9 @@ SIMULATION
   PROCESS_MODELS
     SUBSURFACE_FLOW FLOW
       MODE TH
+        OPTIONS 
+            REVERT_PARAMETERS_ON_RESTART 
+        / 
 #      OPTIONS
 #	REVERT_PARAMETERS_ON_RESTART
 #      /
@@ -12,6 +15,10 @@ SIMULATION
   /
   CHECKPOINT
   /
+  RESTART 
+    FILENAME /Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/pflotran_output/pflotran-restart.chk 
+    REALIZATION_DEPENDENT 
+  / 
 #  RESTART
 #    FILENAME 1dthermal-restart.chk
 #    REALIZATION_DEPENDENT
@@ -117,7 +124,7 @@ END
 
 #=========================== times ============================================
 TIME
-  FINAL_TIME 8640.0 sec
+  FINAL_TIME 44640.0 sec
   INITIAL_TIMESTEP_SIZE 6.0d1  min
   MAXIMUM_TIMESTEP_SIZE 6.0d1 min
   MINIMUM_TIMESTEP_SIZE 1.0d-2 sec

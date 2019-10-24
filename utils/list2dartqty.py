@@ -36,8 +36,10 @@ pflotran_set = obs_set + para_set
 
 # Parse the PFLOTRAN variables and get DART variable quantities
 p            = re.compile('[A-Z_]+')
-pflotran_set = [p.search(v).group() for v in pflotran_set]
-dart_set     = ['QTY_PFLOTRAN_' + v for v in pflotran_set]
+# pflotran_set = [p.search(v).group() for v in pflotran_set]
+# dart_set     = ['QTY_PFLOTRAN_' + v for v in pflotran_set]
+obs_set      = [p.search(v).group() for v in obs_set]
+dart_set     = ['QTY_PFLOTRAN_' + v for v in obs_set]
 dart_ind_set = []
 
 ########################

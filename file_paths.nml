@@ -29,17 +29,19 @@
     /
 
 &data_file_nml
-    obs_raw_file             = '[pflotran_in_dir]/temperature.csv'
-    obs_nc_original_file     = '[pflotran_in_dir]/obs_pflotran_original.nc'
-    obs_nc_file              = '[pflotran_in_dir]/obs_pflotran_clipped.nc'
-    obs_dart_file            = '[dart_data_dir]/obs_seq_pflotran.out'
-    dart_prior_nc_file       = '[dart_data_dir]/prior_ensemble_[ENS]_time_[TIME].nc'
-    dart_posterior_nc_file   = '[dart_data_dir]/posterior_ensemble_[ENS]_time_[TIME].nc'
-    dart_prior_nc_all_file  = '[dart_data_dir]/prior_ensemble_[ENS]_all.nc'
-    dart_posterior_nc_all_file  = '[dart_data_dir]/posterior_ensemble_[ENS]_all.nc'
-    dart_prior_template_file = '[dart_data_dir]/prior_ensemble_template.nc'
-    dart_input_list_file     = '[dart_data_dir]/filter_input_list.txt'
-    dart_output_list_file    = '[dart_data_dir]/filter_output_list.txt'
+    obs_raw_file                   = '[pflotran_in_dir]/temperature.csv'
+    obs_nc_original_file           = '[pflotran_in_dir]/obs_pflotran_original.nc'
+    obs_nc_file                    = '[pflotran_in_dir]/obs_pflotran_clipped.nc'
+    obs_dart_file                  = '[dart_data_dir]/obs_seq_pflotran.out'
+    dart_prior_nc_file             = '[dart_data_dir]/prior_ensemble_[ENS]_time_[TIME].nc'
+    dart_posterior_nc_file         = '[dart_data_dir]/posterior_ensemble_[ENS]_time_[TIME].nc'
+    dart_prior_nc_all_file         = '[dart_data_dir]/prior_ensemble_[ENS]_all.nc'
+    dart_posterior_nc_all_file     = '[dart_data_dir]/posterior_ensemble_[ENS]_all.nc'
+    dart_prior_nc_all_ens_file     = '[dart_data_dir]/prior_ensemble_all.nc'
+    dart_posterior_nc_all_ens_file = '[dart_data_dir]/posterior_ensemble_all.nc'
+    dart_prior_template_file       = '[dart_data_dir]/prior_ensemble_template.nc'
+    dart_input_list_file           = '[dart_data_dir]/filter_input_list.txt'
+    dart_output_list_file          = '[dart_data_dir]/filter_output_list.txt'
     /
 
 &shellscript_file_nml

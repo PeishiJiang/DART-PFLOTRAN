@@ -75,107 +75,6 @@ set UPDATE_PFLOTRAN_INPUT      = `GET_ITEM update_pflotran_input_file $CONFIG_NM
 cd $APP_WORK_DIR
 
 
-# ##########################################
-# # Conduct the data assimilation at time t0
-# ##########################################
-# echo ""
-# echo "------------------------------------------------------------"
-# echo "------------------------------------------------------------"
-# echo "Start the first assimilation at the current model time $MODEL_TIME [day] ..."
-# echo ""
-# if ($NCORE_DA == 1) then
-#   $FILTER_EXE  || exit 1
-# else
-# #  $MPI_RUN -n $NCORE_DA -nolocal $FILTER_EXE || exit 1
-#   $MPI_RUN -n $NCORE_DA $FILTER_EXE || exit 1
-#   wait
-# endif
-
-# ##########################################
-# # Continue the rest of MDA at time t0
-# ##########################################
-# while ($ENKSMDA_CURRENT_ITERATION < $ENKSMDA_TOTAL_ITERATIONS)
-
-#   ##########################################
-#   # Step 1 -- Update the inflation in DART observation
-#   ##########################################
-#   echo ""
-#   echo ""
-#   echo "------------------------------------------------------------"
-#   echo "Update the inflation coefficient in DART observation ..."
-#   echo ""
-#   python $UPDATE_DART_OBS_INFLATION $CONFIG_NML  || exit 1
-
-#   ##########################################
-#   # Step 2 -- Update PFLOTRAN input files
-#   # based on DART posterior output
-#   # It includes PFLOTRAN.in and parameter_prior.h5 files
-#   ##########################################
-#   echo ""
-#   echo ""
-#   echo "------------------------------------------------------------"
-#   echo "Update PFLOTRAN input files ..."
-#   echo ""
-#   python $UPDATE_PFLOTRAN_INPUT  $CONFIG_NML || exit 2
-
-#   ##########################################
-#   # Step 3-- Conduct PFLOTRAN forward simulation
-#   # by using PFLOTRAN.sh file
-#   ##########################################
-#   echo ""
-#   echo ""
-#   echo "------------------------------------------------------------"
-#   echo "Conduct the ensemble forward simulation for PFLOTRAN ..."
-#   echo ""
-#   $PFLOTRAN_SH $CONFIG_NML  || exit 3
-
-#   ##########################################
-#   # Step 4 -- Convert the PFLOTRAN output to NetCDF format
-#   ##########################################
-#   echo ""
-#   echo ""
-#   echo "------------------------------------------------------------"
-#   echo "Convert the PFLOTRAN HDF output to DART prior NetCDF data ..."
-#   echo ""
-#   python $PREP_PRIOR_NC $CONFIG_NML  || exit 4
-
-#   ##########################################
-#   # Step 5 -- Data Assimilation
-#   ##########################################
-#   echo ""
-#   echo ""
-#   echo "------------------------------------------------------------"
-#   echo "Start the assimilation at the current model time $MODEL_TIME [day] ..."
-#   echo ""
-#   if ($NCORE_DA == 1) then
-#     $FILTER_EXE  || exit 1
-#   else
-#     $MPI_RUN -n $NCORE_DA $FILTER_EXE || exit 1
-#     wait
-#   endif
-
-#   ##########################################
-#   # Step 6 -- Get the updated current iteraction step
-#   ##########################################
-#   @ ENKSMDA_CURRENT_ITERATION = `GET_ITEM enks_mda_iteration_step $CONFIG_NML`
-
-
-
-
-# ##########################################
-# # Update the model time and observation start/end time
-# ##########################################
-# echo ""
-# echo ""
-# echo "------------------------------------------------------------"
-# echo "Move the time forward ..."
-# echo ""
-# python $UPDATE_CONFIGNML_TIME $CONFIG_NML $INPUT_NML  || exit 5
-# set MODEL_TIME = `GET_ITEM current_model_time $CONFIG_NML`  || exit 6
-# set EXCEEDS_OBS_TIME = `GET_ITEM exceeds_obs_time $CONFIG_NML`  || exit 7
-# @ ENKSMDA_CURRENT_ITERATION = `GET_ITEM enks_mda_iteration_step $CONFIG_NML`  || exit 8
-
-
 ##########################################
 # Data assimilation workflow starts here!
 ##########################################
@@ -185,7 +84,7 @@ set EXCEEDS_OBS_TIME = `GET_ITEM exceeds_obs_time $CONFIG_NML`  || exit 7
 echo ""
 echo ""
 echo "------------------------------------------------------------"
-echo "Continue data assimilation at the rest of time steps ..."
+echo "Start data assimilation ..."
 echo ""
 # Continue the assimilation if MODEL_TIME is smaller than LAST_OBS_TIME
 #@ EXCEEDS_OBS_TIME = `MATH $MODEL_TIME >= $LAST_OBS_TIME`

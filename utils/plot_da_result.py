@@ -9,6 +9,7 @@ import f90nml
 import warnings
 import numpy as np
 import pandas as pd
+import seaborn as sns
 from datetime import datetime
 from math import ceil, log10
 from netCDF4 import Dataset, num2date
@@ -20,6 +21,72 @@ from matplotlib import gridspec
 calendar     = 'gregorian'
 tunits_begin = 'days since '
 
+def plot_compare_multiple_daresults(var_name,         # the variable name to be compared
+                                    settings_list,    # the list of settings/scenario names
+                                    config_file_list, # the list of config.nml files to be compared
+                                    ax,               # the axis for plotting
+                                    true_used):       # the true values
+                                    # true_file_name):  # the file containing the true values
+    """This function is used for compare multiple data assimilation results. Therefore, it has to have the same variables and the same
+       assimilation time length & time window."""
+    n_settings = len(config_file_list)
+
+    # Get the true values
+    # true_set        = pd.read_csv(true_file_name)
+    # true_set_raw_time  = true_set.iloc[:, 0].values
+    # # true_set_dates     = [datetime.strptime(t, '%m/%d/%Y %H:%M') for t in true_set_raw_time]
+    # true               = true_set.iloc[:, 1].values
+    # true               = true[2:, :]
+    # true_set_used_ind  = (true_set_time >= model_start_time) & (true_set_time <= model_end_time)
+    # true_set_used      = true[true_set_used_ind]
+
+    # Initialize the dictionary for ensemble errors
+    error_pd = pd.DataFrame(columns=['type', 'error', 'setting'])
+    # errors_prior     = dict.fromkeys(settings_list)
+    # errors_posterior = dict.fromkeys(settings_list)
+
+    # Get the simulated values
+    for i in range(n_settings):
+        # Read the namelist file
+        configs = f90nml.read(config_file_list[i])
+
+        # Get the file names for prior and posterior
+        dart_prior_all_ens_file     = configs["file_cfg"]["dart_prior_nc_all_ens_file"]
+        dart_posterior_all_ens_file = configs["file_cfg"]["dart_posterior_nc_all_ens_file"]
+
+        # Read the prior and posterior data
+        root_prior     = Dataset(dart_prior_all_ens_file, 'r')
+        root_posterior = Dataset(dart_posterior_all_ens_file, 'r')
+
+        # Get the spatial averaged values
+        prior          , posterior           = root_prior.variables[var_name][:], root_posterior.variables[var_name][:]
+        prior_space_ave, posterior_space_ave = np.mean(prior, axis=(2, 3, 4)),    np.mean(posterior, axis=(2, 3, 4))
+
+        nens, ntime = prior_space_ave.shape
+        # true_used = true[:nens, :]
+
+        errors_prior     = prior_space_ave - np.tile(true_used, [nens, 1])
+        errors_posterior = posterior_space_ave - np.tile(true_used, [nens, 1])
+        # errors_prior, errors_posterior = errors_prior.flatten(), errors_posterior.flatten()
+
+        errors_prior_pd = pd.DataFrame({'type': ["prior"] * nens * ntime, 
+                                        'error': errors_prior.flatten(), 
+                                        'setting': [settings_list[i]] * nens * ntime })
+        errors_posterior_pd = pd.DataFrame({'type': ["posterior"] * nens * ntime, 
+                                            'error': errors_posterior.flatten(), 
+                                            'setting': [settings_list[i]] * nens * ntime })
+        
+        error_pd = error_pd.append(errors_prior_pd)
+        error_pd = error_pd.append(errors_posterior_pd)
+
+        # errors_prior[settings_list[i]]     = prior_space_ave - np.tile(true, [nens, 1])
+        # errors_posterior[settings_list[i]] = posterior_space_ave - np.tile(true, [nens, 1])
+    
+    # Plot
+    sns.violinplot(x='setting', y='error', hue='type', data=error_pd, split=True, ax=ax)
+    ax.axhline(y=0, color='k', linestyle='--')
+
+
 class DaResults(object):
     def __init__(self, config_nml):
         """Initialization: Read in the required configurations from config_nml."""
@@ -30,13 +97,6 @@ class DaResults(object):
                 % config_nml)
         self.config_nml = config_nml
         self.configs    = f90nml.read(config_nml)
-
-        # DART prior and posterior files
-        self.dart_posterior_file     = self.configs["file_cfg"]["dart_posterior_nc_file"]
-        self.dart_prior_file         = self.configs["file_cfg"]["dart_prior_nc_file"]
-        self.dart_posterior_all_file = self.configs["file_cfg"]["dart_posterior_nc_all_file"]
-        self.dart_prior_all_file     = self.configs["file_cfg"]["dart_prior_nc_all_file"]
-        self.dart_prior_template     = self.configs["file_cfg"]["dart_prior_template_file"]
 
         # Variables
         self.obs_set  = self.configs["obspara_set_cfg"]["obs_set"]
@@ -61,7 +121,8 @@ class DaResults(object):
         self.model_start_time = self.model_time_list[0]
         self.model_end_time   = self.model_time_list[-1]
         # self.model_end_time   = self.model_time_list[-1] + self.assim_window
-        self.ndigit = int(ceil(log10(self.ntime)))
+        self.ndigit_time = int(ceil(log10(self.ntime)))
+        self.ndigit_ens = int(ceil(log10(self.nens))) + 1
 
         # Convert the model time to time units
         self.tunits                = tunits_begin + self.assim_start_time
@@ -74,6 +135,7 @@ class DaResults(object):
             warnings.warn("The data assimilation is not completed!")
 
         # Get the model spatial domain
+        self.dart_prior_template         = self.configs["file_cfg"]["dart_prior_template_file"]
         root_template = Dataset(self.dart_prior_template, 'r')
         self.x_loc    = root_template.variables['x_location'][:]
         self.y_loc    = root_template.variables['y_location'][:]
@@ -81,7 +143,7 @@ class DaResults(object):
         self.nx, self.ny, self.nz = len(self.x_loc), len(self.y_loc), len(self.z_loc)
         root_template.close()
 
-    def setup(self, from_concatenated=False):
+    def setup(self, from_concatenated=2):
         """Read in the observation, prior, and posterior data"""
         # Get the parameters
         nvar, nens, ntime = self.nvar, self.nens, self.ntime
@@ -93,21 +155,44 @@ class DaResults(object):
         model_start_time = self.model_start_time
         model_end_time   = self.model_end_time
         tunits           = self.tunits
-        ndigit           = self.ndigit
+        ndigit_time      = self.ndigit_time
+        ndigit_ens       = self.ndigit_ens
+
+        # DART prior and posterior files
+        self.dart_posterior_file         = self.configs["file_cfg"]["dart_posterior_nc_file"]
+        self.dart_prior_file             = self.configs["file_cfg"]["dart_prior_nc_file"]
 
         dart_prior_file , dart_posterior_file = self.dart_prior_file, self.dart_posterior_file
-        if from_concatenated: 
+        if from_concatenated == 1: 
+            self.dart_posterior_all_file     = self.configs["file_cfg"]["dart_posterior_nc_all_file"]
+            self.dart_prior_all_file         = self.configs["file_cfg"]["dart_prior_nc_all_file"]
             dart_prior_all_file, dart_posterior_all_file = self.dart_prior_all_file, self.dart_posterior_all_file
+        elif from_concatenated == 2:
+            self.dart_posterior_all_ens_file = self.configs["file_cfg"]["dart_posterior_nc_all_ens_file"]
+            self.dart_prior_all_ens_file     = self.configs["file_cfg"]["dart_prior_nc_all_ens_file"]
+            dart_prior_all_ens_file, dart_posterior_all_ens_file = self.dart_prior_all_ens_file, self.dart_posterior_all_ens_file
 
         # Read in the prior and posterior data
-        prior = np.zeros([nvar, nens, ntime, nz, ny, nx])
+        prior     = np.zeros([nvar, nens, ntime, nz, ny, nx])
         posterior = np.zeros([nvar, nens, ntime, nz, ny, nx])
+
+        # If read the prior or posterior from one single file
+        if from_concatenated == 2:
+            root_prior = Dataset(dart_prior_all_ens_file, 'r')
+            root_posterior = Dataset(dart_posterior_all_ens_file, 'r')
 
         for i in range(nens):
             ens = i + 1
 
-            if from_concatenated:
+            if from_concatenated == 2: # from concatenated files at all ensembles
+                for k in range(nvar):
+                    varn                        = pflotran_var_set[k]
+                    prior[k, :, :, :, :, :]     = root_prior.variables[varn][:]
+                    posterior[k, :, :, :, :, :] = root_posterior.variables[varn][:]
+            
+            elif from_concatenated == 1: # from concatenated files at all time steps per ensemble
                 # Prior data
+                # dart_prior_all = re.sub(r"\[ENS\]", str(ens).zfill(ndigit_ens), dart_prior_all_file)
                 dart_prior_all = re.sub(r"\[ENS\]", str(ens), dart_prior_all_file)
                 root_prior     = Dataset(dart_prior_all, 'r')
                 for k in range(nvar):
@@ -117,6 +202,7 @@ class DaResults(object):
                 root_prior.close()
 
                 # Posterior data
+                # dart_posterior_all = re.sub(r"\[ENS\]", str(ens).zfill(ndigit_ens), dart_posterior_all_file)
                 dart_posterior_all = re.sub(r"\[ENS\]", str(ens), dart_posterior_all_file)
                 root_posterior     = Dataset(dart_posterior_all, 'r')
                 for k in range(nvar):
@@ -129,11 +215,8 @@ class DaResults(object):
                 for j in range(ntime):
                     model_time_ind = j + 1
                     # Prior data
-                    prior_nc_file = re.sub(r"\[ENS\]", str(ens), dart_prior_file)
-                    prior_nc_file = re.sub(r"\[TIME\]", str(model_time_ind).zfill(ndigit), prior_nc_file)
-                    # prior_nc_file = re.sub(
-                    #     r"\[ENS\]",
-                    #     str(ens) + "_time" + str(model_time_ind), dart_prior_file)
+                    prior_nc_file = re.sub(r"\[ENS\]", str(ens).zfill(ndigit_ens), dart_prior_file)
+                    prior_nc_file = re.sub(r"\[TIME\]", str(model_time_ind).zfill(ndigit_time), prior_nc_file)
                     root_prior = Dataset(prior_nc_file, 'r')
                     for k in range(nvar):
                         varn = pflotran_var_set[k]
@@ -143,12 +226,8 @@ class DaResults(object):
                     root_prior.close()
 
                     # Posterior data
-                    posterior_nc_file = re.sub(r"\[ENS\]", str(ens), dart_posterior_file)
-                    posterior_nc_file = re.sub(r"\[TIME\]", str(model_time_ind).zfill(ndigit), posterior_nc_file)
-                    # posterior_nc_file = re.sub(
-                    #     r"\[ENS\]",
-                    #     str(ens) + "_time" + str(model_time_ind),
-                    #     dart_posterior_file)
+                    posterior_nc_file = re.sub(r"\[ENS\]", str(ens).zfill(ndigit_ens), dart_posterior_file)
+                    posterior_nc_file = re.sub(r"\[TIME\]", str(model_time_ind).zfill(ndigit_time), posterior_nc_file)
                     root_posterior = Dataset(posterior_nc_file, 'r')
                     for k in range(nvar):
                         varn = pflotran_var_set[k]
@@ -184,8 +263,9 @@ class DaResults(object):
         self.obs_loc_set = obs_loc
 
     def plot_spatial_average(self,
-                             figsize=None,
-                             constrained_layout=True,
+                             axes,
+                            #  figsize=None,
+                            #  constrained_layout=True,
                              ylim=None,
                              plot_averaged_obs=False):
         """Plot the spatial averaged DA results"""
@@ -201,24 +281,10 @@ class DaResults(object):
         obs_value_set_used    = self.obs_value_set_used
 
         # Plot
-        if figsize is not None:
-            fig = plt.figure(num=1,
-                             dpi=150,
-                             figsize=figsize,
-                             constrained_layout=constrained_layout)
-        else:
-            fig = plt.figure(num=1,
-                             dpi=150,
-                             figsize=(12, 6 * nvar),
-                             constrained_layout=constrained_layout)
-        gs = gridspec.GridSpec(nvar, 2, width_ratios=[1, 1])
-
-        # Define axes array
-        axes = np.empty([nvar, 2], dtype=object)
         for i in range(nvar):
             varn = pflotran_var_set[i]
             # Plot the prior
-            ax1 = plt.subplot(gs[i, 0])
+            ax1 = axes[i, 0]
             for j in range(nens):
                 prior_ens_mean = np.mean(prior[i, j, :, :, :, :],
                                          axis=(1, 2, 3))
@@ -243,8 +309,7 @@ class DaResults(object):
                                   label='obs')
 
             # Plot the posterior
-            ax2 = plt.subplot(gs[i, 1], sharey=ax1, sharex=ax1)
-            # ax2 = plt.subplot(gs[i, 1])
+            ax2 = axes[i, 1]
             for j in range(nens):
                 posterior_ens_mean = np.mean(posterior[i, j, :, :, :, :],
                                              axis=(1, 2, 3))
@@ -269,8 +334,6 @@ class DaResults(object):
                          linewidth=1,
                          label='obs')
             ax2.set_ylim(ylim)
-
-            axes[i, :] = [ax1, ax2]
 
         # Plot the labels and titles
         for i in range(nvar):
@@ -467,9 +530,9 @@ class DaResults(object):
             axes[i + 1, 0].set_ylabel("Dimension %s: \n %.2f (m)" %
                                       (dim_str, obs_loc_set[dim, i]))
 
-    def compare_univar_spatial_average(self, var_name, file_name, figsize=None, constrained_layout=True, ylim=None):
+    def compare_univar_spatial_average(self, var_name, true_file_name, axes, constrained_layout=True, ylim=None):
         """Plot the temporal evolution of a spatial averaged analyzed variable against the true values from other source.
-           Note that the file_name has to be a csv file with two columns (the first for time and the second for the values)
+           Note that the true_file_name has to be a csv file with two columns (the first for time and the second for the values)
         """
         # Get the parameter
         nens , ntime     = self.nens,  self.ntime
@@ -491,7 +554,7 @@ class DaResults(object):
         # model_start_date, model_end_date = model_time_dates_list[0], model_time_dates_list[-1]
 
         # Read the true value from file_name
-        true_set           = pd.read_csv(file_name)
+        true_set           = pd.read_csv(true_file_name)
         true_set_raw_time  = true_set.iloc[:, 0].values
         true_set_dates     = [datetime.strptime(t, '%m/%d/%Y %H:%M') for t in true_set_raw_time]
         dates_ref          = [t-ref_time for t in true_set_dates]
@@ -506,24 +569,8 @@ class DaResults(object):
         analyzed_prior_ens     = np.mean(prior[var_ind, :, :, :, :, :], axis=(2, 3, 4))
         analyzed_posterior_ens = np.mean(posterior[var_ind, :, :, :, :, :], axis=(2, 3, 4))
 
-        # Define axes array
-        # axes = np.empty([2], dtype=object)
-
-        # Set up the plotting grids
-        if figsize is not None:
-            fig = plt.figure(num=1,
-                             dpi=150,
-                             figsize=figsize,
-                             constrained_layout=constrained_layout)
-        else:
-            fig = plt.figure(num=1,
-                             dpi=150,
-                             figsize=(12, 6),
-                             constrained_layout=constrained_layout)
-        gs = gridspec.GridSpec(1, 2, width_ratios=[1, 1])
-
         # Plot the prior
-        ax1 = plt.subplot(gs[0, 0])
+        ax1 = axes[0]
         for j in range(nens):
             prior_ens = analyzed_prior_ens[j, :]
             line1, = ax1.plot(model_time_list,
@@ -545,7 +592,7 @@ class DaResults(object):
                             label='obs')
 
         # Plot the posterior
-        ax2 = plt.subplot(gs[0, 1])
+        ax2 = axes[1]
         for j in range(nens):
             posterior_ens = analyzed_posterior_ens[j, :]
             line1, = ax2.plot(model_time_list,
