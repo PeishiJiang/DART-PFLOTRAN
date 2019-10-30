@@ -136,17 +136,6 @@ real(r8) :: x0, y0, z0  ! the lowest values
 real(r8) :: dx, dy, dz  ! the grid sizes
 integer  :: nx, ny, nz  ! the numbers of grids
 real(r8), allocatable :: x_set(:), y_set(:), z_set(:)  ! the grid locations in each dimension
-!namelist /grid_nml/  &
-   !x0,               &
-   !y0,               &
-   !z0,               &
-   !dx,               &
-   !dx,               &
-   !dy,               &
-   !dz,               &
-   !nx,               &
-   !ny,               &
-   !nz
 
 contains
 
@@ -388,6 +377,8 @@ integer,            intent(out) :: istatus(ens_size)
 
 ! Local storage
 real(r8), dimension(LocationDims) :: loc_array
+logical :: is_find=.false.
+integer, dimension(LocationDims) :: loc_array_ens_ind
 real(r8) :: loc_x, loc_y, loc_z
 integer  :: loc_x_ind, loc_y_ind, loc_z_ind
 real(r8), dimension(LocationDims) :: loc_lrt, loc_llt, loc_urt, loc_ult
@@ -425,61 +416,76 @@ loc_z     = loc_array(3)
 ! Eight locations: lower right (top), lower left (top), upper right (top), upper left (top)
 !                  lower right (bottom), lower left (bottom), upper right (bottom), upper left (bottom)
 ! And their indices.
-call get_the_four_corners_locations(loc_array, loc_ult, loc_urt, loc_llt, loc_lrt, &
-           loc_ulb, loc_urb, loc_llb, loc_lrb, &
-           loc_ult_ind, loc_urt_ind, loc_llt_ind, loc_lrt_ind, &
-           loc_ulb_ind, loc_urb_ind, loc_llb_ind, loc_lrb_ind)
+! TODO
+! Let's first try to find the exact location in the array, if that exists, return it
+! if not, get the eight corner locations and do the IWD interpolation 
+call get_exact_location(loc_array, is_find, loc_array_ens_ind)
 
-! Get the weights of the four locations (based on the inverse distances of
-! these locations to the location to be interpolated)
-w_ult = sqrt(sum((loc_ult-loc_array)**2))
-w_urt = sqrt(sum((loc_urt-loc_array)**2))
-w_llt = sqrt(sum((loc_llt-loc_array)**2))
-w_lrt = sqrt(sum((loc_lrt-loc_array)**2))
-w_ulb = sqrt(sum((loc_ulb-loc_array)**2))
-w_urb = sqrt(sum((loc_urb-loc_array)**2))
-w_llb = sqrt(sum((loc_llb-loc_array)**2))
-w_lrb = sqrt(sum((loc_lrb-loc_array)**2))
-w_sum = w_ult+w_urt+w_llt+w_lrt+w_ulb+w_urb+w_llb+w_lrb
-w_ult = w_ult / w_sum
-w_urt = w_urt / w_sum
-w_llt = w_llt / w_sum
-w_lrt = w_lrt / w_sum
-w_ulb = w_ulb / w_sum
-w_urb = w_urb / w_sum
-w_llb = w_llb / w_sum
-w_lrb = w_lrb / w_sum
+if ( is_find ) then
+    ! print *, "What a conincidence!"
+    ! print *, loc_array
+    ! print *, loc_array_ens_ind
+    expected_obs = get_val(state_handle, ens_size, loc_array_ens_ind, obs_qty)
+    ! print *, expected_obs
+    
+else
+    print *, "I have to do the IWD interpolation!"
+    call get_the_eight_corners_locations(loc_array, loc_ult, loc_urt, loc_llt, loc_lrt, &
+            loc_ulb, loc_urb, loc_llb, loc_lrb, &
+            loc_ult_ind, loc_urt_ind, loc_llt_ind, loc_lrt_ind, &
+            loc_ulb_ind, loc_urb_ind, loc_llb_ind, loc_lrb_ind)
 
-! Get the values of the four locations
-! Four locations: lower right, lower left, upper right, upper left
-val(1, 1, 1, :) =  get_val(state_handle, ens_size, loc_ult_ind, obs_qty)
-val(1, 2, 1, :) =  get_val(state_handle, ens_size, loc_urt_ind, obs_qty)
-val(2, 1, 1, :) =  get_val(state_handle, ens_size, loc_llt_ind, obs_qty)
-val(2, 2, 1, :) =  get_val(state_handle, ens_size, loc_lrt_ind, obs_qty)
-val(1, 1, 2, :) =  get_val(state_handle, ens_size, loc_ulb_ind, obs_qty)
-val(1, 2, 2, :) =  get_val(state_handle, ens_size, loc_urb_ind, obs_qty)
-val(2, 1, 2, :) =  get_val(state_handle, ens_size, loc_llb_ind, obs_qty)
-val(2, 2, 2, :) =  get_val(state_handle, ens_size, loc_lrb_ind, obs_qty)
+    ! Get the weights of the four locations (based on the inverse distances of
+    ! these locations to the location to be interpolated)
+    w_ult = 1.0 / sqrt(sum((loc_ult-loc_array)**2))
+    w_urt = 1.0 / sqrt(sum((loc_urt-loc_array)**2))
+    w_llt = 1.0 / sqrt(sum((loc_llt-loc_array)**2))
+    w_lrt = 1.0 / sqrt(sum((loc_lrt-loc_array)**2))
+    w_ulb = 1.0 / sqrt(sum((loc_ulb-loc_array)**2))
+    w_urb = 1.0 / sqrt(sum((loc_urb-loc_array)**2))
+    w_llb = 1.0 / sqrt(sum((loc_llb-loc_array)**2))
+    w_lrb = 1.0 / sqrt(sum((loc_lrb-loc_array)**2))
+    w_sum = w_ult+w_urt+w_llt+w_lrt+w_ulb+w_urb+w_llb+w_lrb
+    w_ult = w_ult / w_sum
+    w_urt = w_urt / w_sum
+    w_llt = w_llt / w_sum
+    w_lrt = w_lrt / w_sum
+    w_ulb = w_ulb / w_sum
+    w_urb = w_urb / w_sum
+    w_llb = w_llb / w_sum
+    w_lrb = w_lrb / w_sum
 
-!if (debug) then
-    !print *, 'The eight locations ....'
-    !print *, loc_ult
-    !print *, loc_urt
-    !print *, loc_llt
-    !print *, loc_lrt
-    !print *, loc_ulb
-    !print *, loc_urb
-    !print *, loc_llb
-    !print *, loc_lrb
-    !print *, "The values at the eight locations ...."
-    !print *, val(1,1,1,:),val(1,2,1,:),val(2,1,1,:),val(2,2,1,:),val(1,1,2,:),val(1,2,2,:),val(2,1,2,:),val(2,2,2,:)
-!end if
+    ! Get the values of the four locations
+    ! Four locations: lower right, lower left, upper right, upper left
+    val(1, 1, 1, :) =  get_val(state_handle, ens_size, loc_ult_ind, obs_qty)
+    val(1, 2, 1, :) =  get_val(state_handle, ens_size, loc_urt_ind, obs_qty)
+    val(2, 1, 1, :) =  get_val(state_handle, ens_size, loc_llt_ind, obs_qty)
+    val(2, 2, 1, :) =  get_val(state_handle, ens_size, loc_lrt_ind, obs_qty)
+    val(1, 1, 2, :) =  get_val(state_handle, ens_size, loc_ulb_ind, obs_qty)
+    val(1, 2, 2, :) =  get_val(state_handle, ens_size, loc_urb_ind, obs_qty)
+    val(2, 1, 2, :) =  get_val(state_handle, ens_size, loc_llb_ind, obs_qty)
+    val(2, 2, 2, :) =  get_val(state_handle, ens_size, loc_lrb_ind, obs_qty)
 
-! Conduct the interpolation based on the weighted summation of the state values at the four locations
-expected_obs = w_ult * val(1,1,1,:) + w_urt * val(1,2,1,:) + &
-               w_llt * val(2,1,1,:) + w_lrt * val(2,2,1,:) + &
-               w_ulb * val(1,1,2,:) + w_urb * val(1,2,2,:) + &
-               w_llb * val(2,1,2,:) + w_lrb * val(2,2,2,:)
+    !if (debug) then
+        !print *, 'The eight locations ....'
+        !print *, loc_ult
+        !print *, loc_urt
+        !print *, loc_llt
+        !print *, loc_lrt
+        !print *, loc_ulb
+        !print *, loc_urb
+        !print *, loc_llb
+        !print *, loc_lrb
+        !print *, "The values at the eight locations ...."
+        !print *, val(1,1,1,:),val(1,2,1,:),val(2,1,1,:),val(2,2,1,:),val(1,1,2,:),val(1,2,2,:),val(2,1,2,:),val(2,2,2,:)
+    !end if
+
+    ! Conduct the interpolation based on the weighted summation of the state values at the eight locations
+    expected_obs = w_ult * val(1,1,1,:) + w_urt * val(1,2,1,:) + &
+                w_llt * val(2,1,1,:) + w_lrt * val(2,2,1,:) + &
+                w_ulb * val(1,1,2,:) + w_urb * val(1,2,2,:) + &
+                w_llb * val(2,1,2,:) + w_lrb * val(2,2,2,:)
+end if
 
 ! if the forward operater failed set the value to missing_r8
 do e = 1, ens_size
@@ -490,20 +496,83 @@ enddo
 
 end subroutine model_interpolate
 
+
 !------------------------------------------------------------------
-! Get the four locations that surrounds the location to be interpolated
-! Four locations: lower right, lower left, upper right, upper left
+! Get the exact location
+! Eight locations: lower right (top), lower left (top), upper right (top), upper left (top)
+!                  lower right (bottom), lower left (bottom), upper right (bottom), upper left (bottom)
 ! And their indices.
-subroutine get_the_four_corners_locations(loc_array, loc_ult, loc_urt, loc_llt, loc_lrt, &
+subroutine get_exact_location(loc_array, is_find, loc_array_ens_ind)
+
+real(r8), dimension(LocationDims), intent(in) :: loc_array
+logical,  intent(inout)                       :: is_find
+integer, dimension(LocationDims), intent(out) :: loc_array_ens_ind
+
+real(r8), parameter :: TORELABLE_DIFF = 1.0d-8
+
+real(r8) :: loc_x, loc_y, loc_z
+real(r8) :: diff_x, diff_y, diff_z
+logical  :: find_x=.false., find_y=.false., find_z=.false.
+integer  :: i,j,k
+
+! Get the individual location values
+loc_x = loc_array(1)
+loc_y = loc_array(2)
+loc_z = loc_array(3)
+
+! Get the location along x dimension
+do i = 1,nx
+    diff_x = abs(x_set(i) - loc_x)
+    if (diff_x < TORELABLE_DIFF) then
+        loc_array_ens_ind(1) = i
+        find_x = .true.
+        exit
+    end if
+end do
+
+! Get the location along y dimension
+do j = 1,ny
+    diff_y = abs(y_set(j) - loc_y)
+    if (diff_y < TORELABLE_DIFF) then
+        loc_array_ens_ind(2) = j
+        find_y = .true.
+        exit
+    end if
+end do
+
+! Get the location along z dimension
+do k = 1,nz
+    diff_z = abs(z_set(k) - loc_z)
+    ! print *, diff_z, TORELABLE_DIFF
+    if (diff_z < TORELABLE_DIFF) then
+        loc_array_ens_ind(3) = k
+        find_z = .true.
+        exit
+    end if
+end do
+
+if (find_x .and. find_y .and. find_z) then
+    is_find = .true.
+end if
+
+end subroutine get_exact_location
+
+
+!------------------------------------------------------------------
+! Get the eight locations that surrounds the location to be interpolated
+! Eight locations: lower right (top), lower left (top), upper right (top), upper left (top)
+!                  lower right (bottom), lower left (bottom), upper right (bottom), upper left (bottom)
+! And their indices.
+subroutine get_the_eight_corners_locations(loc_array, loc_ult, loc_urt, loc_llt, loc_lrt, &
            loc_ulb, loc_urb, loc_llb, loc_lrb, &
            loc_ult_ind, loc_urt_ind, loc_llt_ind, loc_lrt_ind, &
            loc_ulb_ind, loc_urb_ind, loc_llb_ind, loc_lrb_ind)
 
-real(r8), dimension(LocationDims), intent(in)  :: loc_array
-real(r8), dimension(LocationDims) :: loc_lrt, loc_llt, loc_urt, loc_ult
-real(r8), dimension(LocationDims) :: loc_lrb, loc_llb, loc_urb, loc_ulb
-integer, dimension(LocationDims)  :: loc_lrt_ind, loc_llt_ind, loc_urt_ind, loc_ult_ind
-integer, dimension(LocationDims)  :: loc_lrb_ind, loc_llb_ind, loc_urb_ind, loc_ulb_ind
+real(r8), dimension(LocationDims), intent(in)    :: loc_array
+real(r8), dimension(LocationDims), intent(out) :: loc_lrt, loc_llt, loc_urt, loc_ult
+real(r8), dimension(LocationDims), intent(out) :: loc_lrb, loc_llb, loc_urb, loc_ulb
+integer, dimension(LocationDims), intent(out)  :: loc_lrt_ind, loc_llt_ind, loc_urt_ind, loc_ult_ind
+integer, dimension(LocationDims), intent(out)  :: loc_lrb_ind, loc_llb_ind, loc_urb_ind, loc_ulb_ind
 !real(r8), dimension(LocationDims), intent(out) :: loc_lr, loc_ll, loc_ur, loc_ul
 !integer, dimension(LocationDims), intent(out)  :: loc_lr_ind, loc_ll_ind, loc_ur_ind, loc_ul_ind
 
@@ -705,7 +774,7 @@ else
     loc_urb_ind(3) = k-1
     loc_ulb_ind(3) = k-1
 end if
-end subroutine get_the_four_corners_locations
+end subroutine get_the_eight_corners_locations
 
 
 !------------------------------------------------------------------

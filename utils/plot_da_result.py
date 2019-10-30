@@ -121,7 +121,7 @@ class DaResults(object):
         self.model_start_time = self.model_time_list[0]
         self.model_end_time   = self.model_time_list[-1]
         # self.model_end_time   = self.model_time_list[-1] + self.assim_window
-        self.ndigit_time = int(ceil(log10(self.ntime)))
+        self.ndigit_time = int(ceil(log10(self.ntime))) + 1
         self.ndigit_ens = int(ceil(log10(self.nens))) + 1
 
         # Convert the model time to time units

@@ -29,6 +29,11 @@ model_time_list          = configs["time_cfg"]["model_time_list"]
 current_model_time       = configs["time_cfg"]["current_model_time"]
 enks_mda_iteration_step  = configs["da_cfg"]["enks_mda_iteration_step"]
 
+try:
+    update_obs_ens_posterior = configs["da_cfg"]["update_obs_ens_posterior"]
+except:
+    update_obs_ens_posterior = False
+
 
 if not isinstance(model_time_list, list):
     model_time_list = [model_time_list]
@@ -71,7 +76,7 @@ assim_window_seconds = configs["da_cfg"]["assim_window_seconds"]
 assim_window         = assim_window_seconds + assim_window_days * 86400  # seconds
 
 # If it is the first iteration, revise the pflotran.in file
-if enks_mda_iteration_step == 1:
+if enks_mda_iteration_step == 1 and not update_obs_ens_posterior:
     # Read the current PFLOTRAN.in information
     if not os.path.isfile(pflotran_in_file):
         raise Exception("The pflotran in file does not exist in the path: %s" %
@@ -97,6 +102,8 @@ if enks_mda_iteration_step == 1:
                 pflotranin.insert(i + 4, "    REALIZATION_DEPENDENT \n")
                 # pflotranin.insert(i + 5, "    RESET_TO_TIME_ZERO \n")
                 pflotranin.insert(i + 5, "  / \n")
+            if "SNAPSHOT_FILE" in s:
+                pflotranin.insert(i + 1, "   PERIODIC TIME 300.0d0 sec \n")
 
         f.writelines(pflotranin)
 
@@ -104,7 +111,7 @@ if enks_mda_iteration_step == 1:
 ###############################
 # If it is the first iteration at the initial model time. No further posterior data is required.
 ###############################
-if current_model_time == 0 and enks_mda_iteration_step == 1:
+if len(model_time_list) == 1 and enks_mda_iteration_step == 1 and not update_obs_ens_posterior:
     print("It is the first iteration at the initial model time. No further conversion from DART posterior is needed.")
     exit()
 
@@ -147,6 +154,9 @@ for i in range(nens):  # For each ensemble...
     ens_num = int(nc_posterior.variables["member"][:])
     ens_ind = ens_num - 1
 
+    if ens_ind != i:
+        raise Exception("The ensemble member does not match! Check your DART posterior file list.")
+
     for j in range(len(para_set)):  # For each model parameter...
         varn = para_set[j]
         # Read the posterior data of para_set
@@ -168,7 +178,8 @@ for j in range(len(para_set)):
     var_min , var_max = para_min_set[j], para_max_set[j]
     var_mean, var_std = para_mean_set[j], para_std_set[j]
 
-    if varn in para_resampled_set:
+    # resample the prior if it is required and it is not the time for updating observation ensemble posterior
+    if varn in para_resampled_set and not update_obs_ens_posterior:
         var_mean  = np.mean(posterior[j, :])
         # Generate the ensemble
         if var_dist.lower() == 'normal':
@@ -179,11 +190,14 @@ for j in range(len(para_set)):
             logstd  = np.exp(2 * var_mean + var_std**2) * (np.exp(var_std**2) - 1)
             posterior[j, :]  = np.random.lognormal(logmean, logstd)
 
-        elif var_dist.lower() == 'truncated_normal':
-            posterior[j, :] = truncnorm.rvs(var_min, var_max, loc=var_mean, scale=var_std, size=nens)
+        # elif var_dist.lower() == 'truncated_normal':
+        #     posterior[j, :] = truncnorm.rvs(var_min, var_max, loc=var_mean, scale=var_std, size=nens)
 
         elif var_dist.lower() == 'uniform':
             posterior[j, :] = np.random.uniform(var_min, var_max, nens)
+        
+        elif var_dist.lower() == 'test':
+            posterior[j, :] = posterior[j, :]
 
         else:
             raise Exception("unknown distribution %s" % var_dist)

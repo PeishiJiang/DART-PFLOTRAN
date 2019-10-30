@@ -35,7 +35,7 @@ assim_window        = float(configs["da_cfg"]["assim_window_size"])  # days
 nens                = configs["da_cfg"]["nens"]
 
 # ndigit = np.ceil(np.log10(ntimestep), dtype=int)
-ndigit_time = int(ceil(log10(ntimestep)))
+ndigit_time = int(ceil(log10(ntimestep))) + 1
 ndigit_ens = int(ceil(log10(nens))) + 1
 
 # Get the list of all required PFLOTRAN variables
@@ -232,7 +232,9 @@ for i in range(nens):
 
     # Get the the center of the assimilation window in unit day, as required by DART's read_model_time() subroutine
     time.units    = "day"
-    time[:]       = model_time + (assim_window - one_sec) / 2.
+    # time[:]       = model_time + (assim_window - one_sec) / 2.
+    # time[:]       = model_time + (assim_window + one_sec) / 2.
+    time[:]       = model_time
     time.calendar = 'none'
     member[:]     = ens
 
@@ -284,8 +286,8 @@ for i in range(nens):
 
     # Get the the center of the assimilation window in unit day, as required by DART's read_model_time() subroutine
     time.units = "day"
-    time[:]    = model_time + (assim_window - one_sec) / 2.
-    # time[:]       = model_time+assim_window/2.
+    # time[:]    = model_time + (assim_window - one_sec) / 2.
+    time[:]       = model_time
     time.calendar = 'none'
     member[:]     = ens
 

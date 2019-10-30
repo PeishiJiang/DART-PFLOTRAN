@@ -53,7 +53,8 @@ set MODEL_TIME    = `GET_ITEM current_model_time $CONFIG_NML`  # the current mod
 set LAST_OBS_TIME = `GET_ITEM last_obs_time_size $CONFIG_NML`  # the last observation time (day)
 set ASSIM_WINDOW  = `GET_ITEM assim_window_size $CONFIG_NML`   # the assimilation window (day)
 
-# Get the locations of a bunch of files
+# Get the locations of a bunch of files or folder
+set PFLOTRAN_IN_DIR            = `GET_ITEM pflotran_in_dir $CONFIG_NML`           # PFLOTRAN in folder
 set PFLOTRAN_SH                = `GET_ITEM pflotran_sh_file $CONFIG_NML`           # shell script for running PFLOTRAN
 set RUN_PFLOTRAN               = `GET_ITEM run_pflotran_file $CONFIG_NML`           # shell script for running PFLOTRAN
 set FILTER_EXE                 = `GET_ITEM filter_exe $CONFIG_NML`                 # the executable filter file
@@ -61,6 +62,7 @@ set CONVERT_NC_EXE             = `GET_ITEM convert_nc_exe $CONFIG_NML`          
 set PREP_PFLOTRAN_INPUT        = `GET_ITEM prep_pflotran_input_file $CONFIG_NML`   # python script for preparing PFLOTRAN input files
 set PREP_PRIOR_NC              = `GET_ITEM prep_prior_nc $CONFIG_NML`  # python script for converting PFLOTRAN HDF 5 output to DART NetCDF prior data
 set UPDATE_DART_OBS_INFLATION  = `GET_ITEM update_dart_obs_inflation_file $CONFIG_NML`  # python script for converting PFLOTRAN HDF 5 output to DART NetCDF prior data
+set UPDATE_OBS_ENS_POSTERIOR   = `GET_ITEM update_obs_ens_posterior_file $CONFIG_NML`  # python script for updating the observation ensemble posterior
 set UPDATE_CONFIGNML_TIME      = `GET_ITEM update_confignml_time_file $CONFIG_NML` # python script for updating the time data in config.nml
 set UPDATE_PFLOTRAN_INPUT      = `GET_ITEM update_pflotran_input_file $CONFIG_NML` # python script for updating PFLOTRAN input files
 
@@ -181,6 +183,18 @@ while ($EXCEEDS_OBS_TIME == ".false.")
 
   end
 
+
+  ##########################################
+  # Step 6 -- Update the observation ensemble posterior if necessary
+  ##########################################
+  echo ""
+  echo ""
+  echo "------------------------------------------------------------"
+  echo "Update the observation ensemble posterior if necessary..."
+  echo ""
+  python $UPDATE_OBS_ENS_POSTERIOR $CONFIG_NML || exit 9
+
+
   ##########################################
   # Step 6 -- Update the model time and observation start/end time
   # for the next assimilation window in the input namelist file
@@ -196,6 +210,15 @@ while ($EXCEEDS_OBS_TIME == ".false.")
   @ ENKSMDA_CURRENT_ITERATION = `GET_ITEM enks_mda_iteration_step $CONFIG_NML`  || exit 8
 
 end
+
+
+echo ""
+echo ""
+echo "------------------------------------------------------------"
+echo "Clean up stuff ..."
+echo ""
+cd $PFLOTRAN_IN_DIR
+rm -f pflotranR*.h5
 
 echo ""
 echo ""

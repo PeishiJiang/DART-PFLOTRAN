@@ -69,6 +69,7 @@
     update_pflotran_input_file     = '[utils_dir]/update_pflotran_input.py'
     update_confignml_time_file     = '[utils_dir]/update_confignml_time.py'
     update_dart_obs_inflation_file = '[utils_dir]/update_dart_obs_inflation.py'
+    update_obs_ens_posterior_file  = '[utils_dir]/update_obs_ens_posterior.py'
     plot_da_result_file            = '[utils_dir]/plot_da_result.py'
     clip_obs_nc_file               = '[utils_dir]/clip_obs_nc.py'
     concatenate_dart_output_file   = '[utils_dir]/concatenate_dart_output.py'

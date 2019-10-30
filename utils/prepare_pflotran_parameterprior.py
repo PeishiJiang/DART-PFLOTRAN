@@ -69,6 +69,9 @@ for i in range(len(para_set)):
     elif dist.lower() == 'uniform':
         values = np.random.uniform(minv, maxv, nens)
 
+    elif dist.lower() == 'test':
+        values = np.linspace(minv, maxv, nens)
+
     else:
         raise Exception("unknown distribution %s" % dist)
 

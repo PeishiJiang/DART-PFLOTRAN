@@ -33,7 +33,7 @@ if not isinstance(model_time_list, list):
     model_time_list = [model_time_list]
 
 # ndigit = np.ceil(np.log10(ntimestep), dtype=int)
-ndigit_time = int(ceil(log10(ntimestep)))
+ndigit_time = int(ceil(log10(ntimestep))) + 1
 ndigit_ens = int(ceil(log10(nens))) + 1
 # Use the real number of time steps here
 ntimestep = len(model_time_list)

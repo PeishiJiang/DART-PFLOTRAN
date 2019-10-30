@@ -39,7 +39,8 @@ if not isinstance(para_set, list):
 # from temperature.csv
 # therm_loc = [-0.01, -0.05, -0.65]  # unit:m, location of thermistor, negative means below the riverbed
 # Configure model domain and PFLOTRAN running environment
-hz = 0.64  # unit: m, height of the 1-D column
+# hz = 0.64  # unit: m, height of the 1-D column
+hz = 0.65  # unit: m, height of the 1-D column
 
 # Get the application folder
 pflotran_in_path = dirname(os.path.abspath(pflotran_in_file))

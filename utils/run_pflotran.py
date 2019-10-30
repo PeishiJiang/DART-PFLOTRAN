@@ -1,5 +1,6 @@
 """This file is used for running PFLOTRAN."""
 
+# Author: Peishi Jiang
 
 import os
 import sys
@@ -27,6 +28,12 @@ iteration_step   = configs["da_cfg"]["enks_mda_iteration_step"]
 total_iterations = configs["da_cfg"]["enks_mda_total_iterations"]
 is_spinup_done   = configs["time_cfg"]["is_spinup_done"]
 
+update_obs_ens_posterior_required = configs["da_cfg"]["obs_ens_posterior_from_model"]
+try:
+    update_obs_ens_posterior_now = configs["da_cfg"]["update_obs_ens_posterior_now"]
+except:
+    update_obs_ens_posterior_now = False
+
 
 ###############################
 # Run forward simulation
@@ -46,13 +53,36 @@ else:
 # - Remove all of them if it is the first iteration given a time step 
 # - Remove only .h5 and .out if else 
 ###############################
+# print(update_obs_ens_posterior_now, update_obs_ens_posterior_required, is_spinup_done)
+# print("Hi", iteration_step, total_iterations)
 if is_spinup_done:
-    if iteration_step == total_iterations:
-        subprocess.run("cd {}; rm pflotran*.h5; rm pflotran*.chk; rm pflotran*.out".format(pflotran_out_dir), shell=True, check=True)
+    if iteration_step == total_iterations + 1:
+        # subprocess.run("cd {}; rm pflotran*.h5; rm pflotran*.chk; rm pflotran*.out".format(pflotran_out_dir), shell=True, check=True)
+        # subprocess.run("cd {}; rm pflotran*.chk; rm pflotran*.out".format(pflotran_out_dir), shell=True, check=True)
+        if update_obs_ens_posterior_required and not update_obs_ens_posterior_now:
+            subprocess.run("cd {}; rm pflotran*.out".format(pflotran_out_dir), shell=True, check=True)
+            # subprocess.run("cd {}; rm pflotran*.out; rm pflotran*.h5".format(pflotran_out_dir), shell=True, check=True)
+        elif update_obs_ens_posterior_required and update_obs_ens_posterior_now:
+            # print("Come here")
+            subprocess.run("cd {}; rm pflotran*.chk; rm pflotran*.out".format(pflotran_out_dir), shell=True, check=True)
+            # subprocess.run("cd {}; rm pflotran*.chk; rm pflotran*.out; rm pflotran*.h5".format(pflotran_out_dir), shell=True, check=True)
+        else:
+            # subprocess.run("cd {}; rm pflotran*.out".format(pflotran_out_dir), shell=True, check=True)
+            subprocess.run("cd {}; rm pflotran*.chk; rm pflotran*.out".format(pflotran_out_dir), shell=True, check=True)
+            # subprocess.run("cd {}; rm pflotran*.chk; rm pflotran*.out; rm pflotran*.h5".format(pflotran_out_dir), shell=True, check=True)
+
     else:
-        subprocess.run("cd {}; rm pflotran*.h5; rm pflotran*.out".format(pflotran_out_dir), shell=True, check=True)
+        subprocess.run("cd {}; rm pflotran*.out".format(pflotran_out_dir), shell=True, check=True)
+        # subprocess.run("cd {}; rm pflotran*.out; rm pflotran*.h5".format(pflotran_out_dir), shell=True, check=True)
+
 else:
-    subprocess.run("cd {}; rm pflotran*.h5; rm pflotran*.chk; rm pflotran*.out".format(pflotran_out_dir), shell=True, check=False)
+    # subprocess.run("cd {}; rm pflotran*.h5; rm pflotran*.chk; rm pflotran*.out".format(pflotran_out_dir), shell=True, check=False)
+    subprocess.run("cd {}; rm pflotran*.chk; rm pflotran*.out".format(pflotran_out_dir), shell=True, check=False)
+    # subprocess.run("cd {}; rm pflotran*.chk; rm pflotran*.out; rm pflotran*.h5".format(pflotran_out_dir), shell=True, check=False)
+    # if update_obs_ens_posterior_required:
+    #     subprocess.run("cd {}; rm pflotran*.chk; rm pflotran*.out".format(pflotran_out_dir), shell=True, check=False)
+    # else:
+    #     subprocess.run("cd {}; rm pflotran*.chk; rm pflotran*.out".format(pflotran_out_dir), shell=True, check=False)
 
 
 ###############################
@@ -61,9 +91,22 @@ else:
 # - Move only .h5 and .out and remove the new .chk if else 
 ###############################
 if is_spinup_done:
-    if iteration_step == total_iterations:
-        subprocess.run("cd {0}; mv pflotran*.h5 {1}; mv pflotran*.chk {1}; mv pflotran*.out {1}".format(pflotran_in_dir, pflotran_out_dir), shell=True, check=True)
+    if iteration_step == total_iterations + 1:
+        # subprocess.run("cd {0}; mv pflotran*.h5 {1}; mv pflotran*.chk {1}; mv pflotran*.out {1}".format(pflotran_in_dir, pflotran_out_dir), shell=True, check=True)
+        if update_obs_ens_posterior_required and not update_obs_ens_posterior_now:
+            subprocess.run("cd {0}; rm pflotran*.chk; cp pflotran*.h5 {1}; mv pflotran*.out {1}".format(pflotran_in_dir, pflotran_out_dir), shell=True, check=True)
+            # subprocess.run("cd {0}; rm pflotran*.chk; mv pflotran*.h5 {1}; mv pflotran*.out {1}".format(pflotran_in_dir, pflotran_out_dir), shell=True, check=True)
+        elif update_obs_ens_posterior_required and update_obs_ens_posterior_now:
+            subprocess.run("cd {0}; cp pflotran*.h5 {1}; mv pflotran*.chk {1}; mv pflotran*.out {1}".format(pflotran_in_dir, pflotran_out_dir), shell=True, check=True)
+            # subprocess.run("cd {0}; mv pflotran*.h5 {1}; mv pflotran*.chk {1}; mv pflotran*.out {1}".format(pflotran_in_dir, pflotran_out_dir), shell=True, check=True)
+        else:
+            subprocess.run("cd {0}; cp pflotran*.h5 {1}; mv pflotran*.chk {1}; mv pflotran*.out {1}".format(pflotran_in_dir, pflotran_out_dir), shell=True, check=True)
+            # subprocess.run("cd {0}; mv pflotran*.h5 {1}; mv pflotran*.chk {1}; mv pflotran*.out {1}".format(pflotran_in_dir, pflotran_out_dir), shell=True, check=True)
+
     else:
-        subprocess.run("cd {0}; rm pflotran*.chk; mv pflotran*.h5 {1}; mv pflotran*.out {1}".format(pflotran_in_dir, pflotran_out_dir), shell=True, check=True)
+        subprocess.run("cd {0}; rm pflotran*.chk; cp pflotran*.h5 {1}; mv pflotran*.out {1}".format(pflotran_in_dir, pflotran_out_dir), shell=True, check=True)
+        # subprocess.run("cd {0}; rm pflotran*.chk; mv pflotran*.h5 {1}; mv pflotran*.out {1}".format(pflotran_in_dir, pflotran_out_dir), shell=True, check=True)
+
 else:
-    subprocess.run("cd {0}; mv pflotran*.h5 {1}; mv pflotran*.chk {1}; mv pflotran*.out {1}".format(pflotran_in_dir, pflotran_out_dir), shell=True, check=True)
+    subprocess.run("cd {0}; cp pflotran*.h5 {1}; mv pflotran*.chk {1}; mv pflotran*.out {1}".format(pflotran_in_dir, pflotran_out_dir), shell=True, check=True)
+    # subprocess.run("cd {0}; mv pflotran*.h5 {1}; mv pflotran*.chk {1}; mv pflotran*.out {1}".format(pflotran_in_dir, pflotran_out_dir), shell=True, check=True)
