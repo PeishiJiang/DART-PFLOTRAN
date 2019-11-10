@@ -1194,6 +1194,36 @@ obs_kind_names(373) = obs_kind_type(QTY_PFLOTRAN_THERMAL_CONDUCTIVITY, 'QTY_PFLO
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ! count here, then output below
 
 num_kind_assimilate = 0
