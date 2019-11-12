@@ -33,6 +33,12 @@ model_time_list     = configs["time_cfg"]["model_time_list"]
 ntimestep           = int(configs["da_cfg"]["ntimestep"])
 assim_window        = float(configs["da_cfg"]["assim_window_size"])  # days
 nens                = configs["da_cfg"]["nens"]
+spinup_time         = configs["time_cfg"]["spinup_length"]
+
+# Get the start and end time of the current assimilation window
+# start_obs    , end_obs     = model_time - assim_window / 2. + spinup_time, model_time + assim_window / 2. + spinup_time
+start_obs    , end_obs     = model_time - assim_window / 2., model_time + assim_window / 2.
+start_obs_sec, end_obs_sec = start_obs * 86400,              end_obs * 86400
 
 # ndigit = np.ceil(np.log10(ntimestep), dtype=int)
 ndigit_time = int(ceil(log10(ntimestep))) + 1
@@ -164,31 +170,67 @@ for i in range(nens):
     z_set = coordinates['Z [m]'][:-1]
     nx, ny, nz = len(x_set), len(y_set), len(z_set)
 
-    # Get the last time step
-    time_set_o = [t for t in list(f_out.keys()) if t.startswith("Time")]
-    time_set   = [t.split()[1:] for t in time_set_o]
-    time_vset  = [float(t[0]) for t in time_set]
+    ## Get the last time step
+    # time_set_o = [t for t in list(f_out.keys()) if t.startswith("Time")]
+    # time_set   = [t.split()[1:] for t in time_set_o]
+    # time_vset  = [float(t[0]) for t in time_set]
 
-    last_time, last_time_ind = np.max(time_vset), np.argmax(time_vset)
-    time_unit, last_time_o   = time_set[last_time_ind][1], time_set_o[last_time_ind]
+    # last_time, last_time_ind = np.max(time_vset), np.argmax(time_vset)
+    # time_unit, last_time_o   = time_set[last_time_ind][1], time_set_o[last_time_ind]
+
+    # Get all the time steps
+    time_set_o = np.array([t for t in list(f_out.keys()) if t.startswith("Time")])
+    time_set   = np.array([t.split()[1:] for t in time_set_o])
+    time_vset  = np.array([float(t[0]) for t in time_set])
+    time_unit  = time_set[0][1]
+
+    # Shift the time_vset by the model spinup time
+    time_vset = time_vset - spinup_time * 86400
+
+    # Get the time steps within the assimilation window
+    # print(time_vset, start_obs_sec, end_obs_sec)
+    time_set_assim_ind = (time_vset > start_obs_sec) & (time_vset <= end_obs_sec)
+    time_vset_assim    = time_vset[time_set_assim_ind]
+    time_set_o_assim   = time_set_o[time_set_assim_ind]
+    time_set_assim     = time_set[time_set_assim_ind]
+
+    if time_unit in ["s", "sec", "second"]: # Convert from seconds to fractional days
+        time_vset_assim_day  = time_vset_assim / 86400. 
+
+    ntime = len(time_vset_assim)
+
+    # Initialize the dart_var_dict
+    for varn in pflotran_var_set:
+        dart_var_dict[varn] = {"value": np.zeros([1,nz,ntime,nx]), 
+                               "unit": ""}
 
     # Get the state/parameter/variable values required in pflotran_var_set
-    dataset          = f_out[last_time_o]
-    pl_out_var_set_o = list(dataset.keys())
-    pl_out_var_dict  = dict()
-    for v in pl_out_var_set_o:
-        # Get the variable name and unit from the original variable name
-        varinfo = v.split()
-        if len(varinfo) == 1:
-            varn, varunit = varinfo[0].upper(), ''
-        elif len(varinfo) == 2:
-            varn, varunit = varinfo[0].upper(), varinfo[1]
-        else:
-            raise Exception('Invalid variable name %s!' % v)
-        pl_out_var_dict[varn] = {"unit": varunit, "original_name": v}
-        # Check if the variable is required by pflotran_var_set
-        if varn in pflotran_var_set:
-            dart_var_dict[varn] = {"value": dataset[v][:], "unit": varunit}
+    for j in range(ntime):
+        time_o           = time_set_o_assim[j]
+        dataset          = f_out[time_o]
+        pl_out_var_set_o = list(dataset.keys())
+        # pl_out_var_dict  = dict()
+        for v in pl_out_var_set_o:
+            # Get the variable name and unit from the original variable name
+            varinfo = v.split()
+            if len(varinfo) == 1:
+                varn, varunit = varinfo[0].upper(), ''
+            elif len(varinfo) == 2:
+                varn, varunit = varinfo[0].upper(), varinfo[1]
+            else:
+                raise Exception('Invalid variable name %s!' % v)
+            # pl_out_var_dict[varn] = {"unit": varunit, "original_name": v}
+            # Check if the variable is required by pflotran_var_set
+            if varn in pflotran_var_set:
+                # dart_var_dict[varn]["value"].append(dataset[v][:]) 
+                # TODO: make sure the shapes between dataset and dart_var_dict[varn]["value"] are compatible.
+                dart_var_dict[varn]["value"][0,:,j,0] = dataset[v][:] 
+                dart_var_dict[varn]["unit"] = varunit 
+                # if time_vset_assim[j] == 300 and ens == 1:
+                #     print(time_vset_assim[j], varn, v)
+                #     print(time_o)
+                #     print(dataset[v][:])
+    
     f_out.close()
 
     ###############################
@@ -203,7 +245,8 @@ for i in range(nens):
         if varn in pflotran_var_set:
             value = f_para[varn][:][i]
             dart_var_dict[varn] = {
-                "value": value * np.ones([nx, ny, nz]),
+                # "value": value * np.ones([nz, ny, nx]),
+                "value": value * np.ones([1, nz, ntime, nx]),
                 "unit": ""
             }
 
@@ -218,7 +261,10 @@ for i in range(nens):
 
     # Create the dimensions
     xloc_d   = root_nc_prior.createDimension('x_location', nx)
-    yloc_d   = root_nc_prior.createDimension('y_location', ny)
+    # TODO: This is a fake dimension
+    # yloc_d   = root_nc_prior.createDimension('y_location', ny)
+    yloc_d   = root_nc_prior.createDimension('y_location', ntime)
+    # TODO: This is a fake dimension
     zloc_d   = root_nc_prior.createDimension('z_location', nz)
     time_d   = root_nc_prior.createDimension('time', None)
     member_d = root_nc_prior.createDimension('member', 1)
@@ -230,7 +276,7 @@ for i in range(nens):
     yloc   = root_nc_prior.createVariable('y_location', 'f8', ('y_location', ))
     zloc   = root_nc_prior.createVariable('z_location', 'f8', ('z_location', ))
 
-    # Get the the center of the assimilation window in unit day, as required by DART's read_model_time() subroutine
+    # Get the center of the assimilation window in unit day, as required by DART's read_model_time() subroutine
     time.units    = "day"
     # time[:]       = model_time + (assim_window - one_sec) / 2.
     # time[:]       = model_time + (assim_window + one_sec) / 2.
@@ -244,7 +290,12 @@ for i in range(nens):
     xloc.units , xloc.type = 'm',               'dimension_value'
 
     # Write coordinates values
-    xloc[:], yloc[:], zloc[:] = x_set, y_set, z_set
+    # xloc[:], yloc[:], zloc[:] = x_set, y_set, z_set
+    # TODO: This is a fake dimension
+    xloc[:], zloc[:] = x_set, z_set
+    # yloc[:] = time_vset_assim_day
+    yloc[:] = time_vset_assim
+    # TODO: This is a fake dimension
 
     # Write the values to the variables
     for varn in pflotran_var_set:
@@ -257,7 +308,17 @@ for i in range(nens):
             varn, 'f8', ('time', 'z_location', 'y_location', 'x_location'))
         vargrp.type = 'observation_value'
         vargrp.unit = dart_var_dict[varn]["unit"]
+        # print(dart_var_dict[varn]["value"].shape)
+        # print(vargrp[:].shape)
         vargrp[:] = dart_var_dict[varn]["value"]
+
+        # if ens == 1:
+        #     ind300 = list(time_vset_assim).index(300)
+        #     print("Let's check nc file...")
+        #     print(vargrp[:].shape)
+        #     print(dart_var_dict[varn]["value"].shape)
+        #     print(dart_var_dict[varn]["value"][:,:,ind300,:])
+        #     print(vargrp[:][:,:,ind300,:])
 
     root_nc_prior.close()
 
@@ -272,7 +333,10 @@ for i in range(nens):
 
     # Create the dimensions
     xloc_d   = root_nc_posterior.createDimension('x_location', nx)
-    yloc_d   = root_nc_posterior.createDimension('y_location', ny)
+    # TODO: This is a fake dimension
+    # yloc_d   = root_nc_posterior.createDimension('y_location', ny)
+    yloc_d   = root_nc_posterior.createDimension('y_location', ntime)
+    # TODO: This is a fake dimension
     zloc_d   = root_nc_posterior.createDimension('z_location', nz)
     time_d   = root_nc_posterior.createDimension('time', None)
     member_d = root_nc_posterior.createDimension('member', 1)
@@ -297,7 +361,12 @@ for i in range(nens):
     xloc.units , xloc.type = 'm',               'dimension_value'
 
     # Write coordinates values
-    xloc[:], yloc[:], zloc[:] = x_set, y_set, z_set
+    # xloc[:], yloc[:], zloc[:] = x_set, y_set, z_set
+    # TODO: This is a fake dimension
+    xloc[:], zloc[:] = x_set, z_set
+    # yloc[:] = time_vset_assim_day
+    yloc[:] = time_vset_assim
+    # TODO: This is a fake dimension
 
     # Write the variables without values
     for varn in pflotran_var_set:

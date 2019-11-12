@@ -118,10 +118,11 @@ class DaResults(object):
         self.assim_window     = float(self.configs["da_cfg"]["assim_window_size"])
         self.nens             = self.configs["da_cfg"]["nens"]
         self.ntime            = len(self.model_time_list)
+        self.ntimestep        = int(self.configs["da_cfg"]["ntimestep"])
         self.model_start_time = self.model_time_list[0]
         self.model_end_time   = self.model_time_list[-1]
         # self.model_end_time   = self.model_time_list[-1] + self.assim_window
-        self.ndigit_time = int(ceil(log10(self.ntime))) + 1
+        self.ndigit_time = int(ceil(log10(self.ntimestep))) + 1
         self.ndigit_ens = int(ceil(log10(self.nens))) + 1
 
         # Convert the model time to time units

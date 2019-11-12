@@ -173,8 +173,7 @@ if (do_nml_term()) write(     *     , nml=model_nml)
 ! window.  All observations within +/- 1/2 this interval from the current
 ! model time will be assimilated. If this isn't settable at runtime
 ! feel free to hardcode it and not add it to a namelist.
-time_step = set_time(time_step_seconds, &
-                                  time_step_days)
+time_step = set_time(time_step_seconds, time_step_days)
 
 ! Get the variable quantity/kind indices
 do ivar = 1, nvar
@@ -493,6 +492,10 @@ do e = 1, ens_size
       expected_obs(e) = MISSING_R8
    endif
 enddo
+
+! print *, "Let's check the artificial time dimension."
+! print *, loc_array
+! print *, expected_obs
 
 end subroutine model_interpolate
 
