@@ -165,7 +165,8 @@ for i in range(nens):
 
     # Initialize the dart_var_dict
     for varn in obs_set:
-        dart_var_dict[varn] = {"value": np.zeros([1,nx,ntime,nz]), 
+        dart_var_dict[varn] = {"value": np.zeros([1,nz,ntime,nx]), 
+        # dart_var_dict[varn] = {"value": np.zeros([1,nx,ntime,nz]), 
                                "unit": ""}
 
     # Get the state/parameter/variable values required in pflotran_var_set
@@ -187,8 +188,17 @@ for i in range(nens):
             # Check if the variable is required by pflotran_var_set
             if varn in obs_set:
                 # dart_var_dict[varn]["value"].append(dataset[v][:]) 
-                dart_var_dict[varn]["value"][:,:,j,:] = dataset[v][:] 
+                # TODO: make sure the shapes between dataset and dart_var_dict[varn]["value"] are compatible.
+                dart_var_dict[varn]["value"][0,:,j,0] = dataset[v][:] 
                 dart_var_dict[varn]["unit"] = varunit 
+                # if time_vset_assim[j] == 300 and ens == 1:
+                #     print(time_vset_assim[j], varn, v)
+                #     print(time_o)
+                #     print(dataset[v][:])
+            # if varn in obs_set:
+            #     # dart_var_dict[varn]["value"].append(dataset[v][:]) 
+            #     dart_var_dict[varn]["value"][:,:,j,:] = dataset[v][:] 
+            #     dart_var_dict[varn]["unit"] = varunit 
 
     f_out.close()
 
