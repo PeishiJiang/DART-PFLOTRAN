@@ -1,0 +1,15 @@
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2019 11 15 10 36 17
+ Program convert_nc
+ --------------------------------------
+
+ ERROR FROM:
+  set_nml_output
+  routine: set_nml_output
+  message: unrecognized input string: ../../workflow_ipynb/none
+ 
+  source file: $URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/assimilation_code/modules/utilities/utilities_mod.f90 $
+  file revision: $Revision: 13137 $
+  revision date: $Date: 2019-04-30 08:48:00 -0700 (Tue, 30 Apr 2019) $

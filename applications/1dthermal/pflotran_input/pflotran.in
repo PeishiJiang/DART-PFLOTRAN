@@ -110,11 +110,6 @@ SNAPSHOT_FILE
    PERIODIC TIME 300.0d0 sec 
    PERIODIC TIME 300.0d0 sec 
    PERIODIC TIME 300.0d0 sec 
-   PERIODIC TIME 300.0d0 sec 
-   PERIODIC TIME 300.0d0 sec 
-   PERIODIC TIME 300.0d0 sec 
-   PERIODIC TIME 300.0d0 sec 
-   PERIODIC TIME 300.0d0 sec 
   FORMAT HDF5 SINGLE_FILE
 #  PERIODIC TIME 300.0d0 sec
 /
@@ -134,7 +129,7 @@ END
 
 #=========================== times ============================================
 TIME
-  FINAL_TIME 43200.0 sec
+  FINAL_TIME 25200.0 sec
   INITIAL_TIMESTEP_SIZE 6.0d1  min
   MAXIMUM_TIMESTEP_SIZE 6.0d1 min
   MINIMUM_TIMESTEP_SIZE 1.0d-2 sec
