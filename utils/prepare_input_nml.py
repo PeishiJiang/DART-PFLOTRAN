@@ -20,9 +20,10 @@ input_nml_dict          = configs["inputnml_cfg"]
 # configure_dict_file     = sys.argv[3]
 
 # Get the location of DART and application paths
-directories = configs["main_dir_cfg"]
-APP_DIR     = directories["app_dir"]
-DART_DIR    = directories["dart_dir"]
+directories  = configs["main_dir_cfg"]
+APP_DIR      = directories["app_dir"]
+DART_DIR     = directories["dart_dir"]
+APP_WORK_DIR = configs["other_dir_cfg"]["app_work_dir"]
 
 if not os.path.isfile(input_nml_template_file):
     raise Exception("The file %s does not exists!" % input_nml_template_file)
@@ -63,6 +64,9 @@ for name in nml.keys():
             nml_ele[item] = value.replace("[app_dir]", APP_DIR)
         elif "[dart_dir]" in value:
             nml_ele[item] = value.replace("[dart_dir]", DART_DIR)
+        # Get the relative directory w.r.t. the application work directory
+        if DART_DIR in nml_ele[item]:
+            nml_ele[item] = os.path.relpath(nml_ele[item], APP_WORK_DIR)
     nml[name] = nml_ele
 
 # Now, let's write
