@@ -57,8 +57,8 @@ Fix the following bugs in DART Manhattan version to allow the usage of the PFLOT
   type(obs_def_type)    :: obs_def
   real(r8)              :: loc_info(4)
   
-  loc_info(1) = lon
-  loc_info(2) = lat
+  loc_info(1) = lat
+  loc_info(2) = lon
   loc_info(3) = vval
   loc_info(4) = real(vkind)
   
