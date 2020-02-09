@@ -29,7 +29,7 @@
     /
 
 &data_file_nml
-    obs_raw_file                   = '[pflotran_in_dir]/temperature.csv'
+    obs_raw_file                   = '[pflotran_in_dir]/temperature_obs.csv'
     obs_nc_original_file           = '[pflotran_in_dir]/obs_pflotran_original.nc'
     obs_nc_file                    = '[pflotran_in_dir]/obs_pflotran_clipped.nc'
     obs_dart_file                  = '[dart_data_dir]/obs_seq_pflotran.out'
