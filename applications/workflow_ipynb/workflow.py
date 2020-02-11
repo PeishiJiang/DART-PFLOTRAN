@@ -62,8 +62,8 @@ ngroup_pf= 4  # The number of group used by stochastic running in PFLOTRAN
 pflotran_exe  = '/Users/jian449/Codes/pflotran/src/pflotran/pflotran'
 
 # Main directory names
-temp_app_dir = "/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/template"          # The template for application folder
-app_dir      = "/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal_test_1month_post"          # The application folder name
+temp_app_dir = "/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal"          # The template for application folder
+app_dir      = "/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal_original_1month_mda1_v2"          # The application folder name
 dart_dir     = "/Users/jian449/Codes/DART/manhattan"
 dart_pf_dir  = "/Users/jian449/Codes/DART/manhattan/models/pflotran"     # The dart pflotran utitlity folder name
 # temp_app_dir = "/global/cscratch1/sd/peishi89/DART_PFLOTRAN_APP/applications/template"          # The template for application folder
@@ -147,12 +147,13 @@ para_max_set  = [5.0]  # The maximum values (99999 means no upper bound limit)
 para_mean_set = [0.0]  # The mean values
 para_std_set  = [0.5]  # The standard deviation values
 para_dist_set = ["normal"]  # The assumed distribution to be sampled
+para_prior_rescaled = False # Whether the prior is generated from rescaling the posterior at the previous time step
 # para_dist_set = ["test"]  # The assumed distribution to be sampled
 
 para_resampled_set = ['FLOW_FLUX']   # The parameters to be resampled at each time step
 # para_resampled_set = ['']   # The parameters to be resampled at each time step
 
-configs["obspara_set_cfg"] = {"obs_set": obs_set, "para_set": para_set,
+configs["obspara_set_cfg"] = {"obs_set": obs_set, "para_set": para_set, "para_prior_rescaled": para_prior_rescaled,
                               "para_min_set": para_min_set, "para_max_set": para_max_set,
                               "para_mean_set": para_mean_set, "para_std_set": para_std_set,
                               "para_dist_set": para_dist_set, "para_resampled_set": para_resampled_set}

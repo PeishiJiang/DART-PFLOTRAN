@@ -18,8 +18,8 @@ from datetime import datetime, timedelta
 ###############################
 # Parameters
 ###############################
-true_error_type = "relative"
-true_error = 0.02
+true_error_type = "obsolute"
+true_error = 0.05
 
 missing_value = -99999
 
@@ -56,4 +56,4 @@ obs_pd = true_pd.copy()
 temperature_obs = temperature + np.random.normal(0,1,[ntime,nz])*errors_var
 obs_pd[obs_pd.keys()[1:]] = temperature_obs
 
-obs_pd.to_csv("temperature_obs.csv", index=False)
+obs_pd.to_csv("temperature_obs_error005.csv", index=False)

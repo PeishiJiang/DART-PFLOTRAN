@@ -28,6 +28,11 @@ spinup_length            = configs["time_cfg"]["spinup_length"]
 model_time_list          = configs["time_cfg"]["model_time_list"]
 current_model_time       = configs["time_cfg"]["current_model_time"]
 enks_mda_iteration_step  = configs["da_cfg"]["enks_mda_iteration_step"]
+assim_window_days        = configs["da_cfg"]["assim_window_days"]
+assim_window_seconds     = configs["da_cfg"]["assim_window_seconds"]
+assim_window_size        = configs["da_cfg"]["assim_window_size"]
+# assim_window             = assim_window_size * 86400
+# assim_window             = assim_window_seconds + assim_window_days * 86400  # seconds
 
 try:
     update_obs_ens_posterior = configs["da_cfg"]["update_obs_ens_posterior"]
@@ -38,7 +43,11 @@ except:
 if not isinstance(model_time_list, list):
     model_time_list = [model_time_list]
 
-current_model_time_sec = float(model_time_list[-1]) * 86400
+one_sec                    = 1./86400.  # one second (fractional days)
+current_model_time_end     = current_model_time + (assim_window_size - one_sec) / 2
+current_model_time_end_sec = current_model_time_end * 86400
+print(current_model_time_end_sec)
+# current_model_time_sec     = float(model_time_list[-1]) * 86400
 spinup_length_sec      = spinup_length * 86400
 
 para_set      = configs["obspara_set_cfg"]["para_set"]
@@ -47,6 +56,7 @@ para_max_set  = configs["obspara_set_cfg"]["para_max_set"]
 para_mean_set = configs["obspara_set_cfg"]["para_mean_set"]
 para_std_set  = configs["obspara_set_cfg"]["para_std_set"]
 para_dist_set = configs["obspara_set_cfg"]["para_dist_set"]
+rescaled      = configs["obspara_set_cfg"]["para_prior_rescaled"]
 para_resampled_set = configs["obspara_set_cfg"]["para_resampled_set"]
 nens               = configs["da_cfg"]["nens"]
 
@@ -70,11 +80,6 @@ first_time_update = True if len(model_time_list) == 1 else False
 # (1) The model running time
 # (2) The restart file config
 ###############################
-# Get the current model time and assimilation window from config.nml
-assim_window_days    = configs["da_cfg"]["assim_window_days"]
-assim_window_seconds = configs["da_cfg"]["assim_window_seconds"]
-assim_window         = assim_window_seconds + assim_window_days * 86400  # seconds
-
 # If it is the first iteration, revise the pflotran.in file
 if enks_mda_iteration_step == 1 and not update_obs_ens_posterior:
     # Read the current PFLOTRAN.in information
@@ -91,7 +96,8 @@ if enks_mda_iteration_step == 1 and not update_obs_ens_posterior:
     with open(pflotran_in_file, 'w') as f:
         for i, s in enumerate(pflotranin):
             if "FINAL_TIME" in s:
-                pflotranin[i] = "  FINAL_TIME {} sec".format(spinup_length_sec + current_model_time_sec + assim_window) + "\n"
+                # pflotranin[i] = "  FINAL_TIME {} sec".format(spinup_length_sec + current_model_time_sec + assim_window) + "\n"
+                pflotranin[i] = "  FINAL_TIME {} sec".format(spinup_length_sec + current_model_time_end_sec) + "\n"
             if "SUBSURFACE_FLOW" in s and "MODE" in pflotranin[i + 1] and first_time_update:
                 pflotranin.insert(i + 2, "        OPTIONS \n")
                 pflotranin.insert(i + 3, "            REVERT_PARAMETERS_ON_RESTART \n")
@@ -180,27 +186,32 @@ for j in range(len(para_set)):
 
     # resample the prior if it is required and it is not the time for updating observation ensemble posterior
     if varn in para_resampled_set and not update_obs_ens_posterior:
-        var_mean  = np.mean(posterior[j, :])
+        var_mean_nc = np.mean(posterior[j, :])
+        var_std_nc  = np.std(posterior[j, :])
         # Generate the ensemble
-        if var_dist.lower() == 'normal':
-            posterior[j, :] = np.random.normal(var_mean, var_std, nens)
+        if rescaled:  # if rescaling the posterior at the previous time step is required
+            posterior[j, :] = (posterior[j, :] - var_mean_nc) / var_std_nc * var_std + var_mean_nc
 
-        elif var_dist.lower() == 'lognormal':
-            logmean = np.exp(var_mean + var_std**2 / 2.)
-            logstd  = np.exp(2 * var_mean + var_std**2) * (np.exp(var_std**2) - 1)
-            posterior[j, :]  = np.random.lognormal(logmean, logstd)
+        else:  # if resampling is required.
+            if var_dist.lower() == 'normal':
+                posterior[j, :] = np.random.normal(var_mean_nc, var_std, nens)
 
-        # elif var_dist.lower() == 'truncated_normal':
-        #     posterior[j, :] = truncnorm.rvs(var_min, var_max, loc=var_mean, scale=var_std, size=nens)
+            elif var_dist.lower() == 'lognormal':
+                logmean = np.exp(var_mean_nc + var_std**2 / 2.)
+                logstd  = np.exp(2 * var_mean_nc + var_std**2) * (np.exp(var_std**2) - 1)
+                posterior[j, :]  = np.random.lognormal(logmean, logstd)
 
-        elif var_dist.lower() == 'uniform':
-            posterior[j, :] = np.random.uniform(var_min, var_max, nens)
-        
-        elif var_dist.lower() == 'test':
-            posterior[j, :] = posterior[j, :]
+            # elif var_dist.lower() == 'truncated_normal':
+            #     posterior[j, :] = truncnorm.rvs(var_min, var_max, loc=var_mean_nc, scale=var_std, size=nens)
 
-        else:
-            raise Exception("unknown distribution %s" % var_dist)
+            elif var_dist.lower() == 'uniform':
+                posterior[j, :] = np.random.uniform(var_min, var_max, nens)
+
+            elif var_dist.lower() == 'test':
+                posterior[j, :] = posterior[j, :]
+
+            else:
+                raise Exception("unknown distribution %s" % var_dist)
 
         # Exclude those values outside of [minv, maxv]
         if var_min != -99999:

@@ -34,6 +34,15 @@ try:
 except:
     update_obs_ens_posterior_now = False
 
+# If the observation posterior needs to be updated from rerunning the model, increment the total_iteration by one.
+if update_obs_ens_posterior_required:
+    total_iterations = total_iterations + 1
+
+# model_time_list = configs["time_cfg"]["model_time_list"]
+# print(model_time_list)
+# if isinstance(model_time_list, list):
+#     print(ncore_pf, model_time_list)
+#     raise Exception("Stop!")
 
 ###############################
 # Run forward simulation
@@ -53,8 +62,6 @@ else:
 # - Remove all of them if it is the first iteration given a time step 
 # - Remove only .h5 and .out if else 
 ###############################
-# print(update_obs_ens_posterior_now, update_obs_ens_posterior_required, is_spinup_done)
-# print("Hi", iteration_step, total_iterations)
 if is_spinup_done:
     if iteration_step == total_iterations + 1:
         # subprocess.run("cd {}; rm pflotran*.h5; rm pflotran*.chk; rm pflotran*.out".format(pflotran_out_dir), shell=True, check=True)
@@ -90,8 +97,9 @@ else:
 # - Move all of them if it is the first iteration given a time step 
 # - Move only .h5 and .out and remove the new .chk if else 
 ###############################
+# print(is_spinup_done, iteration_step, total_iterations, update_obs_ens_posterior_required)
 if is_spinup_done:
-    if iteration_step == total_iterations + 1:
+    if iteration_step == total_iterations:
         # subprocess.run("cd {0}; mv pflotran*.h5 {1}; mv pflotran*.chk {1}; mv pflotran*.out {1}".format(pflotran_in_dir, pflotran_out_dir), shell=True, check=True)
         if update_obs_ens_posterior_required and not update_obs_ens_posterior_now:
             subprocess.run("cd {0}; rm pflotran*.chk; cp pflotran*.h5 {1}; mv pflotran*.out {1}".format(pflotran_in_dir, pflotran_out_dir), shell=True, check=True)
@@ -100,6 +108,7 @@ if is_spinup_done:
             subprocess.run("cd {0}; cp pflotran*.h5 {1}; mv pflotran*.chk {1}; mv pflotran*.out {1}".format(pflotran_in_dir, pflotran_out_dir), shell=True, check=True)
             # subprocess.run("cd {0}; mv pflotran*.h5 {1}; mv pflotran*.chk {1}; mv pflotran*.out {1}".format(pflotran_in_dir, pflotran_out_dir), shell=True, check=True)
         else:
+            # raise Exception("Hello~~")
             subprocess.run("cd {0}; cp pflotran*.h5 {1}; mv pflotran*.chk {1}; mv pflotran*.out {1}".format(pflotran_in_dir, pflotran_out_dir), shell=True, check=True)
             # subprocess.run("cd {0}; mv pflotran*.h5 {1}; mv pflotran*.chk {1}; mv pflotran*.out {1}".format(pflotran_in_dir, pflotran_out_dir), shell=True, check=True)
 
