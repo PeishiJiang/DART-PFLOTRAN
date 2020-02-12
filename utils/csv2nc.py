@@ -55,7 +55,7 @@ dates_ref_values = [t.days+float(t.seconds)/86400. for t in dates_ref]
 # Get the true and perturbed temperature values
 temperature = obs_pd[obs_pd.keys()[1:]].values
 ntime,  nz  = temperature.shape
-if obs_error_type == "obsolute":
+if obs_error_type == "absolute":
     errors_var = obs_error / 3. * np.ones([ntime, nz])
 elif obs_error_type == "relative":
     errors_var = obs_error / 3. * temperature

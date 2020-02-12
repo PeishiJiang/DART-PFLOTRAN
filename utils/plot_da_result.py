@@ -621,8 +621,8 @@ class DaResults(object):
                    bbox_to_anchor=(0.0, -0.5))
 
         # Plot the labels and titles
-        ax1.set_title("Prior ({})".format(var_name))
-        ax2.set_title("Posterior ({})".format(var_name))
+        # ax1.set_title("Prior ({})".format(var_name))
+        # ax2.set_title("Posterior ({})".format(var_name))
         ax1.set_xlabel("Time (day)")
         ax2.set_xlabel("Time (day)")
         ax1.set_ylim(ylim)

@@ -1,5 +1,5 @@
 &app_dir_nml
-    obs_type_dir     = '[app_dir]/obs_type' 
+    obs_type_dir     = '[app_dir]/obs_type'
     app_work_dir     = '[app_dir]/work'
     pflotran_in_dir  = '[app_dir]/pflotran_input'
     pflotran_out_dir = '[app_dir]/pflotran_output'
@@ -29,7 +29,7 @@
     /
 
 &data_file_nml
-    obs_raw_file                   = '[pflotran_in_dir]/temperature_obs.csv'
+    obs_raw_file                   = '[pflotran_in_dir]/temperature_obs_error05.csv'
     obs_nc_original_file           = '[pflotran_in_dir]/obs_pflotran_original.nc'
     obs_nc_file                    = '[pflotran_in_dir]/obs_pflotran_clipped.nc'
     obs_dart_file                  = '[dart_data_dir]/obs_seq_pflotran.out'
@@ -52,7 +52,7 @@
     compile_convert_nc_csh      = '[dart_work_dir]/dart_seq_convert.csh'
     compile_model_check_mod_csh = '[dart_work_dir]/check_model_mod.csh'
     run_filter_csh              = '[dart_work_dir]/run_DART_PFLOTRAN.csh'
-    advance_model_csh           = '[dart_work_dir]/advance_model.csh'  
+    advance_model_csh           = '[dart_work_dir]/advance_model.csh'
     /
 
 &utility_file_nml
