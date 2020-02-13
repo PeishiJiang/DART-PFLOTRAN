@@ -5,6 +5,7 @@
 .vscode
 .idea
 *.code-workspace
+model_mod_copy.f90
 
 /work/*.o
 /work/*.mod

@@ -63,6 +63,7 @@
     nvar = 2
     time_step_days = 0
     time_step_seconds = 1800
+    interpolate_option = 1
     var_names = 'TEMPERATURE', 'FLOW_FLUX'
     template_file = '/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/dart_inout/prior_ensemble_template.nc'
     var_qtynames = 'QTY_PFLOTRAN_TEMPERATURE', 'QTY_PFLOTRAN_FLOW_FLUX'
@@ -136,6 +137,9 @@
     print_box_level = 0
     debug = 0
 /
+
+&xyz_location_nml
+  /
 
 &smoother_nml
     num_lags = 0
