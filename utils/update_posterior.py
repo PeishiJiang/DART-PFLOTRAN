@@ -49,10 +49,10 @@ if not isinstance(obs_set, list):
 ###############################
 # Remove the temporary prior files
 ###############################
-# DART posterior
+# DART prior
 dart_prior_file_set = []
 if not os.path.isfile(dart_input_list):
-    raise Exception("The DART output list file does not exist in the path: %s" % dart_output_list)
+    raise Exception("The DART input list file does not exist in the path: %s" % dart_input_list)
 with open(dart_input_list, "r") as f:
     dart_prior_file_list = f.readlines()
 for i in range(len(dart_prior_file_list)):

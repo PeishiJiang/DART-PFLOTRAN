@@ -48,7 +48,7 @@ mpi_exe_da  = '/Users/jian449/Codes/petsc/arch-darwin-c-opt/bin/mpirun'
 mpi_exe_pf  = '/Users/jian449/Codes/petsc/arch-darwin-c-opt/bin/mpirun'
 # mpi_exe_da  = '/software/petsc_v3.11.3/arch-linux2-c-opt/bin/mpirun'  # The location of mpirun
 # mpi_exe_pf  = '/software/petsc_v3.11.3/arch-linux2-c-opt/bin/mpirun'
-ncore_da = 4  # The number of MPI cores used by DART
+ncore_da = 1  # The number of MPI cores used by DART
 ncore_pf = 4  # The number of MPI cores used by PFLOTRAN
 ngroup_pf= 4  # The number of group used by stochastic running in PFLOTRAN
 
@@ -59,7 +59,7 @@ pflotran_exe  = '/Users/jian449/Codes/pflotran/src/pflotran/pflotran'
 
 # Main directory names
 temp_app_dir = "/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal"          # The template for application folder
-app_dir      = "/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal_test_ncprior"          # The application folder name
+app_dir      = "/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal_test_unstructured"          # The application folder name
 dart_dir     = "/Users/jian449/Codes/DART/manhattan"
 dart_pf_dir  = "/Users/jian449/Codes/DART/manhattan/models/pflotran"     # The dart pflotran utitlity folder name
 # temp_app_dir = "/home/jian449/DART/manhattan/models/pflotran/applications/template"          # The template for application folder
@@ -218,7 +218,7 @@ time_cfg["first_obs_time_seconds"] = 0
 time_cfg["first_obs_time_size"] = time_cfg["first_obs_time_days"]+float(time_cfg["first_obs_time_seconds"])/86400. # day
 time_cfg["last_obs_time_days"]    = 0
 # time_cfg["last_obs_time_seconds"] = 3600*24*29
-time_cfg["last_obs_time_seconds"] = 3600*5
+time_cfg["last_obs_time_seconds"] = 3600*3
 # time_cfg["last_obs_time_seconds"] = 300
 time_cfg["last_obs_time_size"] = time_cfg["last_obs_time_days"]+float(time_cfg["last_obs_time_seconds"])/86400. # day
 
@@ -262,8 +262,8 @@ da_cfg["obs_ens_posterior_from_model"] = True
 
 # %%
 # The inflation settings used in EnKS-MDA (the alpha value)
-da_cfg["enks_mda_alpha"] = [4., 4., 4., 4.]  # Note that the summation of the inverse of alpha should be one
-# da_cfg["enks_mda_alpha"] = [3., 3., 3.]  # Note that the summation of the inverse of alpha should be one
+# da_cfg["enks_mda_alpha"] = [4., 4., 4., 4.]  # Note that the summation of the inverse of alpha should be one
+da_cfg["enks_mda_alpha"] = [3., 3., 3.]  # Note that the summation of the inverse of alpha should be one
 # da_cfg["enks_mda_alpha"] = [2., 2.]  # Note that the summation of the inverse of alpha should be one
 # da_cfg["enks_mda_alpha"] = [1.]  # Note that the summation of the inverse of alpha should be one
 da_cfg["enks_mda_iteration_step"] = 1  # the ith iteration (1 for the first iteration)
@@ -468,7 +468,6 @@ assim_tools_nml = {"filter_kind":2}
 model_nml = {"time_step_days":da_cfg["assim_window_days"],
              "time_step_seconds":da_cfg["assim_window_seconds"],
              "nvar":len(obs_set)+len(para_set),
-             "interpolate_option":2,
              "debug": False,
              "var_names":obs_set+para_set,
              "template_file":files_cfg["dart_prior_template_file"],

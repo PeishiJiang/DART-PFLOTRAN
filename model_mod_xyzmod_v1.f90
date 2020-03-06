@@ -6,7 +6,7 @@
 
 module model_mod
 
-! These are the interfaces required for PFLOTRAN to be compliant
+! This is a template showing the interfaces required for a model to be compliant
 ! with the DART data assimilation infrastructure. The public interfaces listed
 ! must all be supported with the argument lists as indicated. Many of the interfaces
 ! are not required for minimal implementation (see the discussion of each
@@ -81,6 +81,7 @@ character(len=256), parameter :: source   = &
 character(len=32 ), parameter :: revision = "$Revision: 12591 $"
 character(len=128), parameter :: revdate  = "$Date: 2018-05-21 13:49:26 -0700 (Mon, 21 May 2018) $"
 
+! TODO: added domain ids for both model states and model parameters
 integer :: dom_id
 
 character(len=512) :: string1, string2, string3
@@ -94,8 +95,8 @@ type(time_type) :: time_step
 ! TODO revise the time_step_days and time_step_seconds
 integer, parameter :: MAX_STATE_VARIABLES = 40
 integer, parameter :: MAX_STATE_NAME_LEN  = 256
-integer  :: time_step_days
-integer  :: time_step_seconds
+integer  :: time_step_days      = 0
+integer  :: time_step_seconds   = 3600
 
 integer          :: model_size
 integer          :: nvar
@@ -103,6 +104,8 @@ integer          :: nvar
 character(len=MAX_STATE_NAME_LEN) :: var_names(MAX_STATE_VARIABLES)
 character(len=MAX_STATE_NAME_LEN) :: var_qtynames(MAX_STATE_VARIABLES)
 integer :: qty_list(MAX_STATE_VARIABLES)
+
+integer  :: interpolate_option
 
 ! Everything needed to describe a variable
 type progvartype
@@ -135,11 +138,19 @@ namelist /model_nml/            &
    debug,                       &
    var_names,                   &
    template_file,               &
+   interpolate_option,          &
    var_qtynames
 
+!namelist /model_nml/ model_size, time_step_days, time_step_seconds, pflotran_variables
+
 ! Define the grids/locations information
-integer  :: nloc
-real(r8), allocatable :: x_loc_all(:), y_loc_all(:), z_loc_all(:)  ! the grid locations of each dimension at all points
+! TODO
+! For now, we assume structured cartesian coordinates
+real(r8) :: x0, y0, z0  ! the lowest values
+real(r8) :: dx, dy, dz  ! the grid sizes
+integer  :: nx, ny, nz  ! the numbers of grids
+real(r8), allocatable :: x_set(:), y_set(:), z_set(:)  ! the grid locations in each dimension
+real(r8), allocatable :: x_set_all(:), y_set_all(:), z_set_all(:)  ! the grid locations of each dimension at all points
 
 contains
 
@@ -172,62 +183,102 @@ call check_namelist_read(iunit, io, "model_nml")
 if (do_nml_file()) write(nmlfileunit, nml=model_nml)
 if (do_nml_term()) write(     *     , nml=model_nml)
 
+! This time is both the minimum time you can ask the model to advance
+! (for models that can be advanced by filter) and it sets the assimilation
+! window.  All observations within +/- 1/2 this interval from the current
+! model time will be assimilated. If this isn't settable at runtime
+! feel free to hardcode it and not add it to a namelist.
+time_step = set_time(time_step_seconds, &
+                                  time_step_days)
+
 ! Get the variable quantity/kind indices
 do ivar = 1, nvar
     qty_list(ivar) = get_index_for_quantity(var_qtynames(ivar))
 end do
 
-! TODO: add two domains for parameters and model states separately
+!print *, 'Wait here'
 ! Add all the variable names to the domain by using add_domain()
 ! tell dart the size of the model
 if (template_file /= 'null') then
     ! Use add_domain_from_file() function
     dom_id = add_domain(template_file, nvar, var_names, qty_list)
 else
-    write(string1,*) 'Problem, the template file cannot be null.'
-    call error_handler(E_ERR,'static_init_model',string1,source,revision,revdate)
+
 endif
 
 ! Get the grid dimensions
 ! Read a file about the spatial information of the model.
+! Let's assume structured CARTESIAN coordinates for now.
+! That is: x0, y0, z0, nx, ny, nz, dx, dy, dz
+! There information can be read from the namelist file.
 ncid = nc_open_file_readonly(template_file, 'static_init_model')
 ! get the requested dimension size
-call nc_check( nf90_inq_dimid(ncid, "location", dimid), &
-               'static_init_model', 'inq dimid'//trim("location"))
-call nc_check( nf90_inquire_dimension(ncid, dimid, len=nloc), &
-               'static_init_model', 'inquire dimension'//trim("location"))
+call nc_check( nf90_inq_dimid(ncid, "x_location", dimid), &
+               'static_init_model', 'inq dimid'//trim("x_location"))
+call nc_check( nf90_inquire_dimension(ncid, dimid, len=nx), &
+               'static_init_model', 'inquire dimension'//trim("x_location"))
+call nc_check( nf90_inq_dimid(ncid, "y_location", dimid), &
+               'static_init_model', 'inq dimid'//trim("y_location"))
+call nc_check( nf90_inquire_dimension(ncid, dimid, len=ny), &
+               'static_init_model', 'inquire dimension'//trim("y_location"))
+call nc_check( nf90_inq_dimid(ncid, "z_location", dimid), &
+               'static_init_model', 'inq dimid'//trim("z_location"))
+call nc_check( nf90_inquire_dimension(ncid, dimid, len=nz), &
+               'static_init_model', 'inquire dimension'//trim("z_location"))
 
 ! Obtain the one-dimensional location in each dimension
-allocate(x_loc_all(nloc))
-allocate(y_loc_all(nloc))
-allocate(z_loc_all(nloc))
+allocate(x_set(nx))
+allocate(y_set(ny))
+allocate(z_set(nz))
 call nc_check( nf90_inq_varid(ncid, "x_location", varid), &
                'static_init_model', 'inq varid'//trim("x_location"))
-call nc_check( nf90_get_var(ncid, varid, x_loc_all), &
+call nc_check( nf90_get_var(ncid, varid, x_set), &
                'static_init_model', 'inquire variable'//trim("x_location"))
 call nc_check( nf90_inq_varid(ncid, "y_location", varid), &
                'static_init_model', 'inq varid'//trim("y_location"))
-call nc_check( nf90_get_var(ncid, varid, y_loc_all), &
+call nc_check( nf90_get_var(ncid, varid, y_set), &
                'static_init_model', 'inquire variable'//trim("y_location"))
 call nc_check( nf90_inq_varid(ncid, "z_location", varid), &
                'static_init_model', 'inq varid'//trim("z_location"))
-call nc_check( nf90_get_var(ncid, varid, z_loc_all), &
+call nc_check( nf90_get_var(ncid, varid, z_set), &
                'static_init_model', 'inquire variable'//trim("z_location"))
 
+x0 = x_set(1)
+y0 = y_set(1)
+z0 = z_set(1)
+dx = x_set(2) - x_set(1)
+dy = y_set(2) - y_set(1)
+dz = z_set(2) - z_set(1)
+
+! TODO
+! Change model_size*nx*ny*nz to a more flexible count of
+! the number of locations to be assimilated
 ! Create storage for locations
-model_size = nvar*nloc
+model_size = nvar*nx*ny*nz
+allocate(state_loc(model_size))
+allocate(x_set_all(model_size))
+allocate(y_set_all(model_size))
+allocate(z_set_all(model_size))
 
 ! Define the locations of the model state variables
 ! naturally, this can be done VERY differently for more complicated models.
 ! set_location() is different for 1D vs. 3D models, not surprisingly.
-allocate(state_loc(model_size))
 index_in = 1
 do ivar = 1, nvar
-    do i = 1, nloc
-        state_loc(index_in) = set_location(x_loc_all(i),y_loc_all(i),z_loc_all(i))
-        index_in = index_in + 1
+    do k = 1, nz
+        do j = 1, ny
+            do i = 1,nx
+                !state_loc(index_in) = set_location(x0+dx*(i-1),y0+dy*(j-1),z0+dz*(k-1))
+                state_loc(index_in) = set_location(x_set(i),y_set(j),z_set(k))
+                x_set_all(index_in) = i
+                y_set_all(index_in) = j
+                z_set_all(index_in) = k
+                index_in = index_in + 1
+            end do
+        end do
     end do
 end do
+
 
 ! Assign the variable name information locally here
 do ivar = 1, nvar
@@ -295,6 +346,7 @@ function get_model_size()
 
 integer(i8) :: get_model_size
 
+! TODO: revise it into unstructured grids with two domains
 get_model_size = model_size
 
 end function get_model_size
@@ -320,6 +372,8 @@ time = set_time(0,0)
 end subroutine init_time
 
 
+
+
 !------------------------------------------------------------------
 ! Given a state handle, a location, and a model state variable type,
 ! interpolates the state variable fields to that location and returns
@@ -333,22 +387,32 @@ end subroutine init_time
 ! with identity observations (i.e. only the value of a particular
 ! state variable is observed), this can be a NULL INTERFACE.
 
+! TODO
 subroutine model_interpolate(state_handle, ens_size, location, obs_qty, expected_obs, istatus)
 
 type(ensemble_type), intent(in) :: state_handle
 integer,             intent(in) :: ens_size
 type(location_type), intent(in) :: location
-integer,             intent(in) :: obs_qty
+integer,             intent(in) :: obs_qty  ! Note that obs_qty here actually refers to observation type instead of observation quantity or kind
 real(r8),           intent(out) :: expected_obs(ens_size) !< array of interpolated values
 integer,            intent(out) :: istatus(ens_size)
 
 ! Local storage
 real(r8), dimension(LocationDims) :: loc_array
-logical  :: is_find=.false.
-integer  :: loc_closest_ind
+logical :: is_find=.false.
+integer, dimension(LocationDims) :: loc_array_ens_ind
 real(r8) :: loc_x, loc_y, loc_z
+integer  :: loc_x_ind, loc_y_ind, loc_z_ind
 
+real(r8), dimension(LocationDims) :: loc_lrt, loc_llt, loc_urt, loc_ult
+real(r8), dimension(LocationDims) :: loc_lrb, loc_llb, loc_urb, loc_ulb
+integer, dimension(LocationDims)  :: loc_lrt_ind, loc_llt_ind, loc_urt_ind, loc_ult_ind
+integer, dimension(LocationDims)  :: loc_lrb_ind, loc_llb_ind, loc_urb_ind, loc_ulb_ind
+real(r8) :: w_lrt, w_llt, w_urt, w_ult
+real(r8) :: w_lrb, w_llb, w_urb, w_ulb, w_sum
+real(r8) :: val(2,2,2,ens_size)
 integer  :: e
+integer  :: i,j,k
 
 !print *, 'ensemble', ens_size
 
@@ -368,15 +432,108 @@ loc_z     = loc_array(3)
 
 !if ((debug) .and. do_output()) print *, 'requesting interpolation at ', loc_x,loc_y,loc_z
 
-! Get the nearest point by using xyz_location_mod first
-call find_closest_loc(loc_array, is_find, loc_closest_ind)
+! Option 1: get the nearest point by using xyz_location_mod first
+if (interpolate_option == 1) then
+    call find_closest_loc(loc_array, is_find, loc_array_ens_ind)
 
-if (is_find) then
-    expected_obs = get_val(state_handle, ens_size, loc_closest_ind, obs_qty)
+    if (is_find) then
+        expected_obs = get_val(state_handle, ens_size, loc_array_ens_ind, obs_qty)
+
+    else
+      write(string1,*) 'Problem, not able to get the nearest point for location: ', loc_x, loc_y, loc_z
+      call error_handler(E_ERR,'model_interpolate',string1,source,revision,revdate)
+    
+    end if
+
+! Option 2: exhaustive search on the structured grids
+else if (interpolate_option == 2) then
+    ! TODO
+    ! For now, this is applied to structured cartesian grids. Later on, it should be modified to unstructured grids.
+    ! Note that for interpolation in unstructured grids, functions and subroutines in location_mod (e.g., get_close_obs) can be used.
+    ! Get the eight locations that surrounds the location to be interpolated
+    ! Eight locations: lower right (top), lower left (top), upper right (top), upper left (top)
+    !                  lower right (bottom), lower left (bottom), upper right (bottom), upper left (bottom)
+    ! And their indices.
+    ! TODO
+    ! Let's first try to find the exact location in the array, if that exists, return it
+    ! if not, get the eight corner locations and do the IWD interpolation 
+    call get_exact_location(loc_array, is_find, loc_array_ens_ind)
+
+    if ( is_find ) then
+        ! print *, "What a conincidence!"
+        ! print *, loc_array
+        ! print *, loc_array_ens_ind
+        if (debug) then 
+            print *, "The nearest location is ", x_set(loc_array_ens_ind(1)), y_set(loc_array_ens_ind(2)), &
+                                                 z_set(loc_array_ens_ind(3))
+            print *, "The indices of the nearest location are", loc_array_ens_ind
+        end if
+
+        expected_obs = get_val(state_handle, ens_size, loc_array_ens_ind, obs_qty)
+        ! print *, expected_obs
+        
+    else
+        print *, "I have to do the IWD interpolation!"
+        call get_the_eight_corners_locations(loc_array, loc_ult, loc_urt, loc_llt, loc_lrt, &
+                loc_ulb, loc_urb, loc_llb, loc_lrb, &
+                loc_ult_ind, loc_urt_ind, loc_llt_ind, loc_lrt_ind, &
+                loc_ulb_ind, loc_urb_ind, loc_llb_ind, loc_lrb_ind)
+
+        ! Get the weights of the four locations (based on the inverse distances of
+        ! these locations to the location to be interpolated)
+        w_ult = 1.0 / sqrt(sum((loc_ult-loc_array)**2))
+        w_urt = 1.0 / sqrt(sum((loc_urt-loc_array)**2))
+        w_llt = 1.0 / sqrt(sum((loc_llt-loc_array)**2))
+        w_lrt = 1.0 / sqrt(sum((loc_lrt-loc_array)**2))
+        w_ulb = 1.0 / sqrt(sum((loc_ulb-loc_array)**2))
+        w_urb = 1.0 / sqrt(sum((loc_urb-loc_array)**2))
+        w_llb = 1.0 / sqrt(sum((loc_llb-loc_array)**2))
+        w_lrb = 1.0 / sqrt(sum((loc_lrb-loc_array)**2))
+        w_sum = w_ult+w_urt+w_llt+w_lrt+w_ulb+w_urb+w_llb+w_lrb
+        w_ult = w_ult / w_sum
+        w_urt = w_urt / w_sum
+        w_llt = w_llt / w_sum
+        w_lrt = w_lrt / w_sum
+        w_ulb = w_ulb / w_sum
+        w_urb = w_urb / w_sum
+        w_llb = w_llb / w_sum
+        w_lrb = w_lrb / w_sum
+
+        ! Get the values of the four locations
+        ! Four locations: lower right, lower left, upper right, upper left
+        val(1, 1, 1, :) =  get_val(state_handle, ens_size, loc_ult_ind, obs_qty)
+        val(1, 2, 1, :) =  get_val(state_handle, ens_size, loc_urt_ind, obs_qty)
+        val(2, 1, 1, :) =  get_val(state_handle, ens_size, loc_llt_ind, obs_qty)
+        val(2, 2, 1, :) =  get_val(state_handle, ens_size, loc_lrt_ind, obs_qty)
+        val(1, 1, 2, :) =  get_val(state_handle, ens_size, loc_ulb_ind, obs_qty)
+        val(1, 2, 2, :) =  get_val(state_handle, ens_size, loc_urb_ind, obs_qty)
+        val(2, 1, 2, :) =  get_val(state_handle, ens_size, loc_llb_ind, obs_qty)
+        val(2, 2, 2, :) =  get_val(state_handle, ens_size, loc_lrb_ind, obs_qty)
+
+        if (debug) then
+            print *, 'The eight locations ....'
+            print *, loc_ult
+            print *, loc_urt
+            print *, loc_llt
+            print *, loc_lrt
+            print *, loc_ulb
+            print *, loc_urb
+            print *, loc_llb
+            print *, loc_lrb
+            print *, "The values at the eight locations ...."
+            print *, val(1,1,1,:),val(1,2,1,:),val(2,1,1,:),val(2,2,1,:),val(1,1,2,:),val(1,2,2,:),val(2,1,2,:),val(2,2,2,:)
+        end if
+
+        ! Conduct the interpolation based on the weighted summation of the state values at the eight locations
+        expected_obs = w_ult * val(1,1,1,:) + w_urt * val(1,2,1,:) + &
+                    w_llt * val(2,1,1,:) + w_lrt * val(2,2,1,:) + &
+                    w_ulb * val(1,1,2,:) + w_urb * val(1,2,2,:) + &
+                    w_llb * val(2,1,2,:) + w_lrb * val(2,2,2,:)
+    end if
 
 else
-    write(string1,*) 'Problem, not able to get the nearest point for location: ', loc_x, loc_y, loc_z
-    call error_handler(E_ERR,'model_interpolate',string1,source,revision,revdate)
+      write(string1,*) 'Problem, incorrect interpolation method number: ', interpolate_option
+      call error_handler(E_ERR,'model_interpolate',string1,source,revision,revdate)
 
 end if
 
@@ -394,18 +551,34 @@ end subroutine model_interpolate
 ! Modified from models/mpas_atm/model_mod.f90
 subroutine init_closest_center()
 
-! initialize a GC structure
+! use nCells, latCell, lonCell to initialize a GC structure
 ! to be used later in find_closest_cell_center().
 
 ! set up a GC in the locations mod
 
-integer :: index_in, i
+integer :: index_in, i, j, k, nloc
 
+! TODO: The following is for structured grids
+nloc = nx * ny * nz
+! TODO: The following is for unstructured grids
+
+! TODO: Define nCells
 allocate(loc_set_xyz(nloc))
 
-do i=1, nloc
-   loc_set_xyz(i) = xyz_set_location(x_loc_all(i), y_loc_all(i), z_loc_all(i))
-enddo
+! TODO: The following is for structured grids
+index_in = 1
+do k = 1, nz
+    do j = 1, ny
+        do i = 1,nx
+            loc_set_xyz(index_in) = xyz_set_location(x_set(i),y_set(j),z_set(k))
+            index_in = index_in + 1
+        end do
+    end do
+end do
+! ! TODO: The following is for unstructured grids
+! do i=1, nloc
+!    loc_set(i) = xyz_set_location(xloc_set(i), yloc_set(i), zloc_set(i))
+! enddo
 
 call xyz_get_close_init(cc_gc, maxdist, nloc, loc_set_xyz)
 
@@ -414,17 +587,18 @@ end subroutine init_closest_center
 
 !------------------------------------------------------------------
 ! Modified from models/mpas_atm/model_mod.f90
-subroutine find_closest_loc(loc_array, is_find, closest_loc_ind)
+subroutine find_closest_loc(loc_array, is_find, loc_array_ens_ind)
 
-! Determine the index for the closest center to the given point
+! Determine the cell index for the closest center to the given point
+! 2D calculation only.
 
 real(r8), dimension(LocationDims), intent(in) :: loc_array
 logical,  intent(inout)                       :: is_find
-integer,  intent(out)                         :: closest_loc_ind
+integer, dimension(LocationDims), intent(out) :: loc_array_ens_ind
 
 real(r8)  :: xloc, yloc, zloc
 type(xyz_location_type) :: pointloc
-integer :: rc
+integer :: closest_loc, rc
 
 ! Get the individual location values
 xloc = loc_array(1)
@@ -439,46 +613,341 @@ endif
 
 pointloc = xyz_set_location(xloc, yloc, zloc)
 
-! Search the closet location
-call xyz_find_nearest(cc_gc, pointloc, loc_set_xyz, closest_loc_ind, rc)
+call xyz_find_nearest(cc_gc, pointloc, loc_set_xyz, closest_loc, rc)
 
 ! decide what to do if we don't find anything.
-if (rc /= 0 .or. closest_loc_ind < 0) then
+if (rc /= 0 .or. closest_loc < 0) then
     print *, 'cannot find nearest cell to the location (x,y,z): ', xloc, yloc, zloc
     is_find = .false.
 ! if we do find something, then get the nearest location
 else
     is_find = .true.
+    ! TODO: The following is for structured grids
+    ! loc_array_ens = xyz_get_location(loc_set_xyz(closest_loc))
+    loc_array_ens_ind(1) = x_set_all(closest_loc)
+    loc_array_ens_ind(2) = y_set_all(closest_loc)
+    loc_array_ens_ind(3) = z_set_all(closest_loc)
     if (debug) then
-        print *, "The nearest location is: ", x_loc_all(closest_loc_ind), y_loc_all(closest_loc_ind), &
-                                              z_loc_all(closest_loc_ind)
-        print *, "The indices of the nearest location are: ", closest_loc_ind
+        print *, "The nearest location is: ", x_set(loc_array_ens_ind(1)), y_set(loc_array_ens_ind(2)), &
+                                              z_set(loc_array_ens_ind(3))
+        print *, "The indices of the nearest location are: ", loc_array_ens_ind
     end if
+    ! ! TODO: The following is for unstructured grids
+    ! loc_array_ens_ind(1) = closest_loc
+    ! loc_array_ens_ind(2) = closest_loc
+    ! loc_array_ens_ind(3) = closest_loc
 endif
 
 end subroutine find_closest_loc
 
 
+!------------------------------------------------------------
+! Get the exact location
+! Eight locations: lower right (top), lower left (top), upper right (top), upper left (top)
+!                  lower right (bottom), lower left (bottom), upper right (bottom), upper left (bottom)
+! And their indices.
+subroutine get_exact_location(loc_array, is_find, loc_array_ens_ind)
+
+real(r8), dimension(LocationDims), intent(in) :: loc_array
+logical,  intent(inout)                       :: is_find
+integer, dimension(LocationDims), intent(out) :: loc_array_ens_ind
+
+real(r8), parameter :: TORELABLE_DIFF = 1.0d-8
+
+real(r8) :: loc_x, loc_y, loc_z
+real(r8) :: diff_x, diff_y, diff_z
+logical  :: find_x=.false., find_y=.false., find_z=.false.
+integer  :: i,j,k
+
+! Get the individual location values
+loc_x = loc_array(1)
+loc_y = loc_array(2)
+loc_z = loc_array(3)
+
+! Get the location along x dimension
+do i = 1,nx
+    diff_x = abs(x_set(i) - loc_x)
+    if (diff_x < TORELABLE_DIFF) then
+        loc_array_ens_ind(1) = i
+        find_x = .true.
+        exit
+    end if
+end do
+
+! Get the location along y dimension
+do j = 1,ny
+    diff_y = abs(y_set(j) - loc_y)
+    if (diff_y < TORELABLE_DIFF) then
+        loc_array_ens_ind(2) = j
+        find_y = .true.
+        exit
+    end if
+end do
+
+! Get the location along z dimension
+do k = 1,nz
+    diff_z = abs(z_set(k) - loc_z)
+    ! print *, diff_z, TORELABLE_DIFF
+    if (diff_z < TORELABLE_DIFF) then
+        loc_array_ens_ind(3) = k
+        find_z = .true.
+        exit
+    end if
+end do
+
+if (find_x .and. find_y .and. find_z) then
+    is_find = .true.
+end if
+
+end subroutine get_exact_location
+
+
 !------------------------------------------------------------------
-function get_val(state_handle, ens_size, loc_ind, var_kind)
+! Get the eight locations that surrounds the location to be interpolated
+! Eight locations: lower right (top), lower left (top), upper right (top), upper left (top)
+!                  lower right (bottom), lower left (bottom), upper right (bottom), upper left (bottom)
+! And their indices.
+subroutine get_the_eight_corners_locations(loc_array, loc_ult, loc_urt, loc_llt, loc_lrt, &
+           loc_ulb, loc_urb, loc_llb, loc_lrb, &
+           loc_ult_ind, loc_urt_ind, loc_llt_ind, loc_lrt_ind, &
+           loc_ulb_ind, loc_urb_ind, loc_llb_ind, loc_lrb_ind)
+
+real(r8), dimension(LocationDims), intent(in)    :: loc_array
+real(r8), dimension(LocationDims), intent(out) :: loc_lrt, loc_llt, loc_urt, loc_ult
+real(r8), dimension(LocationDims), intent(out) :: loc_lrb, loc_llb, loc_urb, loc_ulb
+integer, dimension(LocationDims), intent(out)  :: loc_lrt_ind, loc_llt_ind, loc_urt_ind, loc_ult_ind
+integer, dimension(LocationDims), intent(out)  :: loc_lrb_ind, loc_llb_ind, loc_urb_ind, loc_ulb_ind
+!real(r8), dimension(LocationDims), intent(out) :: loc_lr, loc_ll, loc_ur, loc_ul
+!integer, dimension(LocationDims), intent(out)  :: loc_lr_ind, loc_ll_ind, loc_ur_ind, loc_ul_ind
+
+real(r8) :: loc_x, loc_y, loc_z
+integer  :: i,j,k
+
+! Get the individual location values
+loc_x     = loc_array(1)
+loc_y     = loc_array(2)
+loc_z     = loc_array(3)
+
+! Get the location along x dimension
+do i = 1,nx
+    if (x_set(i) >= loc_x) then
+        ! grid value
+        loc_urt(1) = x_set(i)
+        loc_lrt(1) = x_set(i)
+        loc_urb(1) = x_set(i)
+        loc_lrb(1) = x_set(i)
+        ! grid index
+        loc_urt_ind(1) = i
+        loc_lrt_ind(1) = i
+        loc_urb_ind(1) = i
+        loc_lrb_ind(1) = i
+        exit
+    end if
+end do
+if (i == 1) then
+    ! grid value
+    loc_ult(1) = x_set(i)
+    loc_llt(1) = x_set(i)
+    loc_ulb(1) = x_set(i)
+    loc_llb(1) = x_set(i)
+    ! grid index
+    loc_ult_ind(1) = i
+    loc_llt_ind(1) = i
+    loc_ulb_ind(1) = i
+    loc_llb_ind(1) = i
+else if (i == nx+1) then
+    i = i-1
+    ! grid value
+    loc_ult(1) = x_set(i)
+    loc_llt(1) = x_set(i)
+    loc_urt(1) = x_set(i)
+    loc_lrt(1) = x_set(i)
+    loc_ulb(1) = x_set(i)
+    loc_llb(1) = x_set(i)
+    loc_urb(1) = x_set(i)
+    loc_lrb(1) = x_set(i)
+    ! grid index
+    loc_ult_ind(1) = i
+    loc_llt_ind(1) = i
+    loc_urt_ind(1) = i
+    loc_lrt_ind(1) = i
+    loc_ulb_ind(1) = i
+    loc_llb_ind(1) = i
+    loc_urb_ind(1) = i
+    loc_lrb_ind(1) = i
+else
+    ! grid value
+    loc_ult(1) = x_set(i-1)
+    loc_llt(1) = x_set(i-1)
+    loc_ulb(1) = x_set(i-1)
+    loc_llb(1) = x_set(i-1)
+    ! grid index
+    loc_ult_ind(1) = i-1
+    loc_llt_ind(1) = i-1
+    loc_ulb_ind(1) = i-1
+    loc_llb_ind(1) = i-1
+end if
+!print *, 'check', i, loc_ul
+!print *, 'check', i, loc_ll
+!print *, 'check', i, loc_ur
+!print *, 'check', i, loc_lr
+
+! Get the location along y dimension
+do j = 1,ny
+    if (y_set(j) >= loc_y) then
+        ! grid value
+        loc_urt(2) = y_set(j)
+        loc_ult(2) = y_set(j)
+        loc_urb(2) = y_set(j)
+        loc_ulb(2) = y_set(j)
+        ! grid index
+        loc_urt_ind(2) = j
+        loc_ult_ind(2) = j
+        loc_urb_ind(2) = j
+        loc_ulb_ind(2) = j
+        exit
+    end if
+end do
+if (j == 1) then
+    ! grid value
+    loc_lrt(2) = y_set(j)
+    loc_llt(2) = y_set(j)
+    loc_lrb(2) = y_set(j)
+    loc_llb(2) = y_set(j)
+    ! grid index
+    loc_lrt_ind(2) = j
+    loc_llt_ind(2) = j
+    loc_lrb_ind(2) = j
+    loc_llb_ind(2) = j
+else if (j == ny+1) then
+    j = j-1
+    ! grid value
+    loc_ult(2) = y_set(j)
+    loc_llt(2) = y_set(j)
+    loc_urt(2) = y_set(j)
+    loc_lrt(2) = y_set(j)
+    loc_ulb(2) = y_set(j)
+    loc_llb(2) = y_set(j)
+    loc_urb(2) = y_set(j)
+    loc_lrb(2) = y_set(j)
+    ! grid index
+    loc_lrt_ind(2) = j
+    loc_llt_ind(2) = j
+    loc_urt_ind(2) = j
+    loc_ult_ind(2) = j
+    loc_lrb_ind(2) = j
+    loc_llb_ind(2) = j
+    loc_urb_ind(2) = j
+    loc_ulb_ind(2) = j
+else
+    ! grid value
+    loc_lrt(2) = y_set(j-1)
+    loc_llt(2) = y_set(j-1)
+    loc_lrb(2) = y_set(j-1)
+    loc_llb(2) = y_set(j-1)
+    ! grid index
+    loc_lrt_ind(2) = j-1
+    loc_llt_ind(2) = j-1
+    loc_lrb_ind(2) = j-1
+    loc_llb_ind(2) = j-1
+end if
+!print *, 'check', j, loc_ul
+!print *, 'check', j, loc_ll
+!print *, 'check', j, loc_ur
+!print *, 'check', j, loc_lr
+!print *, 'check', j, y_set(j), y_set(j-1)
+!print *, 'check', y_set
+!print *, 'check', x_set
+
+! Get the location along z dimension
+do k = 1,nz
+    if (z_set(k) >= loc_z) then
+        ! grid value
+        loc_ult(3) = z_set(k)
+        loc_llt(3) = z_set(k)
+        loc_urt(3) = z_set(k)
+        loc_lrt(3) = z_set(k)
+        ! grid index
+        loc_lrt_ind(3) = k
+        loc_llt_ind(3) = k
+        loc_urt_ind(3) = k
+        loc_ult_ind(3) = k
+        exit
+    end if
+end do
+if (k == 1) then
+    ! grid value
+    loc_ulb(3) = z_set(k)
+    loc_llb(3) = z_set(k)
+    loc_urb(3) = z_set(k)
+    loc_lrb(3) = z_set(k)
+    ! grid index
+    loc_lrb_ind(3) = k
+    loc_llb_ind(3) = k
+    loc_urb_ind(3) = k
+    loc_ulb_ind(3) = k
+else if (k == nz+1) then
+    k = k-1
+    ! grid value
+    loc_ult(3) = z_set(k)
+    loc_llt(3) = z_set(k)
+    loc_urt(3) = z_set(k)
+    loc_lrt(3) = z_set(k)
+    loc_ulb(3) = z_set(k)
+    loc_llb(3) = z_set(k)
+    loc_urb(3) = z_set(k)
+    loc_lrb(3) = z_set(k)
+    ! grid index
+    loc_lrt_ind(3) = k
+    loc_llt_ind(3) = k
+    loc_urt_ind(3) = k
+    loc_ult_ind(3) = k
+    loc_lrb_ind(3) = k
+    loc_llb_ind(3) = k
+    loc_urb_ind(3) = k
+    loc_ulb_ind(3) = k
+else
+    ! grid value
+    loc_ulb(3) = z_set(k-1)
+    loc_llb(3) = z_set(k-1)
+    loc_urb(3) = z_set(k-1)
+    loc_lrb(3) = z_set(k-1)
+    ! grid index
+    loc_lrb_ind(3) = k-1
+    loc_llb_ind(3) = k-1
+    loc_urb_ind(3) = k-1
+    loc_ulb_ind(3) = k-1
+end if
+end subroutine get_the_eight_corners_locations
+
+
+!------------------------------------------------------------------
+function get_val(state_handle, ens_size, loc_array_ind, var_kind)
 
 type(ensemble_type), intent(in) :: state_handle
+integer, dimension(LocationDims) :: loc_array_ind
+!integer, intent(in) :: lon_index, lat_index, level, var_kind
 integer, intent(in) :: var_kind
 integer, intent(in) :: ens_size
-integer  :: loc_ind
 real(r8) :: get_val(ens_size)
 
-integer :: i
+integer :: loc_x_ind, loc_y_ind, loc_z_ind
 
 character(len = 129) :: msg_string
 integer :: var_id
 integer(i8) :: state_index
 
+! Get the individual location values
+loc_x_ind = loc_array_ind(1)
+loc_y_ind = loc_array_ind(2)
+loc_z_ind = loc_array_ind(3)
+
+! TODO: change the dom_id to the observation variable domain
 var_id = get_varid_from_kind(dom_id, var_kind)
 
-! TODO: probably need to revise this once state-space formulation is implemented.
-! state_index = get_dart_vector_index(loc_x_ind, loc_y_ind, loc_z_ind, dom_id, var_id)
-state_index = get_dart_vector_index(loc_ind, 1, 1, dom_id, var_id)
+! Find the index into state array and return this value
+!dom_id = progvar(var_id)%domain
+state_index = get_dart_vector_index(loc_x_ind, loc_y_ind, loc_z_ind, dom_id, var_id)
 get_val     = get_state(state_index, state_handle)
 
 !if (debug) then
@@ -497,27 +966,16 @@ end function get_val
 ! time you want the model to advance between assimilations.
 ! This interface is required for all applications.
 
-! Note that this function is unused in DART-PFLOTRAN, because we run
-! PFLOTRAN as an external executable.
-
 function shortest_time_between_assimilations()
 
 type(time_type) :: shortest_time_between_assimilations
-
-! This time is both the minimum time you can ask the model to advance
-! (for models that can be advanced by filter) and it sets the assimilation
-! window.  All observations within +/- 1/2 this interval from the current
-! model time will be assimilated. If this isn't settable at runtime
-! feel free to hardcode it and not add it to a namelist.
-! Note that time_step is unused in DART-PFLOTRAN, because we run
-! PFLOTRAN as an external executable.
-time_step = set_time(time_step_seconds, time_step_days)
 
 ! TODO
 ! Revise it if the unit of time_step is not the same as desired
 shortest_time_between_assimilations = time_step
 
 end function shortest_time_between_assimilations
+
 
 
 !------------------------------------------------------------------
@@ -588,12 +1046,11 @@ end subroutine get_state_meta_data
 subroutine end_model()
 
 ! More variables allocated in static_init_model() should be deallocated here
-!TODO: Modify it later once a full unstructured grid implementation is enabled.
 deallocate(state_loc)
 
-deallocate(x_loc_all)
-deallocate(y_loc_all)
-deallocate(z_loc_all)
+deallocate(x_set)
+deallocate(y_set)
+deallocate(z_set)
 
 end subroutine end_model
 
