@@ -29,12 +29,14 @@
     /
 
 &data_file_nml
-    obs_raw_file                   = '[pflotran_in_dir]/temperature_obs_error05.csv'
+    obs_raw_file                   = '[pflotran_in_dir]/temperature_obs_error005.csv'
     obs_nc_original_file           = '[pflotran_in_dir]/obs_pflotran_original.nc'
     obs_nc_file                    = '[pflotran_in_dir]/obs_pflotran_clipped.nc'
     obs_dart_file                  = '[dart_data_dir]/obs_seq_pflotran.out'
     dart_prior_nc_file             = '[dart_data_dir]/prior_ensemble_[ENS]_time_[TIME].nc'
     dart_posterior_nc_file         = '[dart_data_dir]/posterior_ensemble_[ENS]_time_[TIME].nc'
+    dart_prior_nc_file_temp        = '[dart_data_dir]/prior_ensemble_[ENS]_time_[TIME]_temp.nc'
+    dart_posterior_nc_file_temp    = '[dart_data_dir]/posterior_ensemble_[ENS]_time_[TIME]_temp.nc'
     dart_prior_nc_all_file         = '[dart_data_dir]/prior_ensemble_[ENS]_all.nc'
     dart_posterior_nc_all_file     = '[dart_data_dir]/posterior_ensemble_[ENS]_all.nc'
     dart_prior_nc_all_ens_file     = '[dart_data_dir]/prior_ensemble_all.nc'
@@ -69,7 +71,7 @@
     update_pflotran_input_file     = '[utils_dir]/update_pflotran_input.py'
     update_confignml_time_file     = '[utils_dir]/update_confignml_time.py'
     update_dart_obs_inflation_file = '[utils_dir]/update_dart_obs_inflation.py'
-    update_obs_ens_posterior_file  = '[utils_dir]/update_obs_ens_posterior.py'
+    update_posterior_file          = '[utils_dir]/update_posterior.py'
     plot_da_result_file            = '[utils_dir]/plot_da_result.py'
     clip_obs_nc_file               = '[utils_dir]/clip_obs_nc.py'
     concatenate_dart_output_file   = '[utils_dir]/concatenate_dart_output.py'

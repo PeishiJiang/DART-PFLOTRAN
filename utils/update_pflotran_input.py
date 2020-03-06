@@ -48,7 +48,7 @@ current_model_time_end     = current_model_time + (assim_window_size - one_sec) 
 current_model_time_end_sec = current_model_time_end * 86400
 print(current_model_time_end_sec)
 # current_model_time_sec     = float(model_time_list[-1]) * 86400
-spinup_length_sec      = spinup_length * 86400
+spinup_length_sec          = spinup_length * 86400
 
 para_set      = configs["obspara_set_cfg"]["para_set"]
 para_min_set  = configs["obspara_set_cfg"]["para_min_set"]
@@ -96,7 +96,7 @@ if enks_mda_iteration_step == 1 and not update_obs_ens_posterior:
     with open(pflotran_in_file, 'w') as f:
         for i, s in enumerate(pflotranin):
             if "FINAL_TIME" in s:
-                # pflotranin[i] = "  FINAL_TIME {} sec".format(spinup_length_sec + current_model_time_sec + assim_window) + "\n"
+                # pflotranin[i] = "  FINAL_TIME {} sec".format(spinup_length_sec + current_model_time_end_sec + assim_window) + "\n"
                 pflotranin[i] = "  FINAL_TIME {} sec".format(spinup_length_sec + current_model_time_end_sec) + "\n"
             if "SUBSURFACE_FLOW" in s and "MODE" in pflotranin[i + 1] and first_time_update:
                 pflotranin.insert(i + 2, "        OPTIONS \n")
@@ -108,7 +108,7 @@ if enks_mda_iteration_step == 1 and not update_obs_ens_posterior:
                 pflotranin.insert(i + 4, "    REALIZATION_DEPENDENT \n")
                 # pflotranin.insert(i + 5, "    RESET_TO_TIME_ZERO \n")
                 pflotranin.insert(i + 5, "  / \n")
-            if "SNAPSHOT_FILE" in s:
+            if "SNAPSHOT_FILE" in s and first_time_update:
                 pflotranin.insert(i + 1, "   PERIODIC TIME 300.0d0 sec \n")
 
         f.writelines(pflotranin)
@@ -138,7 +138,7 @@ for i in range(len(dart_posterior_file_list)):
     dart_posterior_file_set.append(file_name)
 
 ###############################
-# TODO Modify the parameter to 3D later on
+# TODO Modify the parameter from a single value to 3D later on
 # Update the parameter values in
 # parameter_prior.h5 based on DART
 # posterior output

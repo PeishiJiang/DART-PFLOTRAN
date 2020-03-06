@@ -1,13 +1,5 @@
 # To add a new cell, type '# %%'
 # To add a new markdown cell, type '# %% [markdown]'
-# %% Change working directory from the workspace root to the ipynb file location. Turn this addition off with the DataScience.changeDirOnImportExport setting
-# ms-python.python added
-import os
-try:
-	os.chdir(os.path.join(os.getcwd(), 'manhattan/models/pflotran/applications/workflow_ipynb'))
-	print(os.getcwd())
-except:
-	pass
 # %%
 from IPython import get_ipython
 
@@ -20,7 +12,7 @@ from IPython import get_ipython
 #  - [x] [DART files preparation](#dart_prepare): add new DART quantities, prepare DART input namelists, prepare DART prior data, prepare observations in DART format, and check ```model_mod``` interface
 #  - [x] [Generate all the executable files](#dart_executables): generate all the executables, convert observations in DART format, check ```model_mod``` interface, and test the filter
 #  - [x] [Run DART and PFLOTRAN](#run_dart_pflotran): run the shell script for integrating DART filter and PFLOTRAN model
-# 
+#
 #  Here, we perform inverse modeling on a 1D thermal model for illustration. The model assimilates temperature observation to update its parameters (i.e., flow flux, porosity, and thermal conductivity). For now, the ensemble Kalman filter (EnKF) is used for assimilation.
 # %% [markdown]
 #  <a id='parameter'></a>
@@ -44,15 +36,18 @@ from datetime import datetime, timedelta
 # %% [markdown]
 #  ****************
 #  **Define the locations of MPI, PFLOTRAN, application folder and DART-PFLOTRAN interface folder**
-# 
+#
 #  It is suggested that <span style="background-color:lightgreen">mpi_exe</span> is defined based on the mpi utility (e.g., mpirun) installed by PFLOTRAN.
-# 
+#
 #  **Important:** You must make sure the <span style="background-color:lightgreen">mpi_exe</span> has the same MPI system as the settings ```MPIFC``` and ```MPILD``` in ```mkmf.template```.
 
 # %%
 # MPI settings
-mpi_exe_da  = '/usr/local/bin/mpirun'  # The location of mpirun
+# mpi_exe_da  = '/usr/local/bin/mpirun'  # The location of mpirun
+mpi_exe_da  = '/Users/jian449/Codes/petsc/arch-darwin-c-opt/bin/mpirun'
 mpi_exe_pf  = '/Users/jian449/Codes/petsc/arch-darwin-c-opt/bin/mpirun'
+# mpi_exe_da  = '/software/petsc_v3.11.3/arch-linux2-c-opt/bin/mpirun'  # The location of mpirun
+# mpi_exe_pf  = '/software/petsc_v3.11.3/arch-linux2-c-opt/bin/mpirun'
 ncore_da = 4  # The number of MPI cores used by DART
 ncore_pf = 4  # The number of MPI cores used by PFLOTRAN
 ngroup_pf= 4  # The number of group used by stochastic running in PFLOTRAN
@@ -60,12 +55,17 @@ ngroup_pf= 4  # The number of group used by stochastic running in PFLOTRAN
 # PFLOTRAN executable
 # pflotran_exe  = '/global/project/projectdirs/m1800/pin/pflotran-haswell/src/pflotran/pflotran'
 pflotran_exe  = '/Users/jian449/Codes/pflotran/src/pflotran/pflotran'
+# pflotran_exe  = '/software/pflotran/src/pflotran/pflotran'
 
 # Main directory names
 temp_app_dir = "/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal"          # The template for application folder
-app_dir      = "/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal_original_1month_mda1_v2"          # The application folder name
+app_dir      = "/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal_test_ncprior"          # The application folder name
 dart_dir     = "/Users/jian449/Codes/DART/manhattan"
 dart_pf_dir  = "/Users/jian449/Codes/DART/manhattan/models/pflotran"     # The dart pflotran utitlity folder name
+# temp_app_dir = "/home/jian449/DART/manhattan/models/pflotran/applications/template"          # The template for application folder
+# app_dir      = "/home/jian449/DART/manhattan/models/pflotran/applications/1dthermal_test_1month_4mda_v2"          # The application folder name
+# dart_dir     = "/home/jian449/DART/manhattan"
+# dart_pf_dir  = "/home/jian449/DART/manhattan/models/pflotran"     # The dart pflotran utitlity folder name
 # temp_app_dir = "/global/cscratch1/sd/peishi89/DART_PFLOTRAN_APP/applications/template"          # The template for application folder
 # app_dir      = "/global/cscratch1/sd/peishi89/DART_PFLOTRAN_APP/applications/1dthermal"          # The application folder name
 # dart_dir     = "/global/homes/p/peishi89/DART/manhattan"
@@ -78,7 +78,7 @@ dart_pf_dir  = "/Users/jian449/Codes/DART/manhattan/models/pflotran"     # The d
 # configs = {}
 configs = f90nml.namelist.Namelist()
 configs["main_dir_cfg"] = {"app_dir": app_dir, "dart_dir": dart_dir, "dart_pf_dir": dart_pf_dir}
-configs["exe_cfg"]      = {"pflotran_exe": pflotran_exe, "mpi_exe_da": mpi_exe_da, "mpi_exe_pf": mpi_exe_pf, 
+configs["exe_cfg"]      = {"pflotran_exe": pflotran_exe, "mpi_exe_da": mpi_exe_da, "mpi_exe_pf": mpi_exe_pf,
                            "ncore_pf": ncore_pf, "ncore_da": ncore_da, "ngroup_pf": ngroup_pf}
 
 # %% [markdown]
@@ -93,7 +93,7 @@ if not os.path.isdir(app_dir):
 # %% [markdown]
 #  ****************
 #  **Load all the required file paths/names from ```file_paths.nml```**
-# 
+#
 #  ```file_paths.nml``` defines the relative locations of all the files (e.g., utility files, shell scripts, data files, etc) used by this application
 
 # %%
@@ -118,6 +118,7 @@ dart_inout_dir    = dirs_cfg["dart_data_dir"]
 # subprocess.run("cd {}; rm *".format(pflotran_in_dir), shell=True, check=False)
 subprocess.run("cd {}; rm -f *".format(pflotran_out_dir), shell=True, check=True)
 subprocess.run("cd {}; ls | xargs rm".format(dart_inout_dir), shell=True, check=True)
+# subprocess.run("cd {}; ls | xargs -r rm".format(dart_inout_dir), shell=True, check=True)
 
 # %% [markdown]
 #  ****************
@@ -147,13 +148,12 @@ para_max_set  = [5.0]  # The maximum values (99999 means no upper bound limit)
 para_mean_set = [0.0]  # The mean values
 para_std_set  = [0.5]  # The standard deviation values
 para_dist_set = ["normal"]  # The assumed distribution to be sampled
-para_prior_rescaled = False # Whether the prior is generated from rescaling the posterior at the previous time step
-# para_dist_set = ["test"]  # The assumed distribution to be sampled
+para_prior_rescaled = True  # The assumed distribution to be sampled
 
 para_resampled_set = ['FLOW_FLUX']   # The parameters to be resampled at each time step
 # para_resampled_set = ['']   # The parameters to be resampled at each time step
 
-configs["obspara_set_cfg"] = {"obs_set": obs_set, "para_set": para_set, "para_prior_rescaled": para_prior_rescaled,
+configs["obspara_set_cfg"] = {"obs_set": obs_set, "para_set": para_set, "para_prior_rescaled": True,
                               "para_min_set": para_min_set, "para_max_set": para_max_set,
                               "para_mean_set": para_mean_set, "para_std_set": para_std_set,
                               "para_dist_set": para_dist_set, "para_resampled_set": para_resampled_set}
@@ -161,7 +161,7 @@ configs["obspara_set_cfg"] = {"obs_set": obs_set, "para_set": para_set, "para_pr
 # %% [markdown]
 #  ****************
 #  **Specify the spatial domains of the observation data to be assimilated**
-# 
+#
 #  The limits of x, y, and z are bounded by the minimum and maximum boundaries through (min, max). If the limit is not specified, -99999 and 99999 are assigned for the lower and upper bounds, respectively.
 
 # %%
@@ -192,7 +192,7 @@ da_cfg["assim_window_size"] = da_cfg["assim_window_days"]+float(da_cfg["assim_wi
 #  - the list of model time or the list of starting assimilation time (starting from zero)
 #  - the map between the observation start time and model start time (considered as zero)
 #  - the first and the last observation times relative to the observation start time
-# 
+#
 #  **note that** model start time is considered after the spinup
 
 # %%
@@ -208,7 +208,7 @@ time_cfg["current_model_time"] = (da_cfg["assim_window_size"] + one_sec)/2  # mo
 time_cfg["model_time_list"]    = [time_cfg["current_model_time"]]   # the list of model time
 
 # Map between observation assimilation start time and model start time
-obs_start   = datetime(2017,4,1,0,0,0) 
+obs_start   = datetime(2017,4,1,0,0,0)
 assim_start = obs_start + timedelta(days=time_cfg["spinup_length"]) # assimilation time should be after the model spinup
 time_cfg["assim_start"] = assim_start.strftime("%Y-%m-%d %H:%M:%S")
 
@@ -217,7 +217,8 @@ time_cfg["first_obs_time_days"]    = 0
 time_cfg["first_obs_time_seconds"] = 0
 time_cfg["first_obs_time_size"] = time_cfg["first_obs_time_days"]+float(time_cfg["first_obs_time_seconds"])/86400. # day
 time_cfg["last_obs_time_days"]    = 0
-time_cfg["last_obs_time_seconds"] = 3600*24*29
+# time_cfg["last_obs_time_seconds"] = 3600*24*29
+time_cfg["last_obs_time_seconds"] = 3600*5
 # time_cfg["last_obs_time_seconds"] = 300
 time_cfg["last_obs_time_size"] = time_cfg["last_obs_time_days"]+float(time_cfg["last_obs_time_seconds"])/86400. # day
 
@@ -261,9 +262,10 @@ da_cfg["obs_ens_posterior_from_model"] = True
 
 # %%
 # The inflation settings used in EnKS-MDA (the alpha value)
-# da_cfg["enks_mda_alpha"] = [4., 4., 4., 4.]  # Note that the summation of the inverse of alpha should be one
-da_cfg["enks_mda_alpha"] = [1.]  # Note that the summation of the inverse of alpha should be one
+da_cfg["enks_mda_alpha"] = [4., 4., 4., 4.]  # Note that the summation of the inverse of alpha should be one
+# da_cfg["enks_mda_alpha"] = [3., 3., 3.]  # Note that the summation of the inverse of alpha should be one
 # da_cfg["enks_mda_alpha"] = [2., 2.]  # Note that the summation of the inverse of alpha should be one
+# da_cfg["enks_mda_alpha"] = [1.]  # Note that the summation of the inverse of alpha should be one
 da_cfg["enks_mda_iteration_step"] = 1  # the ith iteration (1 for the first iteration)
 da_cfg["enks_mda_total_iterations"] = len(da_cfg["enks_mda_alpha"])  # Note that the summation of the inverse of alpha should be one
 
@@ -297,11 +299,11 @@ configs.write(config_file, force=True)
 #  <a id='pflotran_prepare'></a>
 #  # Step 2: PFLOTRAN preparation
 #  *Here, we use Kewei's 1D thermal model as an example for generating PFLOTRAN input card and parameter.h5.*
-# 
+#
 #  In this section, the following procedures are performed:
 #  - generate PFLOTRAN input deck file ```PFLOTRAN.in```
 #  - generate the parameter files in HDF 5, ```parameter_prior.h5```, used by PFLOTRAN input deck file
-# 
+#
 #  **Note that**
 #  - ```PFLOTRAN.in``` for each DA scenario should be prepared by users.
 
@@ -312,7 +314,7 @@ prep_pflotran_parameterprior = files_cfg["prep_pflotran_para_file"]
 # %% [markdown]
 #  ****************
 #  **Generate the ensembles of PFLOTRAN prior**
-# 
+#
 #  **Run code**
 #  - Run: ```prepare_pflotran_parameterprior.py```
 #  - Code input arguments (loaded from the configuration file):
@@ -329,7 +331,7 @@ subprocess.run("python {} {}".format(prep_pflotran_parameterprior, config_file),
 # %% [markdown]
 #  ****************
 #  **Generate PFLOTRAN input deck file**
-# 
+#
 #  **Run code**
 #  - Run: ```prepare_pflotran_inputdeck.py```
 #  - Code input arguments (loaded from the configuration file):
@@ -352,7 +354,7 @@ subprocess.run("python {} {}".format(prep_pflotran_inputdeck, config_file), shel
 #  <a id='pflotran_spinup'></a>
 #  # Step 3: PFLOTRAN model spin-up
 #  Take in the ```pflotran.in``` and ```parameter.h5``` files and conduct the model spin-up by running ```pflotran.sh``` file. The ```pflotran.sh``` is a simple shell script executing ensemble simulation of PFLOTRAN by using MPI.
-# 
+#
 #  **Run the code**
 #  - Run: ```prepare_pflotran_inpara.py```
 #  - Code input arguments (loaded from the configuration file):
@@ -418,20 +420,20 @@ subprocess.run("python {} {}".format(to_dartqty, config_file), shell=True, check
 
 # %% [markdown]
 #  ## Generate  DART input namelists in ```input.nml```
-# 
+#
 #  The ```input.nml``` file is generated based on a template ```input.nml.template``` by modifying the following namelist entries:
-# 
+#
 #  ```input.nml.template``` $\rightarrow$ ```input.nml```
-# 
+#
 #  |filter_nml|obs_kind_nml|preprocess_nml|model_nml|convertnc_nml|
 #  |:--:|:--:|:--:|:--:|:--:|
 #  | input_state_file_list, output_state_file_list, ens_size, async, adv_ens_command, obs_sequence_in_name | assimilate_these_obs_types | input_files, input_obs_kind_mod_file | time_step_days, time_step_seconds, nvar, var_names, template_file, var_qtynames | netcdf_file, out_file |
-# 
+#
 #  **Namelists from DART**
 #  - [filter_nml](https://www.image.ucar.edu/DAReS/DART/Manhattan/assimilation_code/modules/assimilation/filter_mod.html): namelist of the main module for driving ensemble filter assimilations
 #  - [obs_kind_nml](https://www.image.ucar.edu/DAReS/DART/Manhattan/assimilation_code/modules/observations/obs_kind_mod.html#Namelist): namelist for controling what observation types are to be assimilated
 #  - [preprocess_nml](https://www.image.ucar.edu/DAReS/Codes/DART/manhattan/assimilation_code/programs/preprocess/preprocess): namelist of the DART-supplied preprocessor program which creates observation kind and observation definition modules from a set of other specially formatted Fortran 90 files
-# 
+#
 #  **Self-defined namelists**
 #  - model_nml: a self-defined namelist for providing the basic information in the model
 #      - time_step_days, time_step_seconds: the assimilation time window
@@ -442,7 +444,7 @@ subprocess.run("python {} {}".format(to_dartqty, config_file), shell=True, check
 #  - convertnc_nml: a self-defined namelist for providing the NetCDF observation file name and the DART observation file name used in ```convert_nc.f90```
 #      - netcdf_file: the location of the NetCDF file containing the observation data
 #      - out_file: the location of the DART observation file
-# 
+#
 #  **Note that**
 #  - There are more namelists or other items in the above namelist in input.nml.template. Users can edit the below python dictionary ```inputnml``` to include their modifications.
 #  - Users can also include more namelists provided by DART by modifying ```inputnml```.
@@ -466,6 +468,8 @@ assim_tools_nml = {"filter_kind":2}
 model_nml = {"time_step_days":da_cfg["assim_window_days"],
              "time_step_seconds":da_cfg["assim_window_seconds"],
              "nvar":len(obs_set)+len(para_set),
+             "interpolate_option":2,
+             "debug": False,
              "var_names":obs_set+para_set,
              "template_file":files_cfg["dart_prior_template_file"],
              "var_qtynames":['QTY_PFLOTRAN_'+v for v in obs_set]+['QTY_PFLOTRAN_'+v for v in para_set]}
@@ -518,13 +522,13 @@ subprocess.run("python {} {}".format(prep_inputnml, config_file), shell=True, ch
 #  <a id='observationconvertion'></a>
 #  ## Prepare the observation conversion to DART observation format
 #  In this section, we prepare the process of converting the observation data to DART format. We first convert observation data in raw format into NetCDF format. Then, a fortran script is prepared for the conversion from the NetCDF to to DART format. The structure of NetCDF file for recording observation file.
-# 
+#
 #  | NetCDF dimensions |           NetCDF variables          |
 #  |:-----------------:|:-----------------------------------:|
 #  | time: 1           | time: shape(time)                   |
 #  | location: nloc    | location: shape(location)           |
 #  |                   | physical variable: shape(time,nloc) |
-# 
+#
 #  **Note that**
 #  - if the time calendar follows *gregorian*, the time unit should be entered as ```seconds since YYYY-MM-DD HH:MM:SS```. Otherwise, put the time calender as *None* and time unit as ```second``` (make sure convert your measurement times to seconds).
 # %% [markdown]
@@ -550,7 +554,7 @@ subprocess.run("python {} {}".format(csv_to_nc, config_file), shell=True, check=
 # %% [markdown]
 #  ***************
 #  **Clip the NetCDF file based on the defined spatial and temporal domains**
-# 
+#
 #  The NetCDF file generated in the previous step is further processed by selecting data observed in the required spatial and temporal domains
 #  - Run: ```clip_obs_nc.py```
 
@@ -603,11 +607,11 @@ quickbuild = files_cfg["quickbuild_csh"]
 
 
 # %%
-# print("\n")
-# print("------------------------------------------------------------")
-# print("Generate all the executables...")
+print("\n")
+print("------------------------------------------------------------")
+print("Generate all the executables...")
 # subprocess.run("cd {}; csh {} {} -mpi".format(dart_work_dir, quickbuild, app_work_dir), shell=True, check=True)
-# # subprocess.run("cd {}; csh {} {}".format(dart_work_dir, quickbuild, app_work_dir), shell=True, check=True)
+# subprocess.run("cd {}; csh {} {}".format(dart_work_dir, quickbuild, app_work_dir), shell=True, check=True)
 
 # %% [markdown]
 #  ## Check ```model_mod.F90``` interface file

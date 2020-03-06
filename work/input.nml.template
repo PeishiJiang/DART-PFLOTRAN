@@ -123,6 +123,8 @@
    outlier_threshold        = -1.0,
 /
 
+&xyz_location_nml
+   /
 
 &state_vector_io_nml
    /
