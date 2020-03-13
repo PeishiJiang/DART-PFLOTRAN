@@ -25,11 +25,12 @@ obs_original    = configs["file_cfg"]["obs_raw_file"]        # The original obse
 obs_nc          = configs["file_cfg"]["obs_nc_original_file"]        # The converted observation file
 obs_error       = configs["da_cfg"]["obs_error"]        # The observation error
 obs_error_type  = configs["da_cfg"]["obs_error_type"]        # The observation type
-assim_start_str = configs["time_cfg"]["assim_start"]     # The map between the start of observation and spinup time
+# assim_start_str = configs["time_cfg"]["assim_start"]     # The map between the start of observation and spinup time
+model_start_str = configs["time_cfg"]["model_start"]     # The map between the start of observation and the start of spinup time
 
 # Get the reference time
 # ref_time = datetime.strptime(assim_start_str, "%Y-%m-%d %H:%M:%S")
-ref_time = datetime.strptime(assim_start_str, "%Y-%m-%d %H:%M:%S")
+ref_time = datetime.strptime(model_start_str, "%Y-%m-%d %H:%M:%S")
 
 missing_value = -99999
 

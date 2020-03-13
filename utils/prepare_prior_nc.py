@@ -174,22 +174,14 @@ for i in range(nens):
         z_set = coordinates['Z [m]'][:-1]
         nx, ny, nz = len(x_set), len(y_set), len(z_set)
 
-        ## Get the last time step
-        # time_set_o = [t for t in list(f_out.keys()) if t.startswith("Time")]
-        # time_set   = [t.split()[1:] for t in time_set_o]
-        # time_vset  = [float(t[0]) for t in time_set]
-
-        # last_time, last_time_ind = np.max(time_vset), np.argmax(time_vset)
-        # time_unit, last_time_o   = time_set[last_time_ind][1], time_set_o[last_time_ind]
-
         # Get all the time steps
         time_set_o = np.array([t for t in list(f_out.keys()) if t.startswith("Time")])
         time_set   = np.array([t.split()[1:] for t in time_set_o])
         time_vset  = np.array([float(t[0]) for t in time_set])
         time_unit  = time_set[0][1]
 
-        # Shift the time_vset by the model spinup time
-        time_vset = time_vset - spinup_time * 86400
+        # # Shift the time_vset by the model spinup time
+        # time_vset = time_vset - spinup_time * 86400
 
         # Get the time steps within the assimilation window
         # print(time_vset, start_obs_sec, end_obs_sec)
@@ -202,17 +194,10 @@ for i in range(nens):
             time_vset_assim_day  = time_vset_assim / 86400. 
 
         ntime = len(time_vset_assim)
-        # TODO: This is a fake dimension
-        ny = ntime
-        y_set = time_vset_assim
-        ntime = 1
-        # TODO: This is a fake dimension
         nloc = nx*ny*nz
 
         # Initialize the dart_var_dict
         for varn in pflotran_var_set:
-            # TODO: This is a fake dimension
-            # Change 1 to the time dimension later on
             dart_var_dict[varn] = {"value": np.zeros([ntime, nloc]), "unit": ""}
 
         # Get the state/parameter/variable values required in pflotran_var_set
@@ -234,10 +219,13 @@ for i in range(nens):
                 # Check if the variable is required by pflotran_var_set
                 if varn in pflotran_var_set:
                     # dart_var_dict[varn]["value"].append(dataset[v][:]) 
-                    # TODO: make sure the shapes between dataset and dart_var_dict[varn]["value"] are compatible.
-                    # TODO: This is a fake dimension
-                    # dart_var_dict[varn]["value"][j,:] = dataset[v][:].flatten()
-                    dart_var_dict[varn]["value"][0,j*nx*nz:(j+1)*nx*nz] = dataset[v][:].flatten()
+                    # # TODO: make sure the shapes between dataset and dart_var_dict[varn]["value"] are compatible.
+                    # # TODO: This is a fake dimension
+                    # # dart_var_dict[varn]["value"][j,:] = dataset[v][:].flatten()
+                    # print(dataset[v][:].shape)
+                    # raise Exception('Stop here')
+                    # dart_var_dict[varn]["value"][0,j*nx*nz:(j+1)*nx*nz] = dataset[v][:].flatten()
+                    dart_var_dict[varn]["value"][j,:] = dataset[v][:].flatten()
                     dart_var_dict[varn]["unit"] = varunit 
                     # if time_vset_assim[j] == 300 and ens == 1:
                     #     print(time_vset_assim[j], varn, v)
@@ -288,9 +276,7 @@ for i in range(nens):
 
     # Get the observation time steps
     stime.units    = "day"
-    # TODO: This is a fake dimension
-    # stime[:]       = time_vset_assim_day
-    stime[:]       = model_time
+    stime[:]       = time_vset_assim_day
     stime.calendar = 'none'
 
     member.type, time.type = 'dimension_value', 'dimension_value'
@@ -300,7 +286,7 @@ for i in range(nens):
     stime.type = 'dimension_value'
 
     # Write coordinates values
-    xloc_grid, yloc_grid, zloc_grid,  = np.meshgrid(x_set, y_set, z_set)
+    xloc_grid, yloc_grid, zloc_grid = np.meshgrid(x_set, y_set, z_set)
     xloc[:], yloc[:], zloc[:] = xloc_grid.flatten(), yloc_grid.flatten(), zloc_grid.flatten() 
 
     # Write the values to the variables
@@ -356,9 +342,9 @@ for i in range(nens):
 
     # Get the observation time steps
     stime.units    = "day"
-    # TODO: This is a fake dimension
-    # stime[:]       = time_vset_assim_day
-    stime[:]       = model_time
+    # # TODO: This is a fake dimension
+    # stime[:]       = model_time
+    stime[:]       = time_vset_assim_day
     stime.calendar = 'none'
 
     member.type, time.type = 'dimension_value', 'dimension_value'

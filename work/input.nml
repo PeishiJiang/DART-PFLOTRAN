@@ -1,4 +1,4 @@
-&filter_nml
+&smoother_nml
     input_state_file_list = '/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/dart_inout/filter_input_list.txt'
     single_file_in = .false.
     single_file_out = .false.
@@ -61,22 +61,23 @@
 
 &model_nml
     nvar = 2
-    time_step_days = 0
-    time_step_seconds = 1800
-    interpolate_option = 1
+    max_time_diff_seconds = 400
+    debug = .true.
     var_names = 'TEMPERATURE', 'FLOW_FLUX'
-    template_file = '/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/dart_inout/prior_ensemble_template.nc'
+    template_file = './model_mod_check_test/unstructured.nc'
     var_qtynames = 'QTY_PFLOTRAN_TEMPERATURE', 'QTY_PFLOTRAN_FLOW_FLUX'
 /
 
 &model_mod_check_nml
-    input_state_files = '/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/dart_inout/prior_ensemble_template.nc'
-    output_state_files = '/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/dart_inout/mmc_output.nc'
+    input_state_files = './model_mod_check_test/unstructured.nc'
+    output_state_files = './model_mod_check_test/mmc_output.nc'
     all_metadata_file = 'metadata.txt'
-    test1thru = 4
-    run_tests = -1
+    obs_time_seconds = 10300
+    obs_time_days = 0
+    test1thru = -1 
+    run_tests = 1,2,3,4
     x_ind = 100
-    loc_of_interest = 0.0, 2.3, -0.36
+    loc_of_interest = 1.4, 10.2, 22 
     quantity_of_interest = 'QTY_PFLOTRAN_TEMPERATURE'
     interp_test_dy = 0.5
     interp_test_dz = 0.5
@@ -88,11 +89,11 @@
 
 &preprocess_nml
     overwrite_output = .true.
-    input_obs_kind_mod_file = '/Users/jian449/Codes/DART/manhattan/models/pflotran/obs_kind/DEFAULT_obs_kind_mod.f90'
-    input_obs_def_mod_file = '/Users/jian449/Codes/DART/manhattan//observations/forward_operators/DEFAULT_obs_def_mod.f90'
-    output_obs_def_mod_file = '/Users/jian449/Codes/DART/manhattan//observations/forward_operators/obs_def_mod.f90'
-    output_obs_kind_mod_file = '/Users/jian449/Codes/DART/manhattan//assimilation_code/modules/observations/obs_kind_mod.f90'
-    input_files = '/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/obs_type/obs_def_pflotran_mod.f90'
+    input_obs_kind_mod_file = '../obs_kind/DEFAULT_obs_kind_mod.f90'
+    input_obs_def_mod_file = '../../../observations/forward_operators/DEFAULT_obs_def_mod.f90'
+    output_obs_def_mod_file = '../../../observations/forward_operators/obs_def_mod.f90'
+    output_obs_kind_mod_file = '../../../assimilation_code/modules/observations/obs_kind_mod.f90'
+    input_files = '../obs_kind/obs_def_pflotran_mod.f90'
 /
 
 &convert_nc_nml
@@ -140,14 +141,6 @@
 
 &xyz_location_nml
   /
-
-&smoother_nml
-    num_lags = 0
-    start_from_restart = .false.
-    output_restart = .false.
-    restart_in_file_name = 'smoother_ics'
-    restart_out_file_name = 'smoother_restart'
-/
 
 &utilities_nml
     termlevel = 1

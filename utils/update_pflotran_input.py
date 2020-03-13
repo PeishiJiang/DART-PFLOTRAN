@@ -46,7 +46,6 @@ if not isinstance(model_time_list, list):
 one_sec                    = 1./86400.  # one second (fractional days)
 current_model_time_end     = current_model_time + (assim_window_size - one_sec) / 2
 current_model_time_end_sec = current_model_time_end * 86400
-print(current_model_time_end_sec)
 # current_model_time_sec     = float(model_time_list[-1]) * 86400
 spinup_length_sec          = spinup_length * 86400
 
@@ -96,8 +95,8 @@ if enks_mda_iteration_step == 1 and not update_obs_ens_posterior:
     with open(pflotran_in_file, 'w') as f:
         for i, s in enumerate(pflotranin):
             if "FINAL_TIME" in s:
-                # pflotranin[i] = "  FINAL_TIME {} sec".format(spinup_length_sec + current_model_time_end_sec + assim_window) + "\n"
-                pflotranin[i] = "  FINAL_TIME {} sec".format(spinup_length_sec + current_model_time_end_sec) + "\n"
+                # pflotranin[i] = "  FINAL_TIME {} sec".format(spinup_length_sec + current_model_time_end_sec) + "\n"
+                pflotranin[i] = "  FINAL_TIME {} sec".format(current_model_time_end_sec) + "\n"
             if "SUBSURFACE_FLOW" in s and "MODE" in pflotranin[i + 1] and first_time_update:
                 pflotranin.insert(i + 2, "        OPTIONS \n")
                 pflotranin.insert(i + 3, "            REVERT_PARAMETERS_ON_RESTART \n")

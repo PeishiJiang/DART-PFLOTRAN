@@ -14,7 +14,7 @@
 
 &dart_file_nml
     def_obs_kind_file       = '[obs_kind_dir]/DEFAULT_obs_kind_mod.f90'
-    obs_type_file           = '[obs_type_dir]/obs_def_pflotran_mod.f90'
+    obs_type_file           = '[obs_kind_dir]/obs_def_pflotran_mod.f90'
     input_nml_file          = '[app_work_dir]/input.nml'
     input_nml_template_file = '[dart_work_dir]/input.nml.template'
     config_file             = '[app_work_dir]/config.nml'
@@ -42,18 +42,18 @@
     dart_prior_nc_all_ens_file     = '[dart_data_dir]/prior_ensemble_all.nc'
     dart_posterior_nc_all_ens_file = '[dart_data_dir]/posterior_ensemble_all.nc'
     dart_prior_template_file       = '[dart_data_dir]/prior_ensemble_template.nc'
-    dart_input_list_file           = '[dart_data_dir]/filter_input_list.txt'
-    dart_output_list_file          = '[dart_data_dir]/filter_output_list.txt'
+    dart_input_list_file           = '[dart_data_dir]/da_input_list.txt'
+    dart_output_list_file          = '[dart_data_dir]/da_output_list.txt'
     /
 
 &shellscript_file_nml
     convert_nc_exe              = '[app_work_dir]/convert_nc'
     model_mod_check_exe         = '[app_work_dir]/model_mod_check'
-    filter_exe                  = '[app_work_dir]/filter'
-    quickbuild_csh              = '[dart_work_dir]/quickbuild.csh'
+    da_exe                      = '[app_work_dir]/smoother'
+    quickbuild_csh              = '[dart_work_dir]/quickbuild_smoother.csh'
     compile_convert_nc_csh      = '[dart_work_dir]/dart_seq_convert.csh'
     compile_model_check_mod_csh = '[dart_work_dir]/check_model_mod.csh'
-    run_filter_csh              = '[dart_work_dir]/run_DART_PFLOTRAN.csh'
+    run_da_csh                  = '[dart_work_dir]/run_DART_PFLOTRAN.csh'
     advance_model_csh           = '[dart_work_dir]/advance_model.csh'
     /
 

@@ -91,10 +91,15 @@ else:
     configs["da_cfg"]["assim_end_seconds"]   = assim_end_seconds
 
     ###############################
-    # Update the obs window times in input.nml
+    # Update the obs window times in input.nml for both smoother_nml and convert_nc_nml
     ###############################
     input_nml_file = configs["file_cfg"]["input_nml_file"]
     input_nml      = f90nml.read(input_nml_file)
+
+    input_nml["smoother_nml"]["first_obs_days"]    = assim_start_days
+    input_nml["smoother_nml"]["first_obs_seconds"] = assim_start_seconds
+    input_nml["smoother_nml"]["last_obs_days"]     = assim_end_days
+    input_nml["smoother_nml"]["last_obs_seconds"]  = assim_end_seconds
 
     input_nml["convert_nc_nml"]["obs_start_day"]    = assim_start_days
     input_nml["convert_nc_nml"]["obs_start_second"] = assim_start_seconds

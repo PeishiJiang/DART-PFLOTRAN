@@ -15,7 +15,8 @@ module model_mod
 
 ! Modules that are absolutely required for use are listed
 use        types_mod, only : r8, i8, MISSING_R8, MISSING_I
-use time_manager_mod, only : time_type, set_time, set_time_missing, set_date
+use time_manager_mod, only : time_type, print_time, set_time, set_time_missing, set_date, get_time, &
+                             operator(-), operator(>), operator(<)
 use     location_mod, only : location_type, get_close_type, &
                              get_close_obs, get_close_state, &
                              convert_vertical_obs, convert_vertical_state, &
@@ -85,7 +86,9 @@ integer :: dom_id
 
 character(len=512) :: string1, string2, string3
 
-type(location_type), allocatable :: state_loc(:)  ! state locations, compute once and store for speed
+type(location_type), allocatable :: state_loc_all(:)  ! state locations, compute once and store for speed
+type(location_type), allocatable :: state_loc_unique(:)  ! state locations, compute once and store for speed
+! type(time_type),     allocatable :: state_time(:) ! state time, compute once and store for speed
 
 type(time_type) :: time_step
 
@@ -94,8 +97,9 @@ type(time_type) :: time_step
 ! TODO revise the time_step_days and time_step_seconds
 integer, parameter :: MAX_STATE_VARIABLES = 40
 integer, parameter :: MAX_STATE_NAME_LEN  = 256
-integer  :: time_step_days
-integer  :: time_step_seconds
+integer, parameter :: SECONDS_PER_DAY = 86400
+integer  :: time_step_days = -1
+integer  :: time_step_seconds = -1
 
 integer          :: model_size
 integer          :: nvar
@@ -121,8 +125,22 @@ character(len=256) :: template_file = 'null'   ! optional; sets sizes of arrays
 ! needed for the get_close code.
 type(xyz_get_close_type)             :: cc_gc
 type(xyz_location_type), allocatable :: loc_set_xyz(:)
+logical  :: module_initialized = .false.
 logical  :: search_initialized = .false.
 real(r8) :: maxdist = 330000.0_r8
+
+! Define the grids/locations information
+integer  :: nloc
+real(r8), allocatable :: x_loc_all(:), y_loc_all(:), z_loc_all(:)  ! the grid locations of each dimension at all points
+
+! Define the state time information
+integer  :: ntime
+real(r8), allocatable :: state_time_all_day(:)  ! the state times in days
+integer, allocatable :: state_time_all_second(:)  ! the state times in seconds
+type(time_type), allocatable :: state_time_unique(:)  ! the state times in time type
+type(time_type), allocatable :: state_time_all(:)  ! the state times in time type
+integer :: max_time_diff_seconds ! the maximum allowable time difference
+type(time_type) :: max_time_diff ! the maximum allowable time difference
 
 ! uncomment this, the namelist related items in the 'use utilities' section above,
 ! and the namelist related items below in static_init_model() to enable the
@@ -132,14 +150,12 @@ namelist /model_nml/            &
    nvar,                        &
    time_step_days,              &
    time_step_seconds,           &
+   max_time_diff_seconds,       &
    debug,                       &
    var_names,                   &
    template_file,               &
    var_qtynames
 
-! Define the grids/locations information
-integer  :: nloc
-real(r8), allocatable :: x_loc_all(:), y_loc_all(:), z_loc_all(:)  ! the grid locations of each dimension at all points
 
 contains
 
@@ -159,8 +175,14 @@ subroutine static_init_model()
  integer  :: ncid, dimid, varid
  integer  :: num_dims
 
+if ( module_initialized ) return ! only need to do this once.
+
 ! Print module information to log file and stdout.
 call register_module(source, revision, revdate)
+
+! Since this routine calls other routines that could call this routine
+! we'll say we've been initialized pretty dang early.
+module_initialized = .true.
 
 ! Read the model information from model_nml in input.nml
 ! the model namelist includes and the list of variable names
@@ -188,7 +210,7 @@ else
     call error_handler(E_ERR,'static_init_model',string1,source,revision,revdate)
 endif
 
-! Get the grid dimensions
+! Get the grid dimensions and state time dimension
 ! Read a file about the spatial information of the model.
 ncid = nc_open_file_readonly(template_file, 'static_init_model')
 ! get the requested dimension size
@@ -196,6 +218,26 @@ call nc_check( nf90_inq_dimid(ncid, "location", dimid), &
                'static_init_model', 'inq dimid'//trim("location"))
 call nc_check( nf90_inquire_dimension(ncid, dimid, len=nloc), &
                'static_init_model', 'inquire dimension'//trim("location"))
+call nc_check( nf90_inq_dimid(ncid, "state_time", dimid), &
+               'static_init_model', 'inq dimid'//trim("state_time"))
+call nc_check( nf90_inquire_dimension(ncid, dimid, len=ntime), &
+               'static_init_model', 'inquire dimension'//trim("state_time"))
+
+! Obtain all the state time steps
+allocate(state_time_all_day(ntime))
+allocate(state_time_all_second(ntime))
+allocate(state_time_unique(ntime))
+call nc_check( nf90_inq_varid(ncid, "state_time", varid), &
+                'static_init_model', 'inq varid'//trim("state_time"))
+call nc_check( nf90_get_var(ncid, varid, state_time_all_day), &
+                'static_init_model', 'inquire variable'//trim("state_time"))
+
+max_time_diff = set_time(max_time_diff_seconds) ! The maximum time difference in model_interpolate()
+
+do i = 1, ntime
+    state_time_all_second(i) = SECONDS_PER_DAY * state_time_all_day(i)
+    state_time_unique(i) = set_time(state_time_all_second(i))
+end do
 
 ! Obtain the one-dimensional location in each dimension
 allocate(x_loc_all(nloc))
@@ -214,18 +256,30 @@ call nc_check( nf90_inq_varid(ncid, "z_location", varid), &
 call nc_check( nf90_get_var(ncid, varid, z_loc_all), &
                'static_init_model', 'inquire variable'//trim("z_location"))
 
+! TODO: fix the model size here
 ! Create storage for locations
-model_size = nvar*nloc
+! model_size = nvar*nloc
+model_size = nvar*nloc*ntime
 
 ! Define the locations of the model state variables
 ! naturally, this can be done VERY differently for more complicated models.
 ! set_location() is different for 1D vs. 3D models, not surprisingly.
-allocate(state_loc(model_size))
+! allocate(state_loc_all(nloc))
+! index_in = 1
+! do i = 1, nloc
+!     state_loc_all(index_in) = set_location(x_loc_all(i),y_loc_all(i),z_loc_all(i))
+!     index_in = index_in + 1
+! end do
+allocate(state_loc_all(model_size))
+allocate(state_time_all(model_size))
 index_in = 1
 do ivar = 1, nvar
     do i = 1, nloc
-        state_loc(index_in) = set_location(x_loc_all(i),y_loc_all(i),z_loc_all(i))
-        index_in = index_in + 1
+        do j = 1, ntime
+            state_loc_all(index_in) = set_location(x_loc_all(i),y_loc_all(i),z_loc_all(i))
+            state_time_all(index_in) = state_time_unique(j)
+            index_in = index_in + 1
+        end do
     end do
 end do
 
@@ -258,6 +312,8 @@ subroutine init_conditions(x)
 
 real(r8), intent(out) :: x(:)
 
+if ( .not. module_initialized ) call static_init_model
+
 x = MISSING_R8
 
 end subroutine init_conditions
@@ -283,6 +339,8 @@ subroutine adv_1step(x, time)
 real(r8),        intent(inout) :: x(:)
 type(time_type), intent(in)    :: time
 
+if ( .not. module_initialized ) call static_init_model
+
 end subroutine adv_1step
 
 
@@ -294,6 +352,8 @@ end subroutine adv_1step
 function get_model_size()
 
 integer(i8) :: get_model_size
+
+if ( .not. module_initialized ) call static_init_model
 
 get_model_size = model_size
 
@@ -314,6 +374,8 @@ subroutine init_time(time)
 
 type(time_type), intent(out) :: time
 
+if ( .not. module_initialized ) call static_init_model
+
 ! for now, just set to 0
 time = set_time(0,0)
 
@@ -333,24 +395,33 @@ end subroutine init_time
 ! with identity observations (i.e. only the value of a particular
 ! state variable is observed), this can be a NULL INTERFACE.
 
-subroutine model_interpolate(state_handle, ens_size, location, obs_qty, expected_obs, istatus)
+! TODO: Find the ensemble of the observation variable at the exact time
+! subroutine model_interpolate(state_handle, ens_size, location, obs_qty, expected_obs, istatus)
+subroutine model_interpolate(state_handle, ens_size, location, obs_time, obs_qty, expected_obs, istatus)
 
 type(ensemble_type), intent(in) :: state_handle
 integer,             intent(in) :: ens_size
 type(location_type), intent(in) :: location
+type(time_type),     intent(in) :: obs_time
 integer,             intent(in) :: obs_qty
 real(r8),           intent(out) :: expected_obs(ens_size) !< array of interpolated values
 integer,            intent(out) :: istatus(ens_size)
 
 ! Local storage
 real(r8), dimension(LocationDims) :: loc_array
-logical  :: is_find=.false.
-integer  :: loc_closest_ind
+logical  :: is_find_loc=.false.
+logical  :: is_find_time=.false.
+integer  :: loc_closest_ind, time_closest_ind
 real(r8) :: loc_x, loc_y, loc_z
+integer :: obs_time_sec
 
 integer  :: e
 
-!print *, 'ensemble', ens_size
+if ( .not. module_initialized ) call static_init_model
+
+! !print *, 'ensemble', ens_size
+! print *, get_location(location)
+! call print_time(obs_time)
 
 ! Let's assume failure.  Set return val to missing, then the code can
 ! just set istatus to something indicating why it failed, and return.
@@ -366,21 +437,30 @@ loc_x     = loc_array(1)
 loc_y     = loc_array(2)
 loc_z     = loc_array(3)
 
+! Get the time
+call get_time(obs_time, obs_time_sec)
+
 !if ((debug) .and. do_output()) print *, 'requesting interpolation at ', loc_x,loc_y,loc_z
 
 ! Get the nearest point by using xyz_location_mod first
-call find_closest_loc(loc_array, is_find, loc_closest_ind)
+call find_closest_loc(loc_array, is_find_loc, loc_closest_ind)
+call find_closest_time(obs_time, is_find_time, time_closest_ind)
 
-if (is_find) then
-    expected_obs = get_val(state_handle, ens_size, loc_closest_ind, obs_qty)
-
-else
+! Check whether the right ensemble state is located
+if (.not. is_find_loc) then
     write(string1,*) 'Problem, not able to get the nearest point for location: ', loc_x, loc_y, loc_z
     call error_handler(E_ERR,'model_interpolate',string1,source,revision,revdate)
 
+else if (.not. is_find_time) then
+    write(string1,*) 'Problem, not able to get the ensemble at time (seconds): ', obs_time_sec
+    call error_handler(E_ERR,'model_interpolate',string1,source,revision,revdate)
+
+else
+    expected_obs = get_val(state_handle, ens_size, loc_closest_ind, time_closest_ind, obs_qty)
+
 end if
 
-    ! if the forward operater failed set the value to missing_r8
+! if the forward operater failed set the value to missing_r8
 do e = 1, ens_size
    if (istatus(e) /= 0) then
       expected_obs(e) = MISSING_R8
@@ -401,6 +481,7 @@ subroutine init_closest_center()
 
 integer :: index_in, i
 
+if (debug) print *, "Allocate memory space for loc_set_xyz for model_interpolate..."
 allocate(loc_set_xyz(nloc))
 
 do i=1, nloc
@@ -458,14 +539,59 @@ endif
 
 end subroutine find_closest_loc
 
+!------------------------------------------------------------------
+subroutine find_closest_time(obs_time, is_find, closest_time_ind)
+
+! Determine the index for the closest center to the given time
+
+type(time_type),    intent(in)                :: obs_time
+logical,  intent(inout)                       :: is_find
+integer,  intent(out)                         :: closest_time_ind
+
+type(time_type) :: smallest_time_diff, current_time_diff
+real(r8)  :: xloc, yloc, zloc
+type(xyz_location_type) :: pointloc
+integer :: rc, i, time_sec
+
+! Set the closest time to the first time index
+closest_time_ind  = 1
+smallest_time_diff = obs_time - state_time_unique(1)
+
+! Search the closest time
+do i = 2, ntime
+   current_time_diff = obs_time - state_time_unique(i)
+   
+   ! Update the smallest time diff
+   if (current_time_diff < smallest_time_diff) then
+       smallest_time_diff = current_time_diff
+       closest_time_ind   = i
+   end if
+
+end do
+
+if (smallest_time_diff > max_time_diff) then
+    call get_time(obs_time, time_sec)
+    print *, 'cannot find closest state time to the time: ', time_sec
+    is_find = .false.
+else
+    is_find = .true.
+    if (debug) then
+        call get_time(state_time_unique(closest_time_ind), time_sec)
+        print *, "The closest state time is: ", time_sec
+        print *, "The indices of the nearest location are: ", closest_time_ind
+    end if
+end if
+
+end subroutine find_closest_time
 
 !------------------------------------------------------------------
-function get_val(state_handle, ens_size, loc_ind, var_kind)
+function get_val(state_handle, ens_size, loc_ind, time_ind, var_kind)
 
 type(ensemble_type), intent(in) :: state_handle
 integer, intent(in) :: var_kind
 integer, intent(in) :: ens_size
 integer  :: loc_ind
+integer  :: time_ind
 real(r8) :: get_val(ens_size)
 
 integer :: i
@@ -474,11 +600,14 @@ character(len = 129) :: msg_string
 integer :: var_id
 integer(i8) :: state_index
 
+if ( .not. module_initialized ) call static_init_model
+
 var_id = get_varid_from_kind(dom_id, var_kind)
 
 ! TODO: probably need to revise this once state-space formulation is implemented.
 ! state_index = get_dart_vector_index(loc_x_ind, loc_y_ind, loc_z_ind, dom_id, var_id)
-state_index = get_dart_vector_index(loc_ind, 1, 1, dom_id, var_id)
+print *, loc_ind, time_ind, dom_id, var_id, var_kind
+state_index = get_dart_vector_index(loc_ind, time_ind, 1, dom_id, var_id)
 get_val     = get_state(state_index, state_handle)
 
 !if (debug) then
@@ -504,6 +633,8 @@ function shortest_time_between_assimilations()
 
 type(time_type) :: shortest_time_between_assimilations
 
+if ( .not. module_initialized ) call static_init_model
+
 ! This time is both the minimum time you can ask the model to advance
 ! (for models that can be advanced by filter) and it sets the assimilation
 ! window.  All observations within +/- 1/2 this interval from the current
@@ -511,7 +642,11 @@ type(time_type) :: shortest_time_between_assimilations
 ! feel free to hardcode it and not add it to a namelist.
 ! Note that time_step is unused in DART-PFLOTRAN, because we run
 ! PFLOTRAN as an external executable.
-time_step = set_time(time_step_seconds, time_step_days)
+if (time_step_days < 0) then
+    time_step = set_time(0, 0)
+else
+    time_step = set_time(time_step_seconds, time_step_days)
+end if
 
 ! TODO
 ! Revise it if the unit of time_step is not the same as desired
@@ -522,26 +657,34 @@ end function shortest_time_between_assimilations
 
 !------------------------------------------------------------------
 ! Given an integer index into the state vector structure, returns the
-! associated location. A second intent(out) optional argument kind
+! associated location and state time. A second intent(out) optional argument kind
 ! can be returned if the model has more than one type of field (for
 ! instance temperature and zonal wind component). This interface is
 ! required for all filter applications as it is required for computing
 ! the distance between observations and state variables.
-subroutine get_state_meta_data(index_in, location, var_qty)
+subroutine get_state_meta_data(index_in, location, var_qty, state_time)
 
 integer(i8),         intent(in)  :: index_in
 type(location_type), intent(out) :: location
 integer,             intent(out), optional :: var_qty
+type(time_type),     intent(out), optional :: state_time
 
 integer  :: n
+! integer  :: index_loc_in, index_time_in
 integer  :: loc_x_ind, loc_y_ind, loc_z_ind
 integer(i8) :: index_start, index_end
 integer  :: var_id, dom_id
 character(len=256) :: varstring
 character(len=256) :: kind_string
 
+if ( .not. module_initialized ) call static_init_model
+
 ! these should be set to the actual location and state quantity
-location = state_loc(index_in)
+location   = state_loc_all(index_in)
+
+if (present(state_time)) then
+    state_time = state_time_all(index_in)
+endif
 
 !print *, get_location(location), index_in
 
@@ -587,10 +730,18 @@ end subroutine get_state_meta_data
 
 subroutine end_model()
 
+if (debug) print *, "Now, let's deallocate all the memories used in model_mod.f90..."
+
 ! More variables allocated in static_init_model() should be deallocated here
 !TODO: Modify it later once a full unstructured grid implementation is enabled.
-deallocate(state_loc)
+deallocate(state_loc_all)
+deallocate(state_time_all)
 
+deallocate(state_time_all_day)
+deallocate(state_time_all_second)
+deallocate(state_time_unique)
+
+deallocate(loc_set_xyz)
 deallocate(x_loc_all)
 deallocate(y_loc_all)
 deallocate(z_loc_all)

@@ -22,6 +22,7 @@ dart_prior_all_file         = configs["file_cfg"]["dart_prior_nc_all_file"]
 dart_posterior_all_file     = configs["file_cfg"]["dart_posterior_nc_all_file"]
 dart_prior_all_ens_file     = configs["file_cfg"]["dart_prior_nc_all_ens_file"]
 dart_posterior_all_ens_file = configs["file_cfg"]["dart_posterior_nc_all_ens_file"]
+keep_each_ens_file          = configs["file_cfg"]["keep_each_ens_file"]
 ntimestep                   = int(configs["da_cfg"]["ntimestep"])
 model_time_list             = configs["time_cfg"]["model_time_list"]
 nens                        = configs["da_cfg"]["nens"]
@@ -48,12 +49,12 @@ for i in range(nens):
     ens = i + 1
 
     # Get the first prior and posterior files
-    # dart_prior_temp     = re.sub(r"\[ENS\]", str(ens), dart_prior_file)
-    dart_prior_temp     = re.sub(r"\[ENS\]", str(ens).zfill(ndigit_ens), dart_prior_file)
-    dart_prior_temp     = re.sub(r"\[TIME\]", "'" + "." * ndigit_time + "'", dart_prior_temp)
-    # dart_posterior_temp = re.sub(r"\[ENS\]", str(ens), dart_posterior_file)
-    dart_posterior_temp = re.sub(r"\[ENS\]", str(ens).zfill(ndigit_ens), dart_posterior_file)
-    dart_posterior_temp = re.sub(r"\[TIME\]", "'" + "." * ndigit_time + "'", dart_posterior_temp)
+    dart_prior_temp1    = re.sub(r"\[ENS\]", str(ens).zfill(ndigit_ens), dart_prior_file)
+    dart_prior_temp     = re.sub(r"\[TIME\]", "'" + "." * ndigit_time + "'", dart_prior_temp1)
+    dart_prior_temp_rm  = re.sub(r"\[TIME\]", "*", dart_prior_temp1)
+    dart_posterior_temp1    = re.sub(r"\[ENS\]", str(ens).zfill(ndigit_ens), dart_posterior_file)
+    dart_posterior_temp     = re.sub(r"\[TIME\]", "'" + "." * ndigit_time + "'", dart_posterior_temp1)
+    dart_posterior_temp_rm  = re.sub(r"\[TIME\]", "*", dart_posterior_temp1)
 
     dart_prior_temp     = os.path.basename(dart_prior_temp)
     dart_posterior_temp = os.path.basename(dart_posterior_temp)
@@ -71,6 +72,11 @@ for i in range(nens):
 
     # Concatanate the posterior data
     subprocess.run("ls | grep {} | ncrcat -o {}".format(dart_posterior_temp, dart_posterior_all), shell=True, check=True)
+
+    # Remove each individual file if needed
+    if not keep_each_ens_file:    
+        subprocess.run("rm {}".format(dart_prior_temp_rm), shell=True)
+        subprocess.run("rm {}".format(dart_posterior_temp_rm), shell=True)
 
 
 ###############################
@@ -90,26 +96,9 @@ subprocess.run("ls | grep {} | ncecat -o {}".format(dart_posterior_all_temp, dar
 subprocess.run("ncrename -d record,ensemble {}".format(dart_prior_all_ens_file), shell=True, check=False)
 subprocess.run("ncrename -d record,ensemble {}".format(dart_posterior_all_ens_file), shell=True, check=False)
 
-
-    # # Get the first prior and posterior files
-    # dart_prior_first     = re.sub(r"\[ENS\]", str(ens), dart_prior_file)
-    # dart_prior_first     = re.sub(r"\[TIME\]", str(1).zfill(ndigit), dart_prior_first)
-    # dart_posterior_first = re.sub(r"\[ENS\]", str(ens), dart_posterior_file)
-    # dart_posterior_first = re.sub(r"\[TIME\]", str(1).zfill(ndigit), dart_posterior_first)
-
-    # dart_prior_all     = re.sub(r"\[ENS\]", str(ens), dart_prior_all_file)
-    # dart_posterior_all = re.sub(r"\[ENS\]", str(ens), dart_posterior_all_file)
-
-    # # Concatanate the prior data
-    # subprocess.run("ncrcat -n {},{},1 {} {}".format(ntimestep, ndigit,
-    #                                                 dart_prior_first,
-    #                                                 dart_prior_all),
-    #                shell=True,
-    #                check=True)
-
-    # # Concatanate the posterior data
-    # subprocess.run("ncrcat -n {},{},1 {} {}".format(ntimestep, ndigit,
-    #                                                 dart_posterior_first,
-    #                                                 dart_posterior_all),
-    #                shell=True,
-    #                check=True)
+# Remove each individual file if needed
+dart_prior_all_temp_rm     = re.sub(r"\[ENS\]", "*", dart_prior_all_file)
+dart_posterior_all_temp_rm = re.sub(r"\[ENS\]", "*", dart_posterior_all_file)
+if not keep_each_ens_file:    
+    subprocess.run("rm {}".format(dart_prior_all_temp_rm), shell=True)
+    subprocess.run("rm {}".format(dart_posterior_all_temp_rm), shell=True)

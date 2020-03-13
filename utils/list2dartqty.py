@@ -147,11 +147,12 @@ print("Finished generating the %s..." % obs_kind_file)
 ########################
 # Create the obs_type_file
 ########################
-with open(obs_type_file, 'w') as f:
-    f.write('! BEGIN DART PREPROCESS KIND LIST\n')
-    for i in range(len(dart_set)):
-        f.write("!" + pflotran_set[i] + ",  " + dart_set[i] +
-                ", COMMON_CODE\n")
-    f.write('! END DART PREPROCESS KIND LIST\n')
+# TODO
+# with open(obs_type_file, 'w') as f:
+#     f.write('! BEGIN DART PREPROCESS KIND LIST\n')
+#     for i in range(len(dart_set)):
+#         f.write("!" + pflotran_set[i] + ",  " + dart_set[i] +
+#                 ", COMMON_CODE\n")
+#     f.write('! END DART PREPROCESS KIND LIST\n')
 
-print("Finished generating the %s..." % obs_type_file)
+# print("Finished generating the %s..." % obs_type_file)

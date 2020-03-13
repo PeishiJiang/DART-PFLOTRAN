@@ -168,8 +168,8 @@ for i in range(nens):
     time_vset  = np.array([float(t[0]) for t in time_set])
     time_unit  = time_set[0][1]
 
-    # Shift the time_vset by the model spinup time
-    time_vset = time_vset - spinup_time * 86400
+    # # Shift the time_vset by the model spinup time
+    # time_vset = time_vset - spinup_time * 86400
 
     # Get the time steps within the assimilation window
     time_set_assim_ind = (time_vset > start_obs_sec) & (time_vset <= end_obs_sec)
@@ -178,12 +178,11 @@ for i in range(nens):
     time_set_assim     = time_set[time_set_assim_ind]
 
     ntime = len(time_vset_assim)
+    nloc = nx*ny*nz
 
     # Initialize the dart_var_dict
     for varn in obs_set:
-        dart_var_dict[varn] = {"value": np.zeros([1,nz,ntime,nx]), 
-        # dart_var_dict[varn] = {"value": np.zeros([1,nx,ntime,nz]), 
-                               "unit": ""}
+        dart_var_dict[varn] = {"value": np.zeros([ntime, nloc]), "unit": ""}
 
     # Get the state/parameter/variable values required in pflotran_var_set
     for j in range(ntime):
@@ -205,7 +204,7 @@ for i in range(nens):
             if varn in obs_set:
                 # dart_var_dict[varn]["value"].append(dataset[v][:]) 
                 # TODO: make sure the shapes between dataset and dart_var_dict[varn]["value"] are compatible.
-                dart_var_dict[varn]["value"][0,:,j,0] = dataset[v][:] 
+                dart_var_dict[varn]["value"][j,:] = dataset[v][:].flatten()
                 dart_var_dict[varn]["unit"] = varunit 
                 # if time_vset_assim[j] == 300 and ens == 1:
                 #     print(time_vset_assim[j], varn, v)

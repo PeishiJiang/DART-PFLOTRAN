@@ -5,7 +5,7 @@
 
 # TODO If there is no observation in one time window, continue running the model and move to the next time step without the data assimilation
 
-set INPUT_NML  = $1  # the input namelist file required by DART filter
+set INPUT_NML  = $1  # the input namelist file required by DART data assimilation engine
 set CONFIG_NML = $2  # the configuration files
 
 ##########################################
@@ -57,7 +57,7 @@ set ASSIM_WINDOW  = `GET_ITEM assim_window_size $CONFIG_NML`   # the assimilatio
 set PFLOTRAN_IN_DIR            = `GET_ITEM pflotran_in_dir $CONFIG_NML`           # PFLOTRAN in folder
 set PFLOTRAN_SH                = `GET_ITEM pflotran_sh_file $CONFIG_NML`           # shell script for running PFLOTRAN
 set RUN_PFLOTRAN               = `GET_ITEM run_pflotran_file $CONFIG_NML`           # shell script for running PFLOTRAN
-set FILTER_EXE                 = `GET_ITEM filter_exe $CONFIG_NML`                 # the executable filter file
+set DA_EXE                     = `GET_ITEM da_exe $CONFIG_NML`                 # the executable data assimilation engine file
 set CONVERT_NC_EXE             = `GET_ITEM convert_nc_exe $CONFIG_NML`             # the executable for generating DART obs
 set PREP_PFLOTRAN_INPUT        = `GET_ITEM prep_pflotran_input_file $CONFIG_NML`   # python script for preparing PFLOTRAN input files
 set PREP_PRIOR_NC              = `GET_ITEM prep_prior_nc $CONFIG_NML`  # python script for converting PFLOTRAN HDF 5 output to DART NetCDF prior data
@@ -172,9 +172,9 @@ while ($EXCEEDS_OBS_TIME == ".false.")
     echo "Conduct the data assimilation..."
     echo ""
     if ($NCORE_DA == 1) then
-      $FILTER_EXE  || exit 7
+      $DA_EXE  || exit 7
     else
-      $MPI_RUN -n $NCORE_DA $FILTER_EXE || exit 7
+      $MPI_RUN -n $NCORE_DA $DA_EXE || exit 7
       wait
     endif
 
