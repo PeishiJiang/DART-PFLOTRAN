@@ -14,7 +14,7 @@
 
 &dart_file_nml
     def_obs_kind_file       = '[obs_kind_dir]/DEFAULT_obs_kind_mod.f90'
-    obs_type_file           = '[obs_kind_dir]/obs_def_pflotran_mod.f90'
+    obs_type_file           = '[obs_kind_dir]/obs_def_PFLOTRAN_mod.f90'
     input_nml_file          = '[app_work_dir]/input.nml'
     input_nml_template_file = '[dart_work_dir]/input.nml.template'
     config_file             = '[app_work_dir]/config.nml'

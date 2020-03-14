@@ -606,7 +606,7 @@ var_id = get_varid_from_kind(dom_id, var_kind)
 
 ! TODO: probably need to revise this once state-space formulation is implemented.
 ! state_index = get_dart_vector_index(loc_x_ind, loc_y_ind, loc_z_ind, dom_id, var_id)
-print *, loc_ind, time_ind, dom_id, var_id, var_kind
+! print *, loc_ind, time_ind, dom_id, var_id, var_kind
 state_index = get_dart_vector_index(loc_ind, time_ind, 1, dom_id, var_id)
 get_val     = get_state(state_index, state_handle)
 

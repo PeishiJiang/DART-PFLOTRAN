@@ -243,8 +243,8 @@ configs["time_cfg"] = time_cfg
 # Observation error, number of ensembles
 da_cfg["obs_reso"]  = 300.0      # observation resolution (second)
 da_cfg["nens"]      = 100        # number of ensembles
-da_cfg["obs_error"] = 0.02       # the observation error
-da_cfg["obs_error_type"] = "relative" # the type of observation error (i.e., relative and absolute)
+da_cfg["obs_error"] = 0.05       # the observation error
+da_cfg["obs_error_type"] = "absolute" # the type of observation error (i.e., relative and absolute)
 
 # The start and end time of the current assimilation time window
 da_cfg["assim_start_days"]    = int(floor(time_cfg["current_model_time"] - da_cfg["assim_window_size"]/2))

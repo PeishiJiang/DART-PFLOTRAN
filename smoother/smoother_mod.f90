@@ -1967,8 +1967,8 @@ if (trace_level <= 0) return
 if (do_output()) then
    if (get_my_num_copies(ens_handle) < 1) return
    call get_ensemble_time(ens_handle, 1, mtime)
-   call print_time(mtime, ' filter trace: '//msg, logfileunit)
-   call print_time(mtime, ' filter trace: '//msg)
+   call print_time(mtime, ' smoother trace: '//msg, logfileunit)
+   call print_time(mtime, ' smoother trace: '//msg)
 endif
 
 end subroutine print_ens_time
@@ -1993,8 +1993,8 @@ if (do_output()) then
    call get_obs_from_key(seq, key, obs)
    call get_obs_def(obs, obs_def)
    mtime = get_obs_def_time(obs_def)
-   call print_time(mtime, ' filter trace: '//msg, logfileunit)
-   call print_time(mtime, ' filter trace: '//msg)
+   call print_time(mtime, ' smoother trace: '//msg, logfileunit)
+   call print_time(mtime, ' smoother trace: '//msg)
    call destroy_obs(obs)
 endif
 
