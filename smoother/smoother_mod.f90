@@ -811,7 +811,7 @@ endif
 
 
    write(msgstring, '(A,I8,A)') 'Ready to assimilate up to', size(keys), ' observations'
-   call trace_message(msgstring, 'filter:', -1)
+   call trace_message(msgstring, 'smoother:', -1)
 
    call     trace_message('Before observation assimilation')
    call timestamp_message('Before observation assimilation')

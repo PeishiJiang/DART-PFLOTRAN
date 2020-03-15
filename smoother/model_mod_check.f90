@@ -687,7 +687,6 @@ do imem = 1, num_ens
                          io_flag = WRITE_COPY)
 enddo
 
-print *, 'b' 
 output_restart_files = get_stage_metadata(file_info_output)
 
 do idom = 1, num_domains
@@ -697,11 +696,9 @@ do idom = 1, num_domains
    enddo
 enddo
 
-print *, 'c' 
 call write_state(ens_handle, file_info_output)
 
 deallocate(file_array_output)
-print *, 'd' 
 
 end subroutine do_write_test
 

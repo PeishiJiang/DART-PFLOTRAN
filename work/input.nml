@@ -60,19 +60,22 @@
 /
 
 &model_nml
-    nvar = 2
+    nvar_para = 1
+    para_var_names = 'FLOW_FLUX'
+    para_var_qtynames = 'QTY_PFLOTRAN_FLOW_FLUX'
+    nvar_state = 1
+    state_var_names = 'TEMPERATURE'
+    state_var_qtynames = 'QTY_PFLOTRAN_TEMPERATURE'
     max_time_diff_seconds = 400
     debug = .true.
-    var_names = 'TEMPERATURE', 'FLOW_FLUX'
-    template_file = './model_mod_check_test/unstructured.nc'
-    var_qtynames = 'QTY_PFLOTRAN_TEMPERATURE', 'QTY_PFLOTRAN_FLOW_FLUX'
+    template_file = './model_mod_check_test/unstructured_parastate.nc'
 /
 
 &model_mod_check_nml
-    input_state_files = './model_mod_check_test/unstructured.nc'
+    input_state_files = './model_mod_check_test/unstructured_parastate.nc'
     output_state_files = './model_mod_check_test/mmc_output.nc'
     all_metadata_file = 'metadata.txt'
-    obs_time_seconds = 10300
+    obs_time_seconds = 20300
     obs_time_days = 0
     test1thru = -1 
     run_tests = 1,2,3,4

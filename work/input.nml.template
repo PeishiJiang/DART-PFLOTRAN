@@ -64,12 +64,15 @@
 
 
 &model_nml
-   nvar                = 2
+   nvar_para = 1
+   nvar_state = 1
+   para_var_names = 'LIQUID_PRESSURE'
+   para_var_qtynames = 'QTY_PFLOTRAN_LIQUID_PRESSURE'
+   state_var_names = 'TEMPERATURE'
+   state_var_qtynames = 'QTY_PFLOTRAN_TEMPERATURE'
    max_time_diff_seconds = 400
    debug               = .false.
-   var_names           = 'LIQUID_SATURATION', 'LIQUID_PRESSURE'
    template_file       = '[app_dir]/dart_inout/prior_Rtemplate.nc'
-   var_qtynames        = 'QTY_PFLOTRAN_LIQUID_SATURATION', 'QTY_PFLOTRAN_LIQUID_PRESSURE'
    /
 
 

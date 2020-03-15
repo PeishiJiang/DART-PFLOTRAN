@@ -34,13 +34,16 @@ model_time         = float(configs["time_cfg"]["current_model_time"])  # days
 model_time_list    = configs["time_cfg"]["model_time_list"]
 nens               = configs["da_cfg"]["nens"]
 required           = configs["da_cfg"]["obs_ens_posterior_from_model"]
-assim_window       = float(configs["da_cfg"]["assim_window_size"])  # days
 spinup_time        = configs["time_cfg"]["spinup_length"] # days
 
 # Get the start and end time of the current assimilation window
-# start_obs    , end_obs     = model_time - assim_window / 2. + spinup_time, model_time + assim_window / 2. + spinup_time
-start_obs    , end_obs     = model_time - assim_window / 2., model_time + assim_window / 2.
-start_obs_sec, end_obs_sec = start_obs * 86400,              end_obs * 86400
+assim_window       = float(configs["da_cfg"]["assim_window_size"])  # days
+assim_end_days    = configs["da_cfg"]["assim_end_days"]
+assim_end_seconds = configs["da_cfg"]["assim_end_seconds"]
+assim_start_days    = configs["da_cfg"]["assim_start_days"]
+assim_start_seconds = configs["da_cfg"]["assim_start_seconds"]
+start_obs_sec = assim_start_days * 86400 + assim_start_seconds
+end_obs_sec   = assim_end_days * 86400 + assim_end_seconds
 
 # Get the list of all required PFLOTRAN variables
 if not isinstance(obs_set, list):
@@ -124,43 +127,13 @@ for i in range(nens):
     # Get the grids/coordinates of the domain
     coordinates = f_out["Coordinates"]
     # The following options are choosing the center of the grid
-    # x_set = coordinates['X [m]'][:]
-    # y_set = coordinates['Y [m]'][:]
-    # z_set = coordinates['Z [m]'][:]
-    # x_set = [(a + b) / 2 for a, b in zip(x_set[:-1], x_set[1:])]
-    # y_set = [(a + b) / 2 for a, b in zip(y_set[:-1], y_set[1:])]
-    # z_set = [(a + b) / 2 for a, b in zip(z_set[:-1], z_set[1:])]
-    # Choose the left boundary of the grid
-    x_set = coordinates['X [m]'][:-1]
-    y_set = coordinates['Y [m]'][:-1]
-    z_set = coordinates['Z [m]'][:-1]
-    nx, ny, nz = len(x_set), len(y_set), len(z_set)
-
-    # # Get the last time step
-    # time_set_o = [t for t in list(f_out.keys()) if t.startswith("Time")]
-    # time_set   = [t.split()[1:] for t in time_set_o]
-    # time_vset  = [float(t[0]) for t in time_set]
-
-    # last_time, last_time_ind = np.max(time_vset), np.argmax(time_vset)
-    # time_unit, last_time_o   = time_set[last_time_ind][1], time_set_o[last_time_ind]
-
-    # # Get the state/parameter/variable values required in pflotran_var_set
-    # dataset          = f_out[last_time_o]
-    # pl_out_var_set_o = list(dataset.keys())
-    # pl_out_var_dict  = dict()
-    # for v in pl_out_var_set_o:
-    #     # Get the variable name and unit from the original variable name
-    #     varinfo = v.split()
-    #     if len(varinfo) == 1:
-    #         varn, varunit = varinfo[0].upper(), ''
-    #     elif len(varinfo) == 2:
-    #         varn, varunit = varinfo[0].upper(), varinfo[1]
-    #     else:
-    #         raise Exception('Invalid variable name %s!' % v)
-    #     pl_out_var_dict[varn] = {"unit": varunit, "original_name": v}
-    #     # Check if the variable is required by pflotran_var_set
-    #     if varn in obs_set:
-    #         dart_var_dict[varn] = dataset[v][:]
+    x_loc_state = coordinates['X [m]'][:]
+    y_loc_state = coordinates['Y [m]'][:]
+    z_loc_state = coordinates['Z [m]'][:]
+    x_loc_state = [(a + b) / 2 for a, b in zip(x_loc_state[:-1], x_loc_state[1:])]
+    y_loc_state = [(a + b) / 2 for a, b in zip(y_loc_state[:-1], y_loc_state[1:])]
+    z_loc_state = [(a + b) / 2 for a, b in zip(z_loc_state[:-1], z_loc_state[1:])]
+    nx_state, ny_state, nz_state = len(x_loc_state), len(y_loc_state), len(z_loc_state)
 
     # Get all the time steps
     time_set_o = np.array([t for t in list(f_out.keys()) if t.startswith("Time")])
@@ -168,24 +141,21 @@ for i in range(nens):
     time_vset  = np.array([float(t[0]) for t in time_set])
     time_unit  = time_set[0][1]
 
-    # # Shift the time_vset by the model spinup time
-    # time_vset = time_vset - spinup_time * 86400
-
     # Get the time steps within the assimilation window
     time_set_assim_ind = (time_vset > start_obs_sec) & (time_vset <= end_obs_sec)
     time_vset_assim    = time_vset[time_set_assim_ind]
     time_set_o_assim   = time_set_o[time_set_assim_ind]
     time_set_assim     = time_set[time_set_assim_ind]
 
-    ntime = len(time_vset_assim)
-    nloc = nx*ny*nz
+    ntime_state = len(time_vset_assim)
+    nloc_state = nx_state*ny_state*nz_state
 
     # Initialize the dart_var_dict
     for varn in obs_set:
-        dart_var_dict[varn] = {"value": np.zeros([ntime, nloc]), "unit": ""}
+        dart_var_dict[varn] = {"value": np.zeros([ntime_state, nloc_state]), "unit": ""}
 
     # Get the state/parameter/variable values required in pflotran_var_set
-    for j in range(ntime):
+    for j in range(ntime_state):
         time_o           = time_set_o_assim[j]
         dataset          = f_out[time_o]
         pl_out_var_set_o = list(dataset.keys())
@@ -199,21 +169,12 @@ for i in range(nens):
                 varn, varunit = varinfo[0].upper(), varinfo[1]
             else:
                 raise Exception('Invalid variable name %s!' % v)
-            # pl_out_var_dict[varn] = {"unit": varunit, "original_name": v}
             # Check if the variable is required by pflotran_var_set
             if varn in obs_set:
                 # dart_var_dict[varn]["value"].append(dataset[v][:]) 
                 # TODO: make sure the shapes between dataset and dart_var_dict[varn]["value"] are compatible.
                 dart_var_dict[varn]["value"][j,:] = dataset[v][:].flatten()
                 dart_var_dict[varn]["unit"] = varunit 
-                # if time_vset_assim[j] == 300 and ens == 1:
-                #     print(time_vset_assim[j], varn, v)
-                #     print(time_o)
-                #     print(dataset[v][:])
-            # if varn in obs_set:
-            #     # dart_var_dict[varn]["value"].append(dataset[v][:]) 
-            #     dart_var_dict[varn]["value"][:,:,j,:] = dataset[v][:] 
-            #     dart_var_dict[varn]["unit"] = varunit 
 
     f_out.close()
 

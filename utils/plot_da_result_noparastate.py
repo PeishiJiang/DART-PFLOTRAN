@@ -17,7 +17,7 @@ from netCDF4 import Dataset, num2date
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 
-# TODO: A more sophisticated OOP architecture will be required in the future to avoid the redundant coding.
+# TODO: A more sophisticated OOP architecture will be required in the future to avoid the many-lines coding.
 
 calendar     = 'gregorian'
 tunits_begin = 'days since '
@@ -107,8 +107,6 @@ class DaResults(object):
         if isinstance(self.para_var_set, str):
             self.para_var_set = [self.para_var_set]
         self.pflotran_var_set = self.obs_var_set + self.para_var_set
-        self.nvar_state = len(self.obs_var_set)
-        self.nvar_para  = len(self.para_var_set)
         self.nvar = len(self.pflotran_var_set)
 
         # Model time, assimilation start time, number of ensemble
@@ -124,9 +122,14 @@ class DaResults(object):
         self.nens             = self.configs["da_cfg"]["nens"]
         self.model_ntime      = len(self.model_time_list)
         self.model_ntimestep  = int(self.configs["da_cfg"]["ntimestep"])
+        # self.model_start_time = self.model_time_list[0]
+        # self.model_end_time   = self.model_time_list[-1]
+        # self.model_end_time   = self.model_time_list[-1] + self.assim_window
+        # self.ndigit_time = int(ceil(log10(self.ntimestep))) + 1
+        # self.ndigit_ens = int(ceil(log10(self.nens))) + 1
 
         # Convert the model time to time units
-        self.tunits                = tunits_begin + self.model_start_time
+        self.tunits                = tunits_begin + self.assim_start_time
         self.model_time_dates_list = num2date(self.model_time_list, self.tunits, calendar)
 
         # Observation file in NetCDF
@@ -135,16 +138,16 @@ class DaResults(object):
         if not self.exceeds_obs_time:
             warnings.warn("The data assimilation is not completed!")
 
-        # # Get the model spatial domain
-        # self.dart_prior_template = self.configs["file_cfg"]["dart_prior_template_file"]
-        # root_template = Dataset(self.dart_prior_template, 'r')
-        # x_loc = root_template.variables['x_location'][:]
-        # y_loc = root_template.variables['y_location'][:]
-        # z_loc = root_template.variables['z_location'][:]
-        # self.model_loc_set = np.array([x_loc, y_loc, z_loc]).T
-        # print(self.model_loc_set.shape)
-        # self.model_nloc = self.model_loc_set.shape[0]
-        # root_template.close()
+        # Get the model spatial domain
+        self.dart_prior_template = self.configs["file_cfg"]["dart_prior_template_file"]
+        root_template = Dataset(self.dart_prior_template, 'r')
+        x_loc    = root_template.variables['x_location'][:]
+        y_loc    = root_template.variables['y_location'][:]
+        z_loc    = root_template.variables['z_location'][:]
+        self.model_loc_set = np.array([x_loc, y_loc, z_loc]).T
+        print(self.model_loc_set.shape)
+        self.model_nloc = self.model_loc_set.shape[0]
+        root_template.close()
 
 
     def setup(self):
@@ -153,86 +156,50 @@ class DaResults(object):
         obs_nc           = self.obs_nc
         obs_var_set      = self.obs_var_set
         para_var_set     = self.para_var_set
-        pflotran_var_set = self.pflotran_var_set
 
-        nvar_state, nvar_para = self.nvar_state, self.nvar_para
+        nvar_obs, nvar_para = len(obs_var_set), len(para_var_set)
         nvar, nens          = self.nvar, self.nens
+        nloc                = self.model_nloc
+
+        pflotran_var_set = self.pflotran_var_set
+        # model_start_time = self.model_start_time
+        # model_end_time   = self.model_end_time
 
         # DART prior and posterior files
         self.dart_posterior_all_ens_file = self.configs["file_cfg"]["dart_posterior_nc_all_ens_file"]
         self.dart_prior_all_ens_file     = self.configs["file_cfg"]["dart_prior_nc_all_ens_file"]
         dart_prior_all_ens_file, dart_posterior_all_ens_file = self.dart_prior_all_ens_file, self.dart_posterior_all_ens_file
 
-        prior     = dict.fromkeys(["para","state"])
-        posterior = dict.fromkeys(["para","state"])
+        # prior     = dict.fromkeys(["para","state"])
+        # posterior = dict.fromkeys(["para","state"])
 
-        # Get the spatial-temporal domains for both model parameters and states
+        # Get the assimilated time
         with Dataset(dart_prior_all_ens_file, 'r') as root_prior:
-            # Get the list of assimilation start and end time
-            assim_start_set = root_prior.variables['assim_start_time'][:][0,:]
-            assim_end_set   = root_prior.variables['assim_end_time'][:][0,:]
-
-            # Get the numbers of time steps and model grids
-            ntime_state = root_prior.dimensions['state_time'].size
-            ntime_para  = root_prior.dimensions['para_time'].size
-            nloc_state = root_prior.dimensions['state_location'].size
-            nloc_para  = root_prior.dimensions['para_location'].size
-
-            # The temporal domain
-            state_time_set = root_prior.variables['state_time'][:]
-            para_time_set = root_prior.variables['para_time'][:]
-            # ntime_state, ntime_para = len(state_time_set), len(para_time_set)
-
-            # The spatial domain
-            xloc_set_state = root_prior.variables['state_x_location'][:][0,:]
-            yloc_set_state = root_prior.variables['state_y_location'][:][0,:]
-            zloc_set_state = root_prior.variables['state_z_location'][:][0,:]
-            xloc_set_para = root_prior.variables['para_x_location'][:][0,:]
-            yloc_set_para = root_prior.variables['para_y_location'][:][0,:]
-            zloc_set_para = root_prior.variables['para_z_location'][:][0,:]
-            nxloc_state, nyloc_state, nzloc_state = len(xloc_set_state), len(yloc_set_state), len(zloc_set_state)
-            nxloc_para, nyloc_para, nzloc_para = len(xloc_set_para), len(yloc_set_para), len(zloc_set_para)
-            # nloc_state = nxloc_state * nyloc_state * nzloc_state
-            # nloc_para = nxloc_para * nyloc_para * nzloc_para
+            assim_time = root_prior.variables['state_time'][:]
+            assim_ntime = len(assim_time)
 
         # Read in the prior data
-        prior['state'] = np.zeros([nvar_state, nens, ntime_state, nloc_state])
-        prior['para'] = np.zeros([nvar_para, nens, ntime_para, nloc_para])
-        
+        prior     = np.zeros([nvar, nens, assim_ntime, nloc])
         with Dataset(dart_prior_all_ens_file, 'r') as root_prior:
-            # State variables
-            for i in range(nvar_state):
-                varn      = obs_var_set[i]
-                prior_var = root_prior.variables[varn][:]
-                prior["state"][i, :, :, :] = prior_var
-            # Parameter variables
-            for i in range(nvar_para):
-                varn      = para_var_set[i]
-                prior_var = root_prior.variables[varn][:]
-                prior["para"][i, :, :, :] = prior_var
+            for k in range(nvar):
+                varn              = pflotran_var_set[k]
+                prior[k, :, :, :] = root_prior.variables[varn][:]
 
         # Read in the posterior data
-        posterior['state'] = np.zeros([nvar_state, nens, ntime_state, nloc_state])
-        posterior['para'] = np.zeros([nvar_para, nens, ntime_para, nloc_para])
+        posterior = np.zeros([nvar, nens, assim_ntime, nloc])
         with Dataset(dart_posterior_all_ens_file, 'r') as root_posterior:
-            # State variables
-            for i in range(nvar_state):
-                varn          = obs_var_set[i]
-                posterior_var = root_posterior.variables[varn][:]
-                posterior["state"][i, :, :, :] = posterior_var
-            # Parameter variables
-            for i in range(nvar_para):
-                varn          = para_var_set[i]
-                posterior_var = root_posterior.variables[varn][:]
-                posterior["para"][i, :, :, :] = posterior_var
+            for k in range(nvar):
+                varn                  = pflotran_var_set[k]
+                posterior[k, :, :, :] = root_posterior.variables[varn][:]
 
+        # TODO: Get the true time data
         # Read in the observation data
         obs_value_set      = dict.fromkeys(obs_var_set)
         obs_value_set_used = dict.fromkeys(obs_var_set)
         with Dataset(obs_nc, 'r') as root_obs:
             # Time in observation
             obs_time_set = root_obs.variables['time'][:]
-            obs_used_ind = (obs_time_set >= state_time_set[0]) & (obs_time_set <= state_time_set[-1])
+            obs_used_ind = (obs_time_set >= assim_time[0]) & (obs_time_set <= assim_time[-1])
             obs_time_set_used = obs_time_set[obs_used_ind]
             # Locations in observation
             xloc = root_obs.variables['x_location']
@@ -246,14 +213,7 @@ class DaResults(object):
                 obs_value_set_used[obs_var] = obs_value_set[obs_var][:, obs_used_ind]
 
         self.prior, self.posterior = prior, posterior
-        self.assim_start_set, self.assim_end_set = assim_start_set, assim_end_set
-        self.state_time_set, self.para_time_set = state_time_set, para_time_set
-        self.ntime_state, self.ntime_para = ntime_state, ntime_para
-        self.xloc_set_state, self.yloc_set_state, self.zloc_set_state = xloc_set_state, yloc_set_state, zloc_set_state
-        self.nxloc_state, self.nyloc_state, self.nzloc_state = nxloc_state, nyloc_state, nzloc_state
-        self.xloc_set_para, self.yloc_set_para, self.zloc_set_para = xloc_set_para, yloc_set_para, zloc_set_para
-        self.nxloc_para, self.nyloc_para, self.nzloc_para = nxloc_para, nyloc_para, nzloc_para
-        self.nloc_state, self.nloc_para = nloc_state, nloc_para
+        self.assim_time_set, self.assim_ntime = assim_time, assim_ntime
         self.obs_value_set_used = obs_value_set_used
         self.obs_time_set_used = obs_time_set_used
         self.obs_loc_set = obs_loc
@@ -261,78 +221,52 @@ class DaResults(object):
 
     def plot_spatial_average(self, axes, ylim=None, plot_averaged_obs=False):
         """Plot the spatial averaged DA results"""
-        nvar, nens = self.nvar, self.nens
-        prior, posterior      = self.prior, self.posterior
+        # Get the parameter
+        nvar, nens, ntime = self.nvar, self.nens, self.assim_ntime
+        prior, posterior = self.prior, self.posterior
 
-        ntime_state, ntime_para = self.ntime_state, self.ntime_para
-        nvar_state, nvar_para = self.nvar_state, self.nvar_para
         obs_var_set           = self.obs_var_set
-        para_var_set          = self.para_var_set
-        state_time_set        = self.state_time_set
-        para_time_set         = self.para_time_set
+        pflotran_var_set      = self.pflotran_var_set
+        assim_time_set        = self.assim_time_set
         obs_time_set_used     = self.obs_time_set_used
         obs_value_set_used    = self.obs_value_set_used
 
-        # The shape of axes has to be (nvar,2)
-        if axes.shape != (nvar,2):
-            raise Exception("The shape {} of the axes is incorrect".format(axes.shape))
-
-        # Plot states
-        for i in range(nvar_state):
-            varn = obs_var_set[i]
-            prior_var, posterior_var = prior["state"][i], posterior["state"][i]
-
+        # Plot
+        for i in range(nvar):
+            varn = pflotran_var_set[i]
             # Plot the prior
             ax1 = axes[i, 0]
             for j in range(nens):
-                prior_var_ens_mean = np.mean(prior_var[j, :, :], axis=(1))
-                line1, = ax1.plot(state_time_set, prior_var_ens_mean, color='grey', linewidth=0.5, linestyle=':', label='ensemble')
-            prior_var_mean = np.mean(prior_var[:, :, :], axis=(0, 2))
-            line2, = ax1.plot(state_time_set, prior_var_mean, color='red', linewidth=1, label='mean')
+                prior_ens_mean = np.mean(prior[i, j, :, :], axis=(1))
+                line1, = ax1.plot(assim_time_set, prior_ens_mean, color='grey',
+                                  linewidth=0.5, linestyle=':', label='ensemble')
+            prior_mean = np.mean(prior[i, :, :, :], axis=(0, 2))
+            line2, = ax1.plot(assim_time_set, prior_mean, color='red',
+                              linewidth=1, label='mean')
             if varn in obs_var_set and plot_averaged_obs:
                 obs_used_mean = np.mean(obs_value_set_used[varn], axis=0)
-                line3, = ax1.plot(obs_time_set_used, obs_used_mean, color='black', linewidth=1, label='obs')
+                line3, = ax1.plot(obs_time_set_used, obs_used_mean,
+                                  color='black', linewidth=1, label='obs')
 
             # Plot the posterior
             ax2 = axes[i, 1]
             for j in range(nens):
-                posterior_var_ens_mean = np.mean(posterior_var[j, :, :], axis=(1))
-                ax2.plot(state_time_set, posterior_var_ens_mean, color='grey', linewidth=0.5, linestyle=':', label='ensemble')
-            posterior_var_mean = np.mean(posterior_var[:, :, :], axis=(0, 2))
-            ax2.plot(state_time_set, posterior_var_mean, color='red', linewidth=1, label='mean')
+                posterior_ens_mean = np.mean(posterior[i, j, :, :], axis=(1))
+                ax2.plot(assim_time_set, posterior_ens_mean, color='grey',
+                         linewidth=0.5, linestyle=':', label='ensemble')
+            posterior_mean = np.mean(posterior[i, :, :, :], axis=(0, 2))
+            ax2.plot(assim_time_set, posterior_mean, color='red',
+                     linewidth=1, label='mean')
             if varn in obs_var_set and plot_averaged_obs:
                 obs_used_mean = np.mean(obs_value_set_used[varn], axis=0)
-                ax2.plot(obs_time_set_used, obs_used_mean, color='black', linewidth=1, label='obs')
+                ax2.plot(obs_time_set_used, obs_used_mean, color='black',
+                         linewidth=1, label='obs')
             ax2.set_ylim(ylim)
 
-            # Plot the variable name
-            ax1.set_ylabel(varn)
-
-        # Plot parameters
-        for i in range(nvar_para):
-            varn = para_var_set[i]
-            prior_var, posterior_var = prior["para"][i], posterior["para"][i]
-
-            # Plot the prior
-            ax1 = axes[nvar_state+i, 0]
-            for j in range(nens):
-                prior_var_ens_mean = np.mean(prior_var[j, :, :], axis=(1))
-                line1, = ax1.plot(para_time_set, prior_var_ens_mean, color='grey', linewidth=0.5, linestyle=':', label='ensemble')
-            prior_var_mean = np.mean(prior_var[:, :, :], axis=(0, 2))
-            line2, = ax1.plot(para_time_set, prior_var_mean, color='red', linewidth=1, label='mean')
-
-            # Plot the posterior
-            ax2 = axes[nvar_state+i, 1]
-            for j in range(nens):
-                posterior_var_ens_mean = np.mean(posterior_var[j, :, :], axis=(1))
-                ax2.plot(para_time_set, posterior_var_ens_mean, color='grey', linewidth=0.5, linestyle=':', label='ensemble')
-            posterior_var_mean = np.mean(posterior_var[:, :, :], axis=(0, 2))
-            ax2.plot(para_time_set, posterior_var_mean, color='red', linewidth=1, label='mean')
-            ax2.set_ylim(ylim)
-
-            # Plot the variable name
-            ax1.set_ylabel(varn)
-
+        # Plot the labels and titles
+        for i in range(nvar):
+            ax = axes[i, 0]
+            ax.set_ylabel(pflotran_var_set[i])
         for i in range(2):
             ax = axes[-1, i]
             ax.set_xlabel('Time (day)')
@@ -352,22 +286,19 @@ class DaResults(object):
                         #   figsize=None, constrained_layout=True,
                           vmin=None, vmax=None, ylim=None):
         """Plot the temporal evolution of DA results for the observation data along one dimension"""
-        nvar, nens = self.nvar, self.nens
-        prior_state, posterior_state = self.prior["state"], self.posterior["state"]
+        # Get the parameter
+        nens , ntime     = self.nens,  self.assim_ntime
+        prior, posterior = self.prior, self.posterior
 
-        ntime_state, ntime_para = self.ntime_state, self.ntime_para
-        nvar_state, nvar_para = self.nvar_state, self.nvar_para
         obs_var_set           = self.obs_var_set
-        para_var_set          = self.para_var_set
-        state_time_set        = self.state_time_set
-        para_time_set         = self.para_time_set
+        pflotran_var_set      = self.pflotran_var_set
+        assim_time_set        = self.assim_time_set
+        # model_time_list       = self.model_time_list
+        # model_time_dates_list = self.model_time_dates_list
         obs_time_set_used     = self.obs_time_set_used
         obs_value_set_used    = self.obs_value_set_used
         obs_loc_set           = self.obs_loc_set
-
-        xloc_set_state, yloc_set_state, zloc_set_state = self.xloc_set_state, self.yloc_set_state, self.zloc_set_state
-
-        model_loc_set = np.array([xloc_set_state, yloc_set_state, zloc_set_state]).T
+        model_loc_set         = self.model_loc_set
 
         if obs_name not in obs_var_set:
             raise Exception('Unknown observation variable name %s' % obs_name)
@@ -383,7 +314,7 @@ class DaResults(object):
         print("The corresponding model grid is {}".format(model_loc))
 
         # Get the index of observation
-        obs_var_ind = obs_var_set.index(obs_name)
+        obs_var_ind = pflotran_var_set.index(obs_name)
 
         ##############################
         # Plot the temporal evolution of the ensemble, the mean, and the observation
@@ -392,25 +323,43 @@ class DaResults(object):
         # Plot the prior
         ax1 = axes[0]
         for j in range(nens):
-            prior_var_ens = prior_state[obs_var_ind, j, :, model_loc_ind]
-            line1, = ax1.plot(state_time_set, prior_var_ens, color='grey', linewidth=0.5, linestyle=':', label='ensemble')
-        prior_var_mean = np.mean(prior_state[obs_var_ind, :, :, model_loc_ind], axis=(0))
-        line2, = ax1.plot(state_time_set, prior_var_mean, color='red', linewidth=1, label='mean')
+            prior_ens = prior[obs_var_ind, j, :, model_loc_ind]
+            line1, = ax1.plot(assim_time_set, prior_ens, color='grey', linewidth=0.5,
+                              linestyle=':', label='ensemble')
+        prior_mean = np.mean(prior[obs_var_ind, :, :, model_loc_ind], axis=(0))
+        line2, = ax1.plot(assim_time_set, prior_mean, color='red',
+                          linewidth=1, label='mean')
         line3, = ax1.plot(obs_time_set_used, obs_value, color='black', linewidth=1, label='obs')
         ax1.set_ylim(ylim)
 
         # Plot the posterior
         ax2 = axes[1]
         for j in range(nens):
-            posterior_var_ens = posterior_state[obs_var_ind, j, :, model_loc_ind]
-            ax2.plot(state_time_set, posterior_var_ens, color='grey', linewidth=0.5, linestyle=':', label='ensemble')
-        posterior_var_mean = np.mean(posterior_state[obs_var_ind, :, :, model_loc_ind], axis=(0))
-        ax2.plot(state_time_set, posterior_var_mean, color='red', linewidth=1, label='mean')
+            posterior_ens = posterior[obs_var_ind, j, :, model_loc_ind]
+            ax2.plot(assim_time_set, posterior_ens, color='grey', linewidth=0.5,
+                     linestyle=':', label='ensemble')
+        posterior_mean = np.mean(posterior[obs_var_ind, :, :, model_loc_ind], axis=(0))
+        ax2.plot(assim_time_set, posterior_mean, color='red',
+                 linewidth=1, label='mean')
         ax2.plot(obs_time_set_used, obs_value, color='black', linewidth=1, label='obs')
         ax2.set_ylim(ylim)
 
         return line1, line2, line3
 
+        # Plot the legends
+        # plt.legend(frameon=False, ncol=3, loc="upper center", bbox_to_anchor=(0.9, -0.3))
+        # plt.legend((line1, line2, line3), ('ensemble', 'mean', 'obs'),
+        #            frameon=False, ncol=3, loc="center", bbox_to_anchor=(0.0, -0.5))
+
+        # # Plot the labels and titles
+        # axes[0, 0].set_title("Prior")
+        # axes[0, 1].set_title("Posterior")
+        # axes[-1, 0].set_xlabel("Time (day)")
+        # axes[-1, 1].set_xlabel("Time (day)")
+        # axes[0, 0].set_ylabel("Dimension %s (m)" % (dim_str, ))
+        # for i in range(nloc):
+        #     axes[i + 1, 0].set_ylabel("Dimension %s: \n %.2f (m)" %
+        #                               (dim_str, obs_loc_set[dim, i]))
 
     # TODO
     def compare_univar_spatial_average(self, var_name, true_file_name, axes, constrained_layout=True, 
@@ -418,19 +367,20 @@ class DaResults(object):
         """Plot the temporal evolution of a spatial averaged analyzed variable against the true values from other source.
            Note that the true_file_name has to be a csv file with two columns (the first for time and the second for the values)
         """
-        nvar, nens = self.nvar, self.nens
-        prior_para, posterior_para = self.prior["para"], self.posterior["para"]
+        # Get the parameter
+        nens , ntime     = self.nens,  self.assim_ntime
+        prior, posterior = self.prior, self.posterior
 
-        ntime_para    = self.ntime_para
-        nvar_para     = self.nvar_para
-        para_var_set  = self.para_var_set
-        para_time_set = self.para_time_set
-        assim_start_set = self.assim_start_set
-        assim_end_set = self.assim_end_set
-        tunits        = self.tunits
-        model_start_str = self.model_start_time
+        model_start_str       = self.model_start_time
+        pflotran_var_set      = self.pflotran_var_set
+        assim_time_set        = self.assim_time_set
+        # model_time_list       = self.model_time_list
+        # model_time_dates_list = self.model_time_dates_list
+        # model_start_time      = self.model_start_time
+        # model_end_time        = self.model_end_time
+        tunits                = self.tunits
 
-        if var_name not in para_var_set:
+        if var_name not in pflotran_var_set:
             raise Exception('Unknown analyzed variable name %s' % var_name)
 
         # Get the reference, start and end dates
@@ -444,43 +394,48 @@ class DaResults(object):
         dates_ref          = [t-ref_time for t in true_set_dates]
         true_set_time      = np.array([t.days+float(t.seconds)/86400. for t in dates_ref])
         true               = true_set.iloc[:, 1].values
-        true_set_used_ind  = (true_set_time >= para_time_set[0]) & (true_set_time <= para_time_set[-1])
+        true_set_used_ind  = (true_set_time >= assim_time_set[0]) & (true_set_time <= assim_time_set[-1])
         true_set_time_used = true_set_time[true_set_used_ind]
         true_set_used      = true[true_set_used_ind]
         # # TODO: fix the lag in plotting the true values
         # print(true_set_used_ind)
         # print(np.where(true_set_used_ind)[0]-12)
         # true_set_used      = true[np.where(true_set_used_ind)[0]-24]
-        # TODO: fix the true flux
-        true_set_used_ave = [np.mean(true[(true_set_time >  (assim_start_set[i]+model_time_offset)) &
-                                          (true_set_time <= (assim_end_set[i]+model_time_offset))])
-                             if i != 0 else np.mean(true[(true_set_time <= (para_time_set[i]+model_time_offset))])
-                             for i in range(len(para_time_set))]
+        true_set_used_ave = [np.mean(true[(true_set_time >  (assim_time_set[i-1]+model_time_offset)) &
+                                          (true_set_time <= (assim_time_set[i]+model_time_offset))])
+                             if i != 0 else np.mean(true[(true_set_time <= (assim_time_set[i]+model_time_offset))])
+                             for i in range(len(assim_time_set))]
         true_set_used_ave = np.array(true_set_used_ave)
 
         # Get the spatially averaged analyzed variable (prior and posterior)
-        var_ind                = para_var_set.index(var_name)
-        analyzed_prior_ens     = np.mean(prior_para[var_ind, :, :, :], axis=(2))
-        analyzed_posterior_ens = np.mean(posterior_para[var_ind, :, :, :], axis=(2))
+        var_ind                = pflotran_var_set.index(var_name)
+        analyzed_prior_ens     = np.mean(prior[var_ind, :, :, :], axis=(2))
+        analyzed_posterior_ens = np.mean(posterior[var_ind, :, :, :], axis=(2))
 
         # Plot the prior
         ax1 = axes[0]
         for j in range(nens):
             prior_ens = analyzed_prior_ens[j, :]
-            line1, = ax1.plot(para_time_set[plot_time_offset:], prior_ens[plot_time_offset:], color='grey', linewidth=0.5, linestyle=':', label='ensemble')
+            line1, = ax1.plot(assim_time_set[plot_time_offset:], prior_ens[plot_time_offset:],
+                              color='grey', linewidth=0.5, linestyle=':', label='ensemble')
         prior_mean = np.mean(analyzed_prior_ens, axis=(0))
-        line2, = ax1.plot(para_time_set[plot_time_offset:], prior_mean[plot_time_offset:], color='red', linewidth=1, label='mean')
+        line2, = ax1.plot(assim_time_set[plot_time_offset:], prior_mean[plot_time_offset:], 
+                          color='red', linewidth=1, label='mean')
         # line3, = ax1.plot(true_set_time_used[plot_time_offset:], true_set_used[plot_time_offset:], 
-        line3, = ax1.plot(para_time_set[plot_time_offset:], true_set_used_ave[plot_time_offset:], color='black', linewidth=1, label='obs')
+        line3, = ax1.plot(assim_time_set[plot_time_offset:], true_set_used_ave[plot_time_offset:], 
+                          color='black', linewidth=1, label='obs')
 
         # Plot the posterior
         ax2 = axes[1]
         for j in range(nens):
             posterior_ens = analyzed_posterior_ens[j, :]
-            line1, = ax2.plot(para_time_set[plot_time_offset:], posterior_ens[plot_time_offset:], color='grey', linewidth=0.5, linestyle=':', label='ensemble')
+            line1, = ax2.plot(assim_time_set[plot_time_offset:], posterior_ens[plot_time_offset:],
+                              color='grey', linewidth=0.5, linestyle=':', label='ensemble')
         posterior_mean = np.mean(analyzed_posterior_ens, axis=(0))
-        line2, = ax2.plot(para_time_set[plot_time_offset:], posterior_mean[plot_time_offset:], color='red', linewidth=1, label='mean')
-        line3, = ax2.plot(para_time_set[plot_time_offset:], true_set_used_ave[plot_time_offset:], color='black', linewidth=1, label='obs')
+        line2, = ax2.plot(assim_time_set[plot_time_offset:], posterior_mean[plot_time_offset:], 
+                          color='red', linewidth=1, label='mean')
+        line3, = ax2.plot(assim_time_set[plot_time_offset:], 
+                          true_set_used_ave[plot_time_offset:], color='black', linewidth=1, label='obs')
 
         # Plot the legends
         plt.legend((line1, line2, line3), ('ensemble', 'mean', 'obs'),

@@ -39,7 +39,7 @@ use state_structure_mod, only : add_domain, get_index_start, get_index_end, &
 use ensemble_manager_mod, only : ensemble_type
 use dart_time_io_mod, only  : read_model_time, write_model_time
 use default_model_mod, only : pert_model_copies, nc_write_model_vars
-use obs_kind_mod, only: get_index_for_quantity
+use obs_kind_mod, only: get_index_for_quantity, get_index_for_type_of_obs, get_name_for_quantity
 use xyz_location_mod, only : xyz_location_type, xyz_set_location, xyz_get_location,         &
                              xyz_get_close_type, xyz_get_close_init, xyz_get_close_destroy, &
                              xyz_find_nearest
@@ -79,15 +79,16 @@ public :: nc_write_model_vars,    &
 ! version controlled file description for error handling, do not edit
 character(len=256), parameter :: source   = &
    "$URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/models/pflotran/model_mod.f90 $"
-character(len=32 ), parameter :: revision = "$Revision: 12591 $"
-character(len=128), parameter :: revdate  = "$Date: 2018-05-21 13:49:26 -0700 (Mon, 21 May 2018) $"
+character(len=32 ), parameter :: revision = "$Revision: v0.3$"
+character(len=128), parameter :: revdate  = "$Date: 2020-03-14$"
 
 integer :: dom_id
 
 character(len=512) :: string1, string2, string3
 
-type(location_type), allocatable :: state_loc_all(:)  ! state locations, compute once and store for speed
-type(location_type), allocatable :: state_loc_unique(:)  ! state locations, compute once and store for speed
+type(location_type), allocatable :: parastate_loc_all(:)  ! locations of both states and parameters at all time steps, compute once and store for speed
+! type(location_type), allocatable :: state_loc_unique(:)  ! unique state locations, compute once and store for speed
+! type(location_type), allocatable :: para_loc_unique(:)  ! unique parameter locations, compute once and store for speed
 ! type(time_type),     allocatable :: state_time(:) ! state time, compute once and store for speed
 
 type(time_type) :: time_step
@@ -101,11 +102,14 @@ integer, parameter :: SECONDS_PER_DAY = 86400
 integer  :: time_step_days = -1
 integer  :: time_step_seconds = -1
 
-integer          :: model_size
-integer          :: nvar
-! TODO revise var_names
+integer  :: model_size, model_size_para, model_size_state
+integer  :: nvar, nvar_para, nvar_state
 character(len=MAX_STATE_NAME_LEN) :: var_names(MAX_STATE_VARIABLES)
 character(len=MAX_STATE_NAME_LEN) :: var_qtynames(MAX_STATE_VARIABLES)
+character(len=MAX_STATE_NAME_LEN) :: para_var_names(MAX_STATE_VARIABLES)
+character(len=MAX_STATE_NAME_LEN) :: para_var_qtynames(MAX_STATE_VARIABLES)
+character(len=MAX_STATE_NAME_LEN) :: state_var_names(MAX_STATE_VARIABLES)
+character(len=MAX_STATE_NAME_LEN) :: state_var_qtynames(MAX_STATE_VARIABLES)
 integer :: qty_list(MAX_STATE_VARIABLES)
 
 ! Everything needed to describe a variable
@@ -113,8 +117,10 @@ type progvartype
    private
    character(len=MAX_STATE_NAME_LEN) :: varname
    character(len=MAX_STATE_NAME_LEN) :: dartqtyname
+   logical                           :: is_parameter
    integer                           :: domain
    integer                           :: dartqtyind
+   integer                           :: darttypeind
 end type progvartype
 
 type(progvartype), dimension(MAX_STATE_VARIABLES) :: progvar
@@ -124,37 +130,51 @@ character(len=256) :: template_file = 'null'   ! optional; sets sizes of arrays
 ! Structure for computing distances to cell centers, and assorted arrays
 ! needed for the get_close code.
 type(xyz_get_close_type)             :: cc_gc
-type(xyz_location_type), allocatable :: loc_set_xyz(:)
+! type(xyz_location_type), allocatable :: loc_set_xyz(:)
+type(xyz_location_type), allocatable :: loc_set_para_xyz(:)
+type(xyz_location_type), allocatable :: loc_set_state_xyz(:)
 logical  :: module_initialized = .false.
 logical  :: search_initialized = .false.
 real(r8) :: maxdist = 330000.0_r8
 
 ! Define the grids/locations information
-integer  :: nloc
-real(r8), allocatable :: x_loc_all(:), y_loc_all(:), z_loc_all(:)  ! the grid locations of each dimension at all points
+! integer  :: nloc
+! real(r8), allocatable :: x_loc_all(:), y_loc_all(:), z_loc_all(:)  ! the grid locations of each dimension at all points
+integer  :: nloc_para, nloc_state
+real(r8), allocatable :: x_loc_para_all(:), y_loc_para_all(:), z_loc_para_all(:)  ! the grid locations of each dimension at all points
+real(r8), allocatable :: x_loc_state_all(:), y_loc_state_all(:), z_loc_state_all(:)  ! the grid locations of each dimension at all points
 
 ! Define the state time information
-integer  :: ntime
-real(r8), allocatable :: state_time_all_day(:)  ! the state times in days
-integer, allocatable :: state_time_all_second(:)  ! the state times in seconds
-type(time_type), allocatable :: state_time_unique(:)  ! the state times in time type
-type(time_type), allocatable :: state_time_all(:)  ! the state times in time type
+integer  :: ntime_state, ntime_para
 integer :: max_time_diff_seconds ! the maximum allowable time difference
 type(time_type) :: max_time_diff ! the maximum allowable time difference
+real(r8), allocatable :: state_time_all_day(:)  ! the unique state times in days
+integer, allocatable :: state_time_all_second(:)  ! the unique state times in seconds
+type(time_type), allocatable :: state_time_unique(:)  ! the unique state times in time type
+real(r8), allocatable :: para_time_all_day(:)  ! the unique parameter times in days
+integer, allocatable :: para_time_all_second(:)  ! the unique parameter times in seconds
+type(time_type), allocatable :: para_time_unique(:)  ! the unique parameter times in time type
+type(time_type), allocatable :: parastate_time_all(:)  ! all the parameters and states at all grids in time type
 
 ! uncomment this, the namelist related items in the 'use utilities' section above,
 ! and the namelist related items below in static_init_model() to enable the
 ! run-time namelist settings.
 ! TODO revise the model namelist
 namelist /model_nml/            &
-   nvar,                        &
    time_step_days,              &
    time_step_seconds,           &
    max_time_diff_seconds,       &
    debug,                       &
-   var_names,                   &
-   template_file,               &
-   var_qtynames
+   nvar_para,                   &
+   para_var_names,              &
+   para_var_qtynames,           &
+   nvar_state,                  &
+   state_var_names,             &
+   state_var_qtynames,           &
+   template_file
+!    nvar,                        &
+!    var_names,                   &
+!    var_qtynames
 
 
 contains
@@ -194,6 +214,17 @@ call check_namelist_read(iunit, io, "model_nml")
 if (do_nml_file()) write(nmlfileunit, nml=model_nml)
 if (do_nml_term()) write(     *     , nml=model_nml)
 
+! Combine both model parameter and model state variables
+nvar = nvar_para + nvar_state
+do ivar = 1, nvar_para
+    var_names(ivar) = para_var_names(ivar)
+    var_qtynames(ivar) = para_var_qtynames(ivar)
+end do
+do ivar = 1, nvar_state
+    var_names(ivar+nvar_para) = state_var_names(ivar)
+    var_qtynames(ivar+nvar_para) = state_var_qtynames(ivar)
+end do
+
 ! Get the variable quantity/kind indices
 do ivar = 1, nvar
     qty_list(ivar) = get_index_for_quantity(var_qtynames(ivar))
@@ -214,52 +245,112 @@ endif
 ! Read a file about the spatial information of the model.
 ncid = nc_open_file_readonly(template_file, 'static_init_model')
 ! get the requested dimension size
-call nc_check( nf90_inq_dimid(ncid, "location", dimid), &
-               'static_init_model', 'inq dimid'//trim("location"))
-call nc_check( nf90_inquire_dimension(ncid, dimid, len=nloc), &
-               'static_init_model', 'inquire dimension'//trim("location"))
+! call nc_check( nf90_inq_dimid(ncid, "location", dimid), &
+!                'static_init_model', 'inq dimid'//trim("location"))
+! call nc_check( nf90_inquire_dimension(ncid, dimid, len=nloc), &
+!                'static_init_model', 'inquire dimension'//trim("location"))
+call nc_check( nf90_inq_dimid(ncid, "para_location", dimid), &
+               'static_init_model', 'inq dimid'//trim("para_location"))
+call nc_check( nf90_inquire_dimension(ncid, dimid, len=nloc_para), &
+               'static_init_model', 'inquire dimension'//trim("para_location"))
+call nc_check( nf90_inq_dimid(ncid, "state_location", dimid), &
+               'static_init_model', 'inq dimid'//trim("state_location"))
+call nc_check( nf90_inquire_dimension(ncid, dimid, len=nloc_state), &
+               'static_init_model', 'inquire dimension'//trim("state_location"))
 call nc_check( nf90_inq_dimid(ncid, "state_time", dimid), &
                'static_init_model', 'inq dimid'//trim("state_time"))
-call nc_check( nf90_inquire_dimension(ncid, dimid, len=ntime), &
+call nc_check( nf90_inquire_dimension(ncid, dimid, len=ntime_state), &
                'static_init_model', 'inquire dimension'//trim("state_time"))
+call nc_check( nf90_inq_dimid(ncid, "para_time", dimid), &
+               'static_init_model', 'inq dimid'//trim("para_time"))
+call nc_check( nf90_inquire_dimension(ncid, dimid, len=ntime_para), &
+               'static_init_model', 'inquire dimension'//trim("para_time"))
 
-! Obtain all the state time steps
-allocate(state_time_all_day(ntime))
-allocate(state_time_all_second(ntime))
-allocate(state_time_unique(ntime))
+! Obtain all the time steps for states
+max_time_diff = set_time(max_time_diff_seconds) ! The maximum time difference in model_interpolate()
+allocate(state_time_all_day(ntime_state))
+allocate(state_time_all_second(ntime_state))
+allocate(state_time_unique(ntime_state))
 call nc_check( nf90_inq_varid(ncid, "state_time", varid), &
                 'static_init_model', 'inq varid'//trim("state_time"))
 call nc_check( nf90_get_var(ncid, varid, state_time_all_day), &
                 'static_init_model', 'inquire variable'//trim("state_time"))
 
-max_time_diff = set_time(max_time_diff_seconds) ! The maximum time difference in model_interpolate()
-
-do i = 1, ntime
+do i = 1, ntime_state
     state_time_all_second(i) = SECONDS_PER_DAY * state_time_all_day(i)
     state_time_unique(i) = set_time(state_time_all_second(i))
 end do
 
-! Obtain the one-dimensional location in each dimension
-allocate(x_loc_all(nloc))
-allocate(y_loc_all(nloc))
-allocate(z_loc_all(nloc))
-call nc_check( nf90_inq_varid(ncid, "x_location", varid), &
-               'static_init_model', 'inq varid'//trim("x_location"))
-call nc_check( nf90_get_var(ncid, varid, x_loc_all), &
-               'static_init_model', 'inquire variable'//trim("x_location"))
-call nc_check( nf90_inq_varid(ncid, "y_location", varid), &
-               'static_init_model', 'inq varid'//trim("y_location"))
-call nc_check( nf90_get_var(ncid, varid, y_loc_all), &
-               'static_init_model', 'inquire variable'//trim("y_location"))
-call nc_check( nf90_inq_varid(ncid, "z_location", varid), &
-               'static_init_model', 'inq varid'//trim("z_location"))
-call nc_check( nf90_get_var(ncid, varid, z_loc_all), &
-               'static_init_model', 'inquire variable'//trim("z_location"))
+! Obtain all the time steps for parameters
+allocate(para_time_all_day(ntime_para))
+allocate(para_time_all_second(ntime_para))
+allocate(para_time_unique(ntime_para))
+call nc_check( nf90_inq_varid(ncid, "para_time", varid), &
+                'static_init_model', 'inq varid'//trim("para_time"))
+call nc_check( nf90_get_var(ncid, varid, para_time_all_day), &
+                'static_init_model', 'inquire variable'//trim("para_time"))
 
-! TODO: fix the model size here
+do i = 1, ntime_para
+    para_time_all_second(i) = SECONDS_PER_DAY * para_time_all_day(i)
+    para_time_unique(i) = set_time(para_time_all_second(i))
+end do
+
+
+! ! Obtain the one-dimensional location in each dimension
+! allocate(x_loc_all(nloc))
+! allocate(y_loc_all(nloc))
+! allocate(z_loc_all(nloc))
+! call nc_check( nf90_inq_varid(ncid, "x_location", varid), &
+!                'static_init_model', 'inq varid'//trim("x_location"))
+! call nc_check( nf90_get_var(ncid, varid, x_loc_all), &
+!                'static_init_model', 'inquire variable'//trim("x_location"))
+! call nc_check( nf90_inq_varid(ncid, "y_location", varid), &
+!                'static_init_model', 'inq varid'//trim("y_location"))
+! call nc_check( nf90_get_var(ncid, varid, y_loc_all), &
+!                'static_init_model', 'inquire variable'//trim("y_location"))
+! call nc_check( nf90_inq_varid(ncid, "z_location", varid), &
+!                'static_init_model', 'inq varid'//trim("z_location"))
+! call nc_check( nf90_get_var(ncid, varid, z_loc_all), &
+!                'static_init_model', 'inquire variable'//trim("z_location"))
+
+! Obtain the locations in each dimension -- for model parameters
+allocate(x_loc_para_all(nloc_para))
+allocate(y_loc_para_all(nloc_para))
+allocate(z_loc_para_all(nloc_para))
+call nc_check( nf90_inq_varid(ncid, "para_x_location", varid), &
+               'static_init_model', 'inq varid'//trim("para_x_location"))
+call nc_check( nf90_get_var(ncid, varid, x_loc_para_all), &
+               'static_init_model', 'inquire variable'//trim("para_x_location"))
+call nc_check( nf90_inq_varid(ncid, "para_y_location", varid), &
+               'static_init_model', 'inq varid'//trim("para_y_location"))
+call nc_check( nf90_get_var(ncid, varid, y_loc_para_all), &
+               'static_init_model', 'inquire variable'//trim("para_y_location"))
+call nc_check( nf90_inq_varid(ncid, "para_z_location", varid), &
+               'static_init_model', 'inq varid'//trim("para_z_location"))
+call nc_check( nf90_get_var(ncid, varid, z_loc_para_all), &
+               'static_init_model', 'inquire variable'//trim("para_z_location"))
+
+! Obtain the locations in each dimension -- for model states
+allocate(x_loc_state_all(nloc_state))
+allocate(y_loc_state_all(nloc_state))
+allocate(z_loc_state_all(nloc_state))
+call nc_check( nf90_inq_varid(ncid, "state_x_location", varid), &
+               'static_init_model', 'inq varid'//trim("state_x_location"))
+call nc_check( nf90_get_var(ncid, varid, x_loc_state_all), &
+               'static_init_model', 'inquire variable'//trim("state_x_location"))
+call nc_check( nf90_inq_varid(ncid, "state_y_location", varid), &
+               'static_init_model', 'inq varid'//trim("state_y_location"))
+call nc_check( nf90_get_var(ncid, varid, y_loc_state_all), &
+               'static_init_model', 'inquire variable'//trim("state_y_location"))
+call nc_check( nf90_inq_varid(ncid, "state_z_location", varid), &
+               'static_init_model', 'inq varid'//trim("state_z_location"))
+call nc_check( nf90_get_var(ncid, varid, z_loc_state_all), &
+               'static_init_model', 'inquire variable'//trim("state_z_location"))
+
 ! Create storage for locations
-! model_size = nvar*nloc
-model_size = nvar*nloc*ntime
+model_size_para  = nvar_para * nloc_para * ntime_para
+model_size_state = nvar_state * nloc_state * ntime_state
+model_size = model_size_para + model_size_state
 
 ! Define the locations of the model state variables
 ! naturally, this can be done VERY differently for more complicated models.
@@ -270,26 +361,54 @@ model_size = nvar*nloc*ntime
 !     state_loc_all(index_in) = set_location(x_loc_all(i),y_loc_all(i),z_loc_all(i))
 !     index_in = index_in + 1
 ! end do
-allocate(state_loc_all(model_size))
-allocate(state_time_all(model_size))
+allocate(parastate_loc_all(model_size))
+allocate(parastate_time_all(model_size))
 index_in = 1
-do ivar = 1, nvar
-    do i = 1, nloc
-        do j = 1, ntime
-            state_loc_all(index_in) = set_location(x_loc_all(i),y_loc_all(i),z_loc_all(i))
-            state_time_all(index_in) = state_time_unique(j)
+do ivar = 1, nvar_para
+    do i = 1, nloc_para
+        do j = 1, ntime_para
+            parastate_loc_all(index_in) = set_location(x_loc_para_all(i),y_loc_para_all(i),z_loc_para_all(i))
+            parastate_time_all(index_in) = para_time_unique(j)
+            index_in = index_in + 1
+        end do
+    end do
+end do
+do ivar = 1, nvar_state
+    do i = 1, nloc_state
+        do j = 1, ntime_state
+            parastate_loc_all(index_in) = set_location(x_loc_state_all(i),y_loc_state_all(i),z_loc_state_all(i))
+            parastate_time_all(index_in) = state_time_unique(j)
             index_in = index_in + 1
         end do
     end do
 end do
 
 ! Assign the variable name information locally here
-do ivar = 1, nvar
-    progvar(ivar)%varname     = var_names(ivar)
-    progvar(ivar)%domain      = dom_id
-    progvar(ivar)%dartqtyname = var_qtynames(ivar)
-    progvar(ivar)%dartqtyind  = qty_list(ivar)
+index_in = 1
+do ivar = 1, nvar_para
+    progvar(index_in)%varname     = para_var_names(ivar)
+    progvar(index_in)%domain      = dom_id
+    progvar(index_in)%dartqtyname = para_var_qtynames(ivar)
+    progvar(index_in)%dartqtyind  = get_index_for_quantity(para_var_qtynames(ivar))
+    progvar(index_in)%darttypeind = get_index_for_type_of_obs(para_var_names(ivar))
+    progvar(index_in)%is_parameter = .true.
+    index_in = index_in + 1
 end do
+do ivar = 1, nvar_state
+    progvar(index_in)%varname     = state_var_names(ivar)
+    progvar(index_in)%domain      = dom_id
+    progvar(index_in)%dartqtyname = state_var_qtynames(ivar)
+    progvar(index_in)%dartqtyind  = get_index_for_quantity(state_var_qtynames(ivar))
+    progvar(index_in)%darttypeind = get_index_for_type_of_obs(state_var_names(ivar))
+    progvar(index_in)%is_parameter = .false. 
+    index_in = index_in + 1
+end do
+! do ivar = 1, nvar
+!     progvar(ivar)%varname     = var_names(ivar)
+!     progvar(ivar)%domain      = dom_id
+!     progvar(ivar)%dartqtyname = var_qtynames(ivar)
+!     progvar(ivar)%dartqtyind  = qty_list(ivar)
+! end do
 
 ! Close the file
 call nc_close_file(ncid, 'static_init_model')
@@ -376,7 +495,8 @@ type(time_type), intent(out) :: time
 
 if ( .not. module_initialized ) call static_init_model
 
-! for now, just set to 0
+! For now, just set to 0
+! Acutally, it is unused in PFLOTRAN
 time = set_time(0,0)
 
 end subroutine init_time
@@ -414,6 +534,9 @@ logical  :: is_find_time=.false.
 integer  :: loc_closest_ind, time_closest_ind
 real(r8) :: loc_x, loc_y, loc_z
 integer :: obs_time_sec
+integer :: i
+logical  :: is_para_var  ! true for model parameter and false for model state variable
+character(len=MAX_STATE_NAME_LEN) :: var_name
 
 integer  :: e
 
@@ -442,8 +565,26 @@ call get_time(obs_time, obs_time_sec)
 
 !if ((debug) .and. do_output()) print *, 'requesting interpolation at ', loc_x,loc_y,loc_z
 
-! Get the nearest point by using xyz_location_mod first
+! Determine whether the variable is a model parameter or model state
+do i = 1, nvar
+    ! print *, progvar(i)
+    if ( progvar(i)%dartqtyind == obs_qty ) then
+        is_para_var = progvar(i)%is_parameter
+        var_name    = progvar(i)%varname
+        exit
+    end if
+end do
+
+! The observation variable shouldn't be a model parameter
+if (is_para_var) then
+    write(string1,*) 'Problem, the interpolated variable should not be parameter: ', var_name
+    call error_handler(E_ERR,'model_interpolate',string1,source,revision,revdate)
+endif
+
+! Get the nearest point by using xyz_location_mod
 call find_closest_loc(loc_array, is_find_loc, loc_closest_ind)
+
+! Get the closest time
 call find_closest_time(obs_time, is_find_time, time_closest_ind)
 
 ! Check whether the right ensemble state is located
@@ -482,13 +623,14 @@ subroutine init_closest_center()
 integer :: index_in, i
 
 if (debug) print *, "Allocate memory space for loc_set_xyz for model_interpolate..."
-allocate(loc_set_xyz(nloc))
+allocate(loc_set_state_xyz(nloc_state))
 
-do i=1, nloc
-   loc_set_xyz(i) = xyz_set_location(x_loc_all(i), y_loc_all(i), z_loc_all(i))
+! For model state variables
+do i=1, nloc_state
+   loc_set_state_xyz(i) = xyz_set_location(x_loc_state_all(i), y_loc_state_all(i), z_loc_state_all(i))
 enddo
 
-call xyz_get_close_init(cc_gc, maxdist, nloc, loc_set_xyz)
+call xyz_get_close_init(cc_gc, maxdist, nloc_state, loc_set_state_xyz)
 
 end subroutine init_closest_center
 
@@ -521,7 +663,7 @@ endif
 pointloc = xyz_set_location(xloc, yloc, zloc)
 
 ! Search the closet location
-call xyz_find_nearest(cc_gc, pointloc, loc_set_xyz, closest_loc_ind, rc)
+call xyz_find_nearest(cc_gc, pointloc, loc_set_state_xyz, closest_loc_ind, rc)
 
 ! decide what to do if we don't find anything.
 if (rc /= 0 .or. closest_loc_ind < 0) then
@@ -531,8 +673,8 @@ if (rc /= 0 .or. closest_loc_ind < 0) then
 else
     is_find = .true.
     if (debug) then
-        print *, "The nearest location is: ", x_loc_all(closest_loc_ind), y_loc_all(closest_loc_ind), &
-                                              z_loc_all(closest_loc_ind)
+        print *, "The nearest location is: ", x_loc_state_all(closest_loc_ind), y_loc_state_all(closest_loc_ind), &
+                                              z_loc_state_all(closest_loc_ind)
         print *, "The indices of the nearest location are: ", closest_loc_ind
     end if
 endif
@@ -558,7 +700,7 @@ closest_time_ind  = 1
 smallest_time_diff = obs_time - state_time_unique(1)
 
 ! Search the closest time
-do i = 2, ntime
+do i = 2, ntime_state
    current_time_diff = obs_time - state_time_unique(i)
    
    ! Update the smallest time diff
@@ -680,10 +822,10 @@ character(len=256) :: kind_string
 if ( .not. module_initialized ) call static_init_model
 
 ! these should be set to the actual location and state quantity
-location   = state_loc_all(index_in)
+location   = parastate_loc_all(index_in)
 
 if (present(state_time)) then
-    state_time = state_time_all(index_in)
+    state_time = parastate_time_all(index_in)
 endif
 
 !print *, get_location(location), index_in
@@ -732,19 +874,26 @@ subroutine end_model()
 
 if (debug) print *, "Now, let's deallocate all the memories used in model_mod.f90..."
 
+call xyz_get_close_destroy(cc_gc)
+
 ! More variables allocated in static_init_model() should be deallocated here
-!TODO: Modify it later once a full unstructured grid implementation is enabled.
-deallocate(state_loc_all)
-deallocate(state_time_all)
+deallocate(parastate_loc_all)
+deallocate(parastate_time_all)
 
 deallocate(state_time_all_day)
 deallocate(state_time_all_second)
 deallocate(state_time_unique)
+deallocate(para_time_all_day)
+deallocate(para_time_all_second)
+deallocate(para_time_unique)
 
-deallocate(loc_set_xyz)
-deallocate(x_loc_all)
-deallocate(y_loc_all)
-deallocate(z_loc_all)
+deallocate(loc_set_state_xyz)
+deallocate(x_loc_state_all)
+deallocate(y_loc_state_all)
+deallocate(z_loc_state_all)
+deallocate(x_loc_para_all)
+deallocate(y_loc_para_all)
+deallocate(z_loc_para_all)
 
 end subroutine end_model
 
