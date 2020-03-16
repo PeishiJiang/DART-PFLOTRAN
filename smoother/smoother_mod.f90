@@ -260,7 +260,7 @@ real(r8) :: inf_sd_lower_bound(2)          = 0.0_r8
 logical  :: allow_missing_clm = .false.
 
 
-namelist /smoother_nml/ async,     &
+namelist /smoother_nml/          &
    ens_size,                     &
    tasks_per_model_advance,      &
    output_members,               &

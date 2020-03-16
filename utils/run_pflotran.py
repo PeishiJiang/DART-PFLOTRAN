@@ -106,7 +106,6 @@ if is_spinup_done:
         # when model state has been updated:
         # move the latest checkout point file in pflotran_in to pflotran_out
         # copy the latest .h5 from pflotran_in to pflotran_out
-            subprocess.run("cd {0}; touch hi_{1}.txt".format(pflotran_out_dir, model_time), shell=True, check=True)
             subprocess.run("cd {0}; cp pflotran*.h5 {1}; mv pflotran*.chk {1}; mv pflotran*.out {1}".format(pflotran_in_dir, pflotran_out_dir), shell=True, check=True)
         else:
             raise Exception("Model can't be run happen when iteration is done and update_obs_ens_posterior_now is false!")

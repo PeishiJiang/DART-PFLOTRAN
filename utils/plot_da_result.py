@@ -195,6 +195,11 @@ class DaResults(object):
             # nloc_state = nxloc_state * nyloc_state * nzloc_state
             # nloc_para = nxloc_para * nyloc_para * nzloc_para
 
+        # Sort the time
+        state_time_arg_sort = state_time_set.argsort()
+        para_time_arg_sort  = para_time_set.argsort()
+        state_time_set.sort(); para_time_set.sort()
+
         # Read in the prior data
         prior['state'] = np.zeros([nvar_state, nens, ntime_state, nloc_state])
         prior['para'] = np.zeros([nvar_para, nens, ntime_para, nloc_para])
@@ -204,12 +209,12 @@ class DaResults(object):
             for i in range(nvar_state):
                 varn      = obs_var_set[i]
                 prior_var = root_prior.variables[varn][:]
-                prior["state"][i, :, :, :] = prior_var
+                prior["state"][i, :, :, :] = prior_var[:,state_time_arg_sort,:]
             # Parameter variables
             for i in range(nvar_para):
                 varn      = para_var_set[i]
                 prior_var = root_prior.variables[varn][:]
-                prior["para"][i, :, :, :] = prior_var
+                prior["para"][i, :, :, :] = prior_var[:,para_time_arg_sort,:]
 
         # Read in the posterior data
         posterior['state'] = np.zeros([nvar_state, nens, ntime_state, nloc_state])
@@ -232,7 +237,7 @@ class DaResults(object):
         with Dataset(obs_nc, 'r') as root_obs:
             # Time in observation
             obs_time_set = root_obs.variables['time'][:]
-            obs_used_ind = (obs_time_set >= state_time_set[0]) & (obs_time_set <= state_time_set[-1])
+            obs_used_ind = (obs_time_set >= state_time_set.min()) & (obs_time_set <= state_time_set.max())
             obs_time_set_used = obs_time_set[obs_used_ind]
             # Locations in observation
             xloc = root_obs.variables['x_location']
@@ -348,7 +353,7 @@ class DaResults(object):
                         frameon=False, ncol=3, loc="center", bbox_to_anchor=(0.0, -0.5))
 
 
-    def plot_obs_at_point(self, axes, obs_name, obs_loc_ind=0,
+    def plot_obs_at_point(self, obs_name, axes, obs_loc_ind=0,
                         #   figsize=None, constrained_layout=True,
                           vmin=None, vmax=None, ylim=None):
         """Plot the temporal evolution of DA results for the observation data along one dimension"""
@@ -412,7 +417,78 @@ class DaResults(object):
         return line1, line2, line3
 
 
-    # TODO
+    def compare_obs_at_point_bias(self, obs_name, axes, obs_loc_ind=0, constrained_layout=True, 
+                                  plot_time_offset=0, ylim=None, xlim=None):
+        """Plot the temporal evolution of the bias and MAE of the updated observation variables against the true value."""
+        nvar, nens = self.nvar, self.nens
+        prior_state, posterior_state = self.prior["state"], self.posterior["state"]
+
+        ntime_state, ntime_para = self.ntime_state, self.ntime_para
+        nvar_state, nvar_para = self.nvar_state, self.nvar_para
+        obs_var_set           = self.obs_var_set
+        para_var_set          = self.para_var_set
+        state_time_set        = self.state_time_set
+        para_time_set         = self.para_time_set
+        obs_time_set_used     = self.obs_time_set_used
+        obs_value_set_used    = self.obs_value_set_used
+        obs_loc_set           = self.obs_loc_set
+
+        xloc_set_state, yloc_set_state, zloc_set_state = self.xloc_set_state, self.yloc_set_state, self.zloc_set_state
+
+        model_loc_set = np.array([xloc_set_state, yloc_set_state, zloc_set_state]).T
+
+        if obs_name not in obs_var_set:
+            raise Exception('Unknown observation variable name %s' % obs_name)
+
+        # Get the observation point and values
+        obs_value = obs_value_set_used[obs_name][obs_loc_ind, :]
+        obs_loc   = obs_loc_set[obs_loc_ind]
+
+        # Find the closest location in the model grids for this observation
+        dist, model_loc_ind = spatial.KDTree(model_loc_set).query(obs_loc)
+        model_loc = model_loc_set[model_loc_ind]
+        print("The observation location of interest is {}".format(obs_loc))
+        print("The corresponding model grid is {}".format(model_loc))
+
+        # Get the index of observation
+        obs_var_ind = obs_var_set.index(obs_name)
+
+        # Get the difference between the estimated and the true for each realization
+        prior_ens     = prior_state[obs_var_ind, :, :, model_loc_ind]
+        posterior_ens = posterior_state[obs_var_ind, :, :, model_loc_ind]
+        diff_prior = prior_ens[:, :] - obs_value[:]
+        bias_prior = np.mean(diff_prior, axis=0)
+        mae_prior  = np.mean(np.abs(diff_prior), axis=0)
+        diff_post = posterior_ens[:, :] - obs_value[:]
+        bias_post = np.mean(diff_post, axis=0)
+        mae_post  = np.mean(np.abs(diff_post), axis=0)
+
+        # Plot the bias and MAE
+        # Prior
+        ax = axes[0]
+        line1, = ax.plot(state_time_set[plot_time_offset:], bias_prior[plot_time_offset:], color='blue', linewidth=1, label='BIAS')
+        line2, = ax.plot(state_time_set[plot_time_offset:], mae_prior[plot_time_offset:], color='red', linestyle='--', linewidth=1, label='MAE')
+        ax.axhline(y=0, color='black', linestyle='--')
+        ax.set_title("$\mu_{|BIAS|}: %.3f;$ $\mu_{MAE}: %.3f$" % (np.mean(np.abs(bias_prior[plot_time_offset:])), np.mean(mae_prior[plot_time_offset:])))
+        # Plot the labels and titles
+        # ax.set_xlabel("Time (day)")
+        ax.set_ylim(ylim)
+        ax.set_xlim(xlim)
+
+        # Posterior
+        ax = axes[1]
+        line1, = ax.plot(state_time_set[plot_time_offset:], bias_post[plot_time_offset:], color='blue', linewidth=1, label='BIAS')
+        line2, = ax.plot(state_time_set[plot_time_offset:], mae_post[plot_time_offset:], color='red', linestyle='--', linewidth=1, label='MAE')
+        ax.axhline(y=0, color='black', linestyle='--')
+        ax.set_title("$\mu_{|BIAS|}: %.3f;$ $\mu_{MAE}: %.3f$" % (np.mean(np.abs(bias_post[plot_time_offset:])), np.mean(mae_post[plot_time_offset:]))) 
+        # Plot the labels and titles
+        # ax.set_xlabel("Time (day)")
+        ax.set_ylim(ylim)
+        ax.set_xlim(xlim)
+
+        return line1, line2 
+
+
     def compare_univar_spatial_average(self, var_name, true_file_name, axes, constrained_layout=True, 
                                        model_time_offset=0, plot_time_offset=0, ylim=None, xlim=None):
         """Plot the temporal evolution of a spatial averaged analyzed variable against the true values from other source.
@@ -454,7 +530,7 @@ class DaResults(object):
         # TODO: fix the true flux
         true_set_used_ave = [np.mean(true[(true_set_time >  (assim_start_set[i]+model_time_offset)) &
                                           (true_set_time <= (assim_end_set[i]+model_time_offset))])
-                             if i != 0 else np.mean(true[(true_set_time <= (para_time_set[i]+model_time_offset))])
+                            #  if i != 0 else np.mean(true[(true_set_time <= (para_time_set[i]+model_time_offset))])
                              for i in range(len(para_time_set))]
         true_set_used_ave = np.array(true_set_used_ave)
 
@@ -482,9 +558,9 @@ class DaResults(object):
         line2, = ax2.plot(para_time_set[plot_time_offset:], posterior_mean[plot_time_offset:], color='red', linewidth=1, label='mean')
         line3, = ax2.plot(para_time_set[plot_time_offset:], true_set_used_ave[plot_time_offset:], color='black', linewidth=1, label='obs')
 
-        # Plot the legends
-        plt.legend((line1, line2, line3), ('ensemble', 'mean', 'obs'),
-                   frameon=False, ncol=3, loc="center", bbox_to_anchor=(0.0, -0.5))
+        # # Plot the legends
+        # plt.legend((line1, line2, line3), ('ensemble', 'mean', 'obs'),
+        #            frameon=False, ncol=3, loc="center", bbox_to_anchor=(0.0, -0.5))
 
         # Plot the labels and titles
         # ax1.set_title("Prior ({})".format(var_name))
@@ -496,31 +572,32 @@ class DaResults(object):
         ax1.set_xlim(xlim)
         ax2.set_xlim(xlim)
 
+        return line1, line2, line3
 
-    # TODO
+
     def compare_univar_spatial_average_diff(self, var_name, true_file_name, ax, plot_time_offset=0,
                                             model_time_offset=0., constrained_layout=True, ylim=None, xlim=None, unit=''):
         """Plot the temporal evolution of the mean and std of the difference between a spatial averaged analyzed variable
            and the true values from other source.
            Note that the true_file_name has to be a csv file with two columns (the first for time and the second for the values)
         """
-        # Get the parameter
-        nens , ntime     = self.nens,  self.ntime
-        prior, posterior = self.prior, self.posterior
+        nvar, nens = self.nvar, self.nens
+        prior_para, posterior_para = self.prior["para"], self.posterior["para"]
 
-        assim_start_str       = self.assim_start_time
-        pflotran_var_set      = self.pflotran_var_set
-        model_time_list       = self.model_time_list
-        model_time_dates_list = self.model_time_dates_list
-        model_start_time      = self.model_start_time
-        model_end_time        = self.model_end_time
-        tunits                = self.tunits
+        ntime_para    = self.ntime_para
+        nvar_para     = self.nvar_para
+        para_var_set  = self.para_var_set
+        para_time_set = self.para_time_set
+        assim_start_set = self.assim_start_set
+        assim_end_set = self.assim_end_set
+        tunits        = self.tunits
+        model_start_str = self.model_start_time
 
-        if var_name not in pflotran_var_set:
+        if var_name not in para_var_set:
             raise Exception('Unknown analyzed variable name %s' % var_name)
 
         # Get the reference, start and end dates
-        ref_time = datetime.strptime(assim_start_str, "%Y-%m-%d %H:%M:%S")
+        ref_time = datetime.strptime(model_start_str, "%Y-%m-%d %H:%M:%S")
         # model_start_date, model_end_date = model_time_dates_list[0], model_time_dates_list[-1]
 
         # Read the true value from file_name
@@ -530,45 +607,26 @@ class DaResults(object):
         dates_ref          = [t-ref_time for t in true_set_dates]
         true_set_time      = np.array([t.days+float(t.seconds)/86400. for t in dates_ref])
         true               = true_set.iloc[:, 1].values
-        # true_set_used_ind  = (true_set_time >= model_start_time) & (true_set_time <= model_end_time)
-        # true_set_time_used = true_set_time[true_set_used_ind]
-        # true_set_used      = true[true_set_used_ind]
-        # # TODO: fix the lag in plotting the true values
-        # print(true_set_used_ind)
-        # print(np.where(true_set_used_ind)[0]-12)
-        # true_set_used      = true[np.where(true_set_used_ind)[0]-24]
-
-        # Compute the temporal averaged true values
-        # true_set_used_ave = [true[true_set_time<=model_time_list[i]][-1]
-        #                      for i in range(len(model_time_list))]
-        # true_set_used_ave = [np.mean(true[(true_set_time>model_time_list[i-1]-model_time_offset) & (true_set_time<=model_time_list[i]-model_time_offset)])
-        #                      if i != 0 else np.mean(true[(true_set_time<=model_time_list[i])])
-        #                      for i in range(len(model_time_list))]
-        true_set_used_ave = [np.mean(true[(true_set_time >  (model_time_list[i-1]+model_time_offset)) &
-                                          (true_set_time <= (model_time_list[i]+model_time_offset))])
-                             if i != 0 else np.mean(true[(true_set_time <= (model_time_list[i]+model_time_offset))])
-                             for i in range(len(model_time_list))]
-        # true_set_used_ave = [true[(true_set_time >  (model_time_list[i-1]+model_time_offset)) &
-        #                           (true_set_time <= (model_time_list[i]+model_time_offset))][-1]
-        #                      if i != 0 else true[(true_set_time <= (model_time_list[i]+model_time_offset))][-1]
-        #                      for i in range(len(model_time_list))]
+        true_set_used_ave = [np.mean(true[(true_set_time >  (assim_start_set[i]+model_time_offset)) &
+                                          (true_set_time <= (assim_end_set[i]+model_time_offset))])
+                            #  if i != 0 else np.mean(true[(true_set_time <= (model_time_list[i]+model_time_offset))])
+                             for i in range(len(para_time_set))]
         true_set_used_ave = np.array(true_set_used_ave)
 
         # Get the spatially averaged analyzed variable (prior and posterior)
-        var_ind                = pflotran_var_set.index(var_name)
-        analyzed_prior_ens     = np.mean(prior[var_ind, :, :, :, :, :], axis=(2, 3, 4))
-        analyzed_posterior_ens = np.mean(posterior[var_ind, :, :, :, :, :], axis=(2, 3, 4))
+        var_ind                = para_var_set.index(var_name)
+        analyzed_prior_ens     = np.mean(prior_para[var_ind, :, :, :], axis=(2))
+        analyzed_posterior_ens = np.mean(posterior_para[var_ind, :, :, :], axis=(2))
 
         # Get the difference between the estimated and the true for each realization
         diff      = analyzed_posterior_ens[:, :] - true_set_used_ave[:]
         diff_mean = np.mean(diff, axis=0)
-        # diff_mean = np.mean(analyzed_posterior_ens, axis=0) - true_set_used_ave
         diff_std  = np.std(diff, axis=0)
         upper, bottom = diff_mean+diff_std, diff_mean-diff_std
 
         # Plot the difference
-        ax.plot(model_time_list[plot_time_offset:], diff_mean[plot_time_offset:], color='blue', linewidth=0.5, label='mean of the difference')
-        ax.fill_between(model_time_list[plot_time_offset:], bottom[plot_time_offset:], upper[plot_time_offset:], color='blue', alpha=0.1)
+        ax.plot(para_time_set[plot_time_offset:], diff_mean[plot_time_offset:], color='blue', linewidth=0.5, label='mean of the difference')
+        ax.fill_between(para_time_set[plot_time_offset:], bottom[plot_time_offset:], upper[plot_time_offset:], color='blue', alpha=0.1)
         ax.axhline(y=0, color='black', linestyle='--')
 
         # Plot the labels and titles
@@ -582,30 +640,29 @@ class DaResults(object):
         return diff_mean, analyzed_posterior_ens.mean(axis=0), true_set_used_ave, true, true_set_time, true_set_dates
 
 
-    # TODO
-    def compare_univar_spatial_average_bias(self, var_name, true_file_name, ax, plot_time_offset=0,
+    def compare_univar_spatial_average_bias(self, var_name, true_file_name, axes, plot_time_offset=0,
                                             model_time_offset=0., constrained_layout=True, ylim=None, xlim=None, unit=''):
         """Plot the temporal evolution of the bias between a spatial averaged analyzed variable
            and the true values from other source.
            Note that the true_file_name has to be a csv file with two columns (the first for time and the second for the values)
         """
-        # Get the parameter
-        nens , ntime     = self.nens,  self.ntime
-        prior, posterior = self.prior, self.posterior
+        nvar, nens = self.nvar, self.nens
+        prior_para, posterior_para = self.prior["para"], self.posterior["para"]
 
-        assim_start_str       = self.assim_start_time
-        pflotran_var_set      = self.pflotran_var_set
-        model_time_list       = self.model_time_list
-        model_time_dates_list = self.model_time_dates_list
-        model_start_time      = self.model_start_time
-        model_end_time        = self.model_end_time
-        tunits                = self.tunits
+        ntime_para    = self.ntime_para
+        nvar_para     = self.nvar_para
+        para_var_set  = self.para_var_set
+        para_time_set = self.para_time_set
+        assim_start_set = self.assim_start_set
+        assim_end_set = self.assim_end_set
+        tunits        = self.tunits
+        model_start_str = self.model_start_time
 
-        if var_name not in pflotran_var_set:
+        if var_name not in para_var_set:
             raise Exception('Unknown analyzed variable name %s' % var_name)
 
         # Get the reference, start and end dates
-        ref_time = datetime.strptime(assim_start_str, "%Y-%m-%d %H:%M:%S")
+        ref_time = datetime.strptime(model_start_str, "%Y-%m-%d %H:%M:%S")
         # model_start_date, model_end_date = model_time_dates_list[0], model_time_dates_list[-1]
 
         # Read the true value from file_name
@@ -617,31 +674,46 @@ class DaResults(object):
         true               = true_set.iloc[:, 1].values
 
         # Compute the temporal averaged true values
-        true_set_used_ave = [np.mean(true[(true_set_time >  (model_time_list[i-1]+model_time_offset)) &
-                                          (true_set_time <= (model_time_list[i]+model_time_offset))])
-                             if i != 0 else np.mean(true[(true_set_time <= (model_time_list[i]+model_time_offset))])
-                             for i in range(len(model_time_list))]
+        true_set_used_ave = [np.mean(true[(true_set_time >  (assim_start_set[i]+model_time_offset)) &
+                                          (true_set_time <= (assim_end_set[i]+model_time_offset))])
+                            #  if i != 0 else np.mean(true[(true_set_time <= (model_time_list[i]+model_time_offset))])
+                             for i in range(len(para_time_set))]
         true_set_used_ave = np.array(true_set_used_ave)
 
         # Get the spatially averaged analyzed variable (prior and posterior)
-        var_ind                = pflotran_var_set.index(var_name)
-        analyzed_prior_ens     = np.mean(prior[var_ind, :, :, :, :, :], axis=(2, 3, 4))
-        analyzed_posterior_ens = np.mean(posterior[var_ind, :, :, :, :, :], axis=(2, 3, 4))
+        var_ind                = para_var_set.index(var_name)
+        analyzed_prior_ens     = np.mean(prior_para[var_ind, :, :, :], axis=(2))
+        analyzed_posterior_ens = np.mean(posterior_para[var_ind, :, :, :], axis=(2))
+
 
         # Get the difference between the estimated and the true for each realization
-        diff = analyzed_posterior_ens[:, :] - true_set_used_ave[:]
-        bias = np.mean(diff, axis=0)
-        mae  = np.mean(np.abs(diff), axis=0)
-        # mae  = np.abs(bias)
+        diff_prior = analyzed_prior_ens[:, :] - true_set_used_ave[:]
+        bias_prior = np.mean(diff_prior, axis=0)
+        mae_prior  = np.mean(np.abs(diff_prior), axis=0)
+        diff_post = analyzed_posterior_ens[:, :] - true_set_used_ave[:]
+        bias_post = np.mean(diff_post, axis=0)
+        mae_post  = np.mean(np.abs(diff_post), axis=0)
 
-        # Plot the bias
-        line1, = ax.plot(model_time_list[plot_time_offset:], bias[plot_time_offset:], color='blue', linewidth=1, label='BIAS')
-        line2, = ax.plot(model_time_list[plot_time_offset:], mae[plot_time_offset:], color='red', linestyle='--', linewidth=1, label='MAE')
+        # Plot the bias and MAE
+        # Prior
+        ax = axes[0]
+        line1, = ax.plot(para_time_set[plot_time_offset:], bias_prior[plot_time_offset:], color='blue', linewidth=1, label='BIAS')
+        line2, = ax.plot(para_time_set[plot_time_offset:], mae_prior[plot_time_offset:], color='red', linestyle='--', linewidth=1, label='MAE')
         ax.axhline(y=0, color='black', linestyle='--')
-        ax.set_title("$\mu_{BIAS}: %.3f;$ $\mu_{MAE}: %.3f$" % (np.mean(bias[plot_time_offset:]), np.mean(mae[plot_time_offset:])))
-
+        ax.set_title("$\mu_{|BIAS|}: %.3f;$ $\mu_{MAE}: %.3f$" % (np.mean(np.abs(bias_prior[plot_time_offset:])), np.mean(mae_prior[plot_time_offset:])))
         # Plot the labels and titles
-        ax.set_xlabel("Time (day)")
+        # ax.set_xlabel("Time (day)")
+        ax.set_ylim(ylim)
+        ax.set_xlim(xlim)
+
+        # Posterior
+        ax = axes[1]
+        line1, = ax.plot(para_time_set[plot_time_offset:], bias_post[plot_time_offset:], color='blue', linewidth=1, label='BIAS')
+        line2, = ax.plot(para_time_set[plot_time_offset:], mae_post[plot_time_offset:], color='red', linestyle='--', linewidth=1, label='MAE')
+        ax.axhline(y=0, color='black', linestyle='--')
+        ax.set_title("$\mu_{|BIAS|}: %.3f;$ $\mu_{MAE}: %.3f$" % (np.mean(np.abs(bias_post[plot_time_offset:])), np.mean(mae_post[plot_time_offset:]))) 
+        # Plot the labels and titles
+        # ax.set_xlabel("Time (day)")
         ax.set_ylim(ylim)
         ax.set_xlim(xlim)
 
@@ -649,30 +721,29 @@ class DaResults(object):
         return line1, line2
 
 
-    # TODO
     def compare_univar_spatial_average_variance(self, var_name, true_file_name, ax, plot_time_offset=None,
                                             model_time_offset=0., constrained_layout=True, ylim=None, xlim=None, unit=''):
         """Plot the temporal evolution of the bias between a spatial averaged analyzed variable
            and the true values from other source.
            Note that the true_file_name has to be a csv file with two columns (the first for time and the second for the values)
         """
-        # Get the parameter
-        nens , ntime     = self.nens,  self.ntime
-        prior, posterior = self.prior, self.posterior
+        nvar, nens = self.nvar, self.nens
+        prior_para, posterior_para = self.prior["para"], self.posterior["para"]
 
-        assim_start_str       = self.assim_start_time
-        pflotran_var_set      = self.pflotran_var_set
-        model_time_list       = self.model_time_list
-        model_time_dates_list = self.model_time_dates_list
-        model_start_time      = self.model_start_time
-        model_end_time        = self.model_end_time
-        tunits                = self.tunits
+        ntime_para    = self.ntime_para
+        nvar_para     = self.nvar_para
+        para_var_set  = self.para_var_set
+        para_time_set = self.para_time_set
+        assim_start_set = self.assim_start_set
+        assim_end_set = self.assim_end_set
+        tunits        = self.tunits
+        model_start_str = self.model_start_time
 
-        if var_name not in pflotran_var_set:
+        if var_name not in para_var_set:
             raise Exception('Unknown analyzed variable name %s' % var_name)
 
         # Get the reference, start and end dates
-        ref_time = datetime.strptime(assim_start_str, "%Y-%m-%d %H:%M:%S")
+        ref_time = datetime.strptime(model_start_str, "%Y-%m-%d %H:%M:%S")
         # model_start_date, model_end_date = model_time_dates_list[0], model_time_dates_list[-1]
 
         # Read the true value from file_name
@@ -684,19 +755,19 @@ class DaResults(object):
         true               = true_set.iloc[:, 1].values
 
         # Compute the temporal averaged true values
-        true_set_used_ave = [np.mean(true[(true_set_time >  (model_time_list[i-1]+model_time_offset)) &
-                                          (true_set_time <= (model_time_list[i]+model_time_offset))])
-                             if i != 0 else np.mean(true[(true_set_time <= (model_time_list[i]+model_time_offset))])
-                             for i in range(len(model_time_list))]
+        true_set_used_ave = [np.mean(true[(true_set_time >  (assim_start_set[i]+model_time_offset)) &
+                                          (true_set_time <= (assim_end_set[i]+model_time_offset))])
+                            #  if i != 0 else np.mean(true[(true_set_time <= (model_time_list[i]+model_time_offset))])
+                             for i in range(len(para_time_set))]
         true_set_used_ave = np.array(true_set_used_ave)
 
         # Get the spatially averaged analyzed variable (prior and posterior)
-        var_ind                = pflotran_var_set.index(var_name)
-        analyzed_posterior_ens = np.mean(posterior[var_ind, :, :, :, :, :], axis=(2, 3, 4))
+        var_ind                = para_var_set.index(var_name)
+        analyzed_posterior_ens = np.mean(posterior_para[var_ind, :, :, :], axis=(2))
 
         # Plot the variance
         variance = np.var(analyzed_posterior_ens, axis=0)
-        line1, = ax.plot(model_time_list[plot_time_offset:], variance[plot_time_offset:], color='blue', linewidth=1, label='VAR')
+        line1, = ax.plot(para_time_set[plot_time_offset:], variance[plot_time_offset:], color='blue', linewidth=1, label='VAR')
         ax.axhline(y=0, color='black', linestyle='--')
         ax.set_title("$\mu_{VAR}: %.3f;$" % (np.mean(variance[plot_time_offset:])))
 

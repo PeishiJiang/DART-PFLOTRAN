@@ -28,6 +28,7 @@ A more detailed document of conda environment is available at the [doc](https://
     ```sh
     conda install numpy scipy pandas h5py f90nml matplotlib seaborn
     conda install netcdf4 netcdf-fortran
+    conda install nco
     ```
 
 ## Configure the environment variables for using netcdf-fortran
