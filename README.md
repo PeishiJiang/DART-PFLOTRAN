@@ -1,4 +1,4 @@
-# PFLOTRAN-DART
+# DART-PFLOTRAN
 
 This is an software framework for integrating [PFLOTRAN](www.pflotran.org) and [DART](https://www.image.ucar.edu/DAReS/DART/). The objective is to allow user to conduct ensemble data assimilation on PFLOTRAN by using DART assimilation engine.
 
@@ -8,7 +8,7 @@ It requires the installations of PFLOTRAN, DART, some Python packages, and other
 
 ### Install PFLOTRAN
 
-Please refer to PFLOTRAN's official [instruction](https://www.pflotran.org/documentation/user_guide/how_to/installation/linux.html#linux-install). For [NERSC Cori](https://nersc.gov/) users, a detailed instruction is available at [here](https://github.com/pnnl-sbrsfa/how-to-guide/blob/master/Compile-PFLOTRAN-on-Cori.md). 
+Please refer to PFLOTRAN's official [instruction](https://www.pflotran.org/documentation/user_guide/how_to/installation/linux.html#linux-install). For [NERSC Cori](https://nersc.gov/) users, a detailed instruction is available at [here](https://github.com/pnnl-sbrsfa/how-to-guide/blob/master/Compile-PFLOTRAN-on-Cori.md).
 
 ### Install DART
 
@@ -17,7 +17,7 @@ Please refer [here](./INSTALL_DART.md) for DART installation.
 ### Install other packages
 
 - a Fortran 90 compiler
-- [HDF5](https://www.hdfgroup.org/solutions/hdf5/) library 
+- [HDF5](https://www.hdfgroup.org/solutions/hdf5/) library
 - [netCDF4](https://www.unidata.ucar.edu/software/netcdf/) library including the F90 interfaces and [NCO](http://nco.sourceforge.net/) utitlilies
 - [C shell](https://www.grymoire.com/Unix/Csh.html)
 - (optional) an MPI library
@@ -65,7 +65,7 @@ The following is the the main structure of the {DART-PFLOTRAN} repository:
 
 - ```smoother```: This folder provides a set of scripts for ensemble smoother using DART utitlies. It includes (1) conducting smoother (i.e., , ```smoother_mod.f90``` -- revised from ```filter_mod.f90``` in DART; ```assim_smoother_tools_mod.f90``` -- revised from ```assim_tools_mod.f90``` in DART; and ```smoother.f90``` -- revised from ```filter.f90``` in DART); and (2) the corresponding test codes (i.e., ```model_mod_check.f90```, ```test_itnerpolate_threed_cartesian.f90```, and ```model_check_utilities_mod.f90``` -- all are revised from DART codes).
 
-- ```work```: The folder provides a set of scripts for integrating PFLOTRAN and DART. It includes (1) shell scripts for running PFLOTRAN with DART (i.e., ```run_DART_PFLOTRAN.csh```); (2) the template for input namelists file (i.e., ```input.nml.template```); (3) the shell script for converting NetCDF observation data to [DART format](https://www.image.ucar.edu/DAReS/DART/DART2_Observations.html#obs_seq_overview) (i.e., ```dart_seq_convert.csh```); (4) the shell script for [check](https://www.image.ucar.edu/DAReS/DART/manhattan/assimilation_code/programs/model_mod_check/model_mod_check.html) ```model_mod.F90```  (i.e., ```check_model_mod.csh```); and (5) other mkmf files and path names files required by the previous shell scripts. 
+- ```work```: The folder provides a set of scripts for integrating PFLOTRAN and DART. It includes (1) shell scripts for running PFLOTRAN with DART (i.e., ```run_DART_PFLOTRAN.csh```); (2) the template for input namelists file (i.e., ```input.nml.template```); (3) the shell script for converting NetCDF observation data to [DART format](https://www.image.ucar.edu/DAReS/DART/DART2_Observations.html#obs_seq_overview) (i.e., ```dart_seq_convert.csh```); (4) the shell script for [check](https://www.image.ucar.edu/DAReS/DART/manhattan/assimilation_code/programs/model_mod_check/model_mod_check.html) ```model_mod.F90```  (i.e., ```check_model_mod.csh```); and (5) other mkmf files and path names files required by the previous shell scripts.
 
 - ```obs_kind```: This folder provides the definitions of PFLOTRAN variables in DART and the corresponding utitlities required by DART, including: (1) ```DEFAULT_obs_kind_mod.F90``` defining a list of DART variable generic quantity (along with PFLOTRAN's variables) and (2) ```obs_def_PFLOTRAN_mod.F90``` defining some interfaces of observation definions and the mapping between PFLOTRAN variable names and their names in DART quantity.
 
@@ -73,7 +73,7 @@ The following is the the main structure of the {DART-PFLOTRAN} repository:
 
 - ```applications``` This folder is where the applications should be put. A default ```template``` folder is provided, where the folder structure of each application should follow. An example of 1D thermal model is also provided in ```1dthermal``` folder. For running PFLOTRAN-DART, we suggest users to configure and run the jupyter notebook or the corresponding python file under ```workflow_ipynb``` to run through the work flow.
 
-  
+
 
 
 ## Configuration
