@@ -120,7 +120,7 @@ class DaResults(object):
             self.model_time_list, list) else self.model_time_list
         # self.model_time_list  = [t+model_time_offset for t in self.model_time_list]
         self.exceeds_obs_time = self.configs["time_cfg"]["exceeds_obs_time"]
-        self.assim_window     = float(self.configs["da_cfg"]["assim_window_size"])
+        # self.assim_window     = float(self.configs["da_cfg"]["assim_window_size"])
         self.nens             = self.configs["da_cfg"]["nens"]
         self.model_ntime      = len(self.model_time_list)
         self.model_ntimestep  = int(self.configs["da_cfg"]["ntimestep"])

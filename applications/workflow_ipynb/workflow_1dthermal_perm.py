@@ -56,7 +56,7 @@ pflotran_exe  = '/Users/jian449/Codes/pflotran/src/pflotran/pflotran'
 
 # Main directory names
 temp_app_dir = "/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal_perm"          # The template for application folder
-app_dir      = "/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal_perm_parastate"          # The application folder name
+app_dir      = "/Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal_perm_parastate_test"          # The application folder name
 dart_dir     = "/Users/jian449/Codes/DART/manhattan"
 dart_pf_dir  = "/Users/jian449/Codes/DART/manhattan/models/pflotran"     # The dart pflotran utitlity folder name
 # temp_app_dir = "/home/jian449/DART/manhattan/models/pflotran/applications/template"          # The template for application folder
@@ -192,7 +192,8 @@ da_cfg["assim_window_fixed"]   = False # whether the assimilation window is fixe
 # da_cfg["assim_window_seconds"] = 3600  # assimilation time window/step  (second)
 # da_cfg["assim_window_size"] = da_cfg["assim_window_days"]+float(da_cfg["assim_window_seconds"])/86400. # day
 # da_cfg["assim_window_list"] = [7200./86400., (4000.*60.+10)/86400.] # day
-da_cfg["assim_window_list"] = [2*86400., (4000.*60+10)/86400.] # day
+# da_cfg["assim_window_list"] = [2., (4000.*60+10)/86400.] # day
+da_cfg["assim_window_list"] = [4000./86400.] # day
 first_assim_window_size = da_cfg["assim_window_list"][0]
 
 # %% [markdown]
@@ -602,7 +603,7 @@ quickbuild = files_cfg["quickbuild_csh"]
 print("\n")
 print("------------------------------------------------------------")
 print("Generate all the executables...")
-# subprocess.run("cd {}; csh {} {} -mpi".format(dart_work_dir, quickbuild, app_work_dir), shell=True, check=True)
+subprocess.run("cd {}; csh {} {} -mpi".format(dart_work_dir, quickbuild, app_work_dir), shell=True, check=True)
 # subprocess.run("cd {}; csh {} {}".format(dart_work_dir, quickbuild, app_work_dir), shell=True, check=True)
 
 # %% [markdown]

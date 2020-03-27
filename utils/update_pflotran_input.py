@@ -47,6 +47,8 @@ if assim_window_fixed:
     current_model_time_end     = current_model_time + (assim_window_size - one_sec) / 2
 else:
     assim_window_list = configs["da_cfg"]["assim_window_list"]
+    if not isinstance(assim_window_list, list):
+        assim_window_list = [assim_window_list]
     assim_time_sofar = np.sum(assim_window_list[:len(model_time_list)])
     current_model_time_end = spinup_length + assim_time_sofar
 

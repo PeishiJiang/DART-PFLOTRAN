@@ -46,6 +46,8 @@ if assim_window_fixed:
     current_model_time += old_assim_window_size / 2 + new_assim_window_size / 2
 else:
     assim_window_list = configs["da_cfg"]["assim_window_list"]
+    if not isinstance(assim_window_list, list):
+        assim_window_list = [assim_window_list]
     old_assim_window_size = assim_window_list[len(model_time_list)-1]
     old_assim_window_days = int(floor(old_assim_window_size))
     old_assim_window_seconds = int((old_assim_window_size - old_assim_window_days) * 86400)

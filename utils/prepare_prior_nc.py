@@ -50,6 +50,8 @@ if assim_window_fixed:
     assim_window = float(configs["da_cfg"]["assim_window_size"])  # days
 else:
     assim_window_list = configs["da_cfg"]["assim_window_list"]  # days
+    if not isinstance(assim_window_list, list):
+        assim_window_list = [assim_window_list]
     assim_window = assim_window_list[len(model_time_list)-1]
 assim_end_days    = configs["da_cfg"]["assim_end_days"]
 assim_end_seconds = configs["da_cfg"]["assim_end_seconds"]
