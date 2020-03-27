@@ -57,29 +57,51 @@ for i in range(len(para_set)):
     # Generate the ensemble
     if dist.lower() == 'normal':
         values = np.random.normal(mean, std, nens)
+        # Exclude those values outside of [minv, maxv]
+        if minv != -99999:
+            values[values < minv] = minv
+        if maxv != 99999:
+            values[values > maxv] = maxv
 
     elif dist.lower() == 'lognormal':
-        logmean = np.exp(mean + std**2 / 2.)
-        logstd  = np.exp(2 * mean + std**2) * (np.exp(std**2) - 1)
-        values  = np.random.lognormal(logmean, logstd)
+        # logmean = np.exp(mean + std**2 / 2.)
+        # logstd  = np.exp(2 * mean + std**2) * (np.exp(std**2) - 1)
+        # values  = np.random.lognormal(logmean, logstd)
+        logvalues  = np.random.normal(mean, std, nens)
+        # Exclude those values outside of [minv, maxv]
+        if minv != -99999:
+            logvalues[logvalues < minv] = minv
+        if maxv != 99999:
+            logvalues[logvalues > maxv] = maxv
+        values = np.power(10, logvalues)
 
     elif dist.lower() == 'truncated_normal':
         values = truncnorm.rvs(minv, maxv, loc=mean, scale=std, size=nens)
+        # Exclude those values outside of [minv, maxv]
+        if minv != -99999:
+            values[values < minv] = minv
+        if maxv != 99999:
+            values[values > maxv] = maxv
 
     elif dist.lower() == 'uniform':
         values = np.random.uniform(minv, maxv, nens)
+        # Exclude those values outside of [minv, maxv]
+        if minv != -99999:
+            values[values < minv] = minv
+        if maxv != 99999:
+            values[values > maxv] = maxv
 
     elif dist.lower() == 'test':
         values = np.linspace(minv, maxv, nens)
+        # Exclude those values outside of [minv, maxv]
+        if minv != -99999:
+            values[values < minv] = minv
+        if maxv != 99999:
+            values[values > maxv] = maxv
 
     else:
         raise Exception("unknown distribution %s" % dist)
 
-    # Exclude those values outside of [minv, maxv]
-    if minv != -99999:
-        values[values < minv] = minv
-    if maxv != 99999:
-        values[values > maxv] = maxv
 
     h5dset = h5file.create_dataset(varn, data=values)
 

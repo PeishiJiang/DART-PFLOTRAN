@@ -32,6 +32,7 @@ dart_output_list    = configs["file_cfg"]["dart_output_list_file"]
 dart_prior_template = configs["file_cfg"]["dart_prior_template_file"]
 obs_set             = configs["obspara_set_cfg"]["obs_set"]
 para_set            = configs["obspara_set_cfg"]["para_set"]
+para_take_log       = configs["obspara_set_cfg"]["para_take_log"]
 model_time          = float(configs["time_cfg"]["current_model_time"])  # days
 model_time_list     = configs["time_cfg"]["model_time_list"]
 ntimestep           = int(configs["da_cfg"]["ntimestep"])
@@ -39,8 +40,17 @@ nens                = configs["da_cfg"]["nens"]
 spinup_time         = configs["time_cfg"]["spinup_length"]
 para_homogeneous    = configs["obspara_set_cfg"]["para_homogeneous"]
 
+# Convert the model_time_list to a list (model_time_list = 0 in the first model tim)
+if not isinstance(model_time_list, list):
+    model_time_list = [model_time_list]
+
 # Get the start and end time of the current assimilation window
-assim_window        = float(configs["da_cfg"]["assim_window_size"])  # days
+assim_window_fixed = configs["da_cfg"]["assim_window_fixed"]
+if assim_window_fixed:
+    assim_window = float(configs["da_cfg"]["assim_window_size"])  # days
+else:
+    assim_window_list = configs["da_cfg"]["assim_window_list"]  # days
+    assim_window = assim_window_list[len(model_time_list)-1]
 assim_end_days    = configs["da_cfg"]["assim_end_days"]
 assim_end_seconds = configs["da_cfg"]["assim_end_seconds"]
 assim_start_days    = configs["da_cfg"]["assim_start_days"]
@@ -62,10 +72,6 @@ if isinstance(obs_set, str):
 if isinstance(para_set, str):
     para_set = [para_set]
 pflotran_var_set = obs_set + para_set
-
-# Convert the model_time_list to a list (model_time_list = 0 in the first model tim)
-if not isinstance(model_time_list, list):
-    model_time_list = [model_time_list]
 
 # Get some constants
 one_sec        = 1. / 86400.  # one second in fractional days
@@ -247,7 +253,10 @@ for i in range(nens):
             if varn in pflotran_var_set:
                 value = f_para[varn][:][i]
                 # dart_var_dict[varn] = {"value": value * np.ones([ntime, nloc]), "unit": ""}
-                dart_var_dict[varn] = {"value": value, "unit": ""}
+                if para_take_log:
+                    dart_var_dict[varn] = {"value": np.log10(value), "unit": ""}
+                else:
+                    dart_var_dict[varn] = {"value": value, "unit": ""}
         x_loc_para, y_loc_para, z_loc_para = x_loc_state[int(nx_state/2)], y_loc_state[int(ny_state/2)], z_loc_state[int(nz_state/2)] 
         nx_para, ny_para, nz_para = 1, 1, 1
         time_para = [model_time]
@@ -340,6 +349,7 @@ for i in range(nens):
         vargrp = root_nc_prior.createVariable(varn, 'f8', ('para_time', 'para_location'))
         vargrp.type = 'parameter_value'
         vargrp.unit = dart_var_dict[varn]["unit"]
+        vargrp.history = "logged" if para_take_log else "not logged"
         vargrp[:] = dart_var_dict[varn]["value"]
 
     root_nc_prior.close()
@@ -425,6 +435,7 @@ for i in range(nens):
             continue
         vargrp = root_nc_posterior.createVariable(varn, 'f8', ('para_time', 'para_location'))
         vargrp.type = 'parameter_value'
+        vargrp.history = "logged" if para_take_log else "not logged"
         vargrp.unit = dart_var_dict[varn]["unit"]
 
     root_nc_posterior.close()

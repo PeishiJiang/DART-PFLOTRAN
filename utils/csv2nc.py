@@ -40,6 +40,7 @@ missing_value = -99999
 obs_pd = pd.read_csv(obs_original)
 
 # Get time and vertical depths
+print(obs_pd.keys())
 time_set  = obs_pd['# Datetime'].values
 z_set     = [float(z[:-2])/100 for z in obs_pd.keys()[1:]]
 ntime, nz = obs_pd.shape

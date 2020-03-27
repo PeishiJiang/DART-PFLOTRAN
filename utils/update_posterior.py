@@ -30,6 +30,7 @@ dart_input_list    = configs["file_cfg"]["dart_input_list_file"]
 dart_output_list   = configs["file_cfg"]["dart_output_list_file"]
 obs_set            = configs["obspara_set_cfg"]["obs_set"]
 para_set           = configs["obspara_set_cfg"]["para_set"]
+para_take_log      = configs["obspara_set_cfg"]["para_take_log"]
 model_time         = float(configs["time_cfg"]["current_model_time"])  # days
 model_time_list    = configs["time_cfg"]["model_time_list"]
 nens               = configs["da_cfg"]["nens"]
@@ -37,7 +38,6 @@ required           = configs["da_cfg"]["obs_ens_posterior_from_model"]
 spinup_time        = configs["time_cfg"]["spinup_length"] # days
 
 # Get the start and end time of the current assimilation window
-assim_window       = float(configs["da_cfg"]["assim_window_size"])  # days
 assim_end_days    = configs["da_cfg"]["assim_end_days"]
 assim_end_seconds = configs["da_cfg"]["assim_end_seconds"]
 assim_start_days    = configs["da_cfg"]["assim_start_days"]

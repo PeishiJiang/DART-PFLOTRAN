@@ -28,28 +28,33 @@ spinup_length            = configs["time_cfg"]["spinup_length"]
 model_time_list          = configs["time_cfg"]["model_time_list"]
 current_model_time       = configs["time_cfg"]["current_model_time"]
 enks_mda_iteration_step  = configs["da_cfg"]["enks_mda_iteration_step"]
-assim_window_days        = configs["da_cfg"]["assim_window_days"]
-assim_window_seconds     = configs["da_cfg"]["assim_window_seconds"]
-assim_window_size        = configs["da_cfg"]["assim_window_size"]
-# assim_window             = assim_window_size * 86400
-# assim_window             = assim_window_seconds + assim_window_days * 86400  # seconds
+assim_window_fixed       = configs["da_cfg"]["assim_window_fixed"]
 
 try:
     update_obs_ens_posterior = configs["da_cfg"]["update_obs_ens_posterior"]
 except:
     update_obs_ens_posterior = False
 
-
 if not isinstance(model_time_list, list):
     model_time_list = [model_time_list]
 
-one_sec                    = 1./86400.  # one second (fractional days)
-current_model_time_end     = current_model_time + (assim_window_size - one_sec) / 2
+# Get the current model end time
+if assim_window_fixed:
+    assim_window_days    = configs["da_cfg"]["assim_window_days"]
+    assim_window_seconds = configs["da_cfg"]["assim_window_seconds"]
+    assim_window_size    = configs["da_cfg"]["assim_window_size"]
+    one_sec                    = 1./86400.  # one second (fractional days)
+    current_model_time_end     = current_model_time + (assim_window_size - one_sec) / 2
+else:
+    assim_window_list = configs["da_cfg"]["assim_window_list"]
+    assim_time_sofar = np.sum(assim_window_list[:len(model_time_list)])
+    current_model_time_end = spinup_length + assim_time_sofar
+
 current_model_time_end_sec = current_model_time_end * 86400
-# current_model_time_sec     = float(model_time_list[-1]) * 86400
 spinup_length_sec          = spinup_length * 86400
 
 para_set      = configs["obspara_set_cfg"]["para_set"]
+para_take_log = configs["obspara_set_cfg"]["para_take_log"]
 para_min_set  = configs["obspara_set_cfg"]["para_min_set"]
 para_max_set  = configs["obspara_set_cfg"]["para_max_set"]
 para_mean_set = configs["obspara_set_cfg"]["para_mean_set"]
@@ -72,6 +77,12 @@ if not isinstance(para_set, list):
 
 # Check whether this is the first time to update pflotran input files
 first_time_update = True if len(model_time_list) == 1 else False
+
+# Check whether this is the first time to update pflotran input files
+second_time_update = True if len(model_time_list) == 2 else False
+
+# Check whether the spinup was conducted before
+is_spinup_length_zero = True if spinup_length == 0 else False
 
 
 ###############################
@@ -97,16 +108,27 @@ if enks_mda_iteration_step == 1 and not update_obs_ens_posterior:
             if "FINAL_TIME" in s:
                 # pflotranin[i] = "  FINAL_TIME {} sec".format(spinup_length_sec + current_model_time_end_sec) + "\n"
                 pflotranin[i] = "  FINAL_TIME {} sec".format(current_model_time_end_sec) + "\n"
-            if "SUBSURFACE_FLOW" in s and "MODE" in pflotranin[i + 1] and first_time_update:
+
+            if "SUBSURFACE_FLOW" in s and "MODE" in pflotranin[i + 1] and first_time_update and not is_spinup_length_zero:
                 pflotranin.insert(i + 2, "        OPTIONS \n")
                 pflotranin.insert(i + 3, "            REVERT_PARAMETERS_ON_RESTART \n")
                 pflotranin.insert(i + 4, "        / \n")
-            if "CHECKPOINT" in s and "/" in pflotranin[i + 1] and first_time_update:
+            elif "SUBSURFACE_FLOW" in s and "MODE" in pflotranin[i + 1] and second_time_update and is_spinup_length_zero:
+                pflotranin.insert(i + 2, "        OPTIONS \n")
+                pflotranin.insert(i + 3, "            REVERT_PARAMETERS_ON_RESTART \n")
+                pflotranin.insert(i + 4, "        / \n")
+
+            if "CHECKPOINT" in s and "/" in pflotranin[i + 1] and first_time_update and not is_spinup_length_zero:
                 pflotranin.insert(i + 2, "  RESTART \n")
                 pflotranin.insert(i + 3, "    FILENAME " + pflotran_checkpoint_file + " \n")
                 pflotranin.insert(i + 4, "    REALIZATION_DEPENDENT \n")
-                # pflotranin.insert(i + 5, "    RESET_TO_TIME_ZERO \n")
                 pflotranin.insert(i + 5, "  / \n")
+            elif "CHECKPOINT" in s and "/" in pflotranin[i + 1] and second_time_update and is_spinup_length_zero:
+                pflotranin.insert(i + 2, "  RESTART \n")
+                pflotranin.insert(i + 3, "    FILENAME " + pflotran_checkpoint_file + " \n")
+                pflotranin.insert(i + 4, "    REALIZATION_DEPENDENT \n")
+                pflotranin.insert(i + 5, "  / \n")
+
             if "SNAPSHOT_FILE" in s and first_time_update:
                 pflotranin.insert(i + 1, "   PERIODIC TIME 300.0d0 sec \n")
 
@@ -143,8 +165,7 @@ for i in range(len(dart_posterior_file_list)):
 # posterior output
 ###############################
 if not os.path.isfile(pflotran_para_file):
-    raise Exception("The file does not exist in the path: %s" %
-                    pflotran_para_file)
+    raise Exception("The file does not exist in the path: %s" % pflotran_para_file)
 f_para = h5py.File(pflotran_para_file, "r+")
 
 posterior = np.zeros([len(para_set), nens])
@@ -194,29 +215,45 @@ for j in range(len(para_set)):
         else:  # if resampling is required.
             if var_dist.lower() == 'normal':
                 posterior[j, :] = np.random.normal(var_mean_nc, var_std, nens)
+                # Exclude those values outside of [minv, maxv]
+                if var_min != -99999:
+                    posterior[j, :][posterior[j, :] < var_min] = var_min
+                if var_max != 99999:
+                    posterior[j, :][posterior[j, :] > var_max] = var_max
 
             elif var_dist.lower() == 'lognormal':
-                logmean = np.exp(var_mean_nc + var_std**2 / 2.)
-                logstd  = np.exp(2 * var_mean_nc + var_std**2) * (np.exp(var_std**2) - 1)
-                posterior[j, :]  = np.random.lognormal(logmean, logstd)
+                # logmean = np.exp(var_mean_nc + var_std**2 / 2.)
+                # logstd  = np.exp(2 * var_mean_nc + var_std**2) * (np.exp(var_std**2) - 1)
+                # posterior[j, :]  = np.random.lognormal(logmean, logstd)
+                logvalues  = np.random.normal(var_mean_nc, var_std, nens)
+                if var_min != -99999:
+                    logvalues[logvalues < var_min] = var_min
+                if var_max != 99999:
+                    logvalues[logvalues > var_max] = var_max
+                posterior[j, :] = np.power(10, logvalues)
 
             # elif var_dist.lower() == 'truncated_normal':
             #     posterior[j, :] = truncnorm.rvs(var_min, var_max, loc=var_mean_nc, scale=var_std, size=nens)
 
             elif var_dist.lower() == 'uniform':
                 posterior[j, :] = np.random.uniform(var_min, var_max, nens)
+                # Exclude those values outside of [minv, maxv]
+                if var_min != -99999:
+                    posterior[j, :][posterior[j, :] < var_min] = var_min
+                if var_max != 99999:
+                    posterior[j, :][posterior[j, :] > var_max] = var_max
 
             elif var_dist.lower() == 'test':
                 posterior[j, :] = posterior[j, :]
+                # Exclude those values outside of [minv, maxv]
+                if var_min != -99999:
+                    posterior[j, :][posterior[j, :] < var_min] = var_min
+                if var_max != 99999:
+                    posterior[j, :][posterior[j, :] > var_max] = var_max
 
             else:
                 raise Exception("unknown distribution %s" % var_dist)
 
-        # Exclude those values outside of [minv, maxv]
-        if var_min != -99999:
-            posterior[j, :][posterior[j, :] < var_min] = var_min
-        if var_max != 99999:
-            posterior[j, :][posterior[j, :] > var_max] = var_max
 
     else:
         # Exclude those values outside of [minv, maxv]
