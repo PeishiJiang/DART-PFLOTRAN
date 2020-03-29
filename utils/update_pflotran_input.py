@@ -168,7 +168,7 @@ for i in range(len(dart_posterior_file_list)):
 # Check whether the parameter file should be adopted from
 # the initial.
 ###############################
-if use_para_initial_at_nth_window == len(model_time_list) and not update_obs_ens_posterior_now:
+if use_para_initial_at_nth_window == len(model_time_list) and not update_obs_ens_posterior_now and enks_mda_iteration_step == 1:
     subprocess.run("mv {} {}".format(pflotran_para_backup_file, pflotran_para_file), shell=True, check=True)
     sys.exit()
 

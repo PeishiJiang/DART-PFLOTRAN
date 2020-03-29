@@ -102,6 +102,7 @@ from utils.read_filepaths_nml import read_filepaths_nml
 # %%
 dirs_cfg, files_cfg      = read_filepaths_nml(app_dir=app_dir, dart_pf_dir=dart_pf_dir)
 files_cfg["keep_each_ens_file"] = False   # Whether each ensemble nc file is kept when the DA ends
+files_cfg["save_immediate_mda_result"] = True   # Indicate whether the results of each MDA iteration will be saved
 configs["other_dir_cfg"] = dirs_cfg
 configs["file_cfg" ]     = files_cfg
 config_file              = files_cfg["config_file"]
@@ -196,7 +197,7 @@ da_cfg["assim_window_fixed"]   = False # whether the assimilation window is fixe
 # da_cfg["assim_window_list"] = [7200./86400., (4000.*60.+10)/86400.] # day
 da_cfg["assim_window_list"] = [2., (4000.*60+10)/86400.] # day
 # da_cfg["assim_window_list"] = [4000./86400.] # day
-da_cfg["use_para_initial_at_nth_window"] = -1 # Use the initial parameter ensemble at the nth assimilation window (unused if negative)
+da_cfg["use_para_initial_at_nth_window"] = 2 # Use the initial parameter ensemble at the nth assimilation window (unused if negative)
 first_assim_window_size = da_cfg["assim_window_list"][0]
 
 # %% [markdown]
@@ -288,8 +289,8 @@ da_cfg["obs_ens_posterior_from_model"] = True
 # The inflation settings used in EnKS-MDA (the alpha value)
 # da_cfg["enks_mda_alpha"] = [4., 4., 4., 4.]  # Note that the summation of the inverse of alpha should be one
 # da_cfg["enks_mda_alpha"] = [3., 3., 3.]  # Note that the summation of the inverse of alpha should be one
-# da_cfg["enks_mda_alpha"] = [2., 2.]  # Note that the summation of the inverse of alpha should be one
-da_cfg["enks_mda_alpha"] = [1.]  # Note that the summation of the inverse of alpha should be one
+da_cfg["enks_mda_alpha"] = [2., 2.]  # Note that the summation of the inverse of alpha should be one
+# da_cfg["enks_mda_alpha"] = [1.]  # Note that the summation of the inverse of alpha should be one
 da_cfg["enks_mda_iteration_step"] = 1  # the ith iteration (1 for the first iteration)
 da_cfg["enks_mda_total_iterations"] = len(da_cfg["enks_mda_alpha"])  # Note that the summation of the inverse of alpha should be one
 

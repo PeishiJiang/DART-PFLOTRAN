@@ -40,6 +40,10 @@ nens                = configs["da_cfg"]["nens"]
 spinup_time         = configs["time_cfg"]["spinup_length"]
 para_homogeneous    = configs["obspara_set_cfg"]["para_homogeneous"]
 
+iteration_step            = configs["da_cfg"]["enks_mda_iteration_step"]
+total_iterations          = configs["da_cfg"]["enks_mda_total_iterations"]
+save_immediate_mda_result = configs["file_cfg"]["save_immediate_mda_result"]
+
 # Convert the model_time_list to a list (model_time_list = 0 in the first model tim)
 if not isinstance(model_time_list, list):
     model_time_list = [model_time_list]
@@ -115,6 +119,11 @@ dart_posterior_file_set = [
     re.sub(r"\[TIME\]", str(model_time_ind).zfill(ndigit_time), dart_posterior_file_each)
     for dart_posterior_file_each in dart_posterior_file_set
 ]
+if save_immediate_mda_result:
+    dart_posterior_file_set = [
+        re.sub(".nc", "_iter"+str(iteration_step)+".nc", dart_posterior_file_each)
+        for dart_posterior_file_each in dart_posterior_file_set
+    ]
 
 ###############################
 # Save the list of prior.nc to dart_input_list
@@ -452,22 +461,30 @@ f_para.close()
 
 
 ###############################
-# Get the prior when it is the first iteration at each window
+# Get the prior when it is the first iteration at each time window
+# or at each iteration if all iterations should be saved
 ###############################
-enks_mda_iteration_step   = configs["da_cfg"]["enks_mda_iteration_step"]
+# Get the file names of all ensembles for the prior file
+dart_prior_file_set = [
+    # re.sub(r"\[ENS\]", str(ens) + "_time" + str(model_time_ind), dart_prior_file)
+    re.sub(r"\[ENS\]", str(ens).zfill(ndigit_ens), dart_prior_file)
+    for ens in ens_set
+]
+dart_prior_file_set = [
+    re.sub(r"\[TIME\]", str(model_time_ind).zfill(ndigit_time), dart_prior_file_each)
+    for dart_prior_file_each in dart_prior_file_set
+]
 
-if enks_mda_iteration_step == 1:
-    # Get the file names of all ensembles for the prior file
+if save_immediate_mda_result:
     dart_prior_file_set = [
-        # re.sub(r"\[ENS\]", str(ens) + "_time" + str(model_time_ind), dart_prior_file)
-        re.sub(r"\[ENS\]", str(ens).zfill(ndigit_ens), dart_prior_file)
-        for ens in ens_set
-    ]
-    dart_prior_file_set = [
-        re.sub(r"\[TIME\]", str(model_time_ind).zfill(ndigit_time), dart_prior_file_each)
+        re.sub(".nc", "_iter"+str(iteration_step)+".nc", dart_prior_file_each)
         for dart_prior_file_each in dart_prior_file_set
     ]
-
     # Copy the temporary prior file to prior file
     for i in range(nens):
         subprocess.run("cd {0}; cp {1} {2}".format(dart_data_dir, dart_prior_file_set_temp[i], dart_prior_file_set[i]), shell=True, check=True)
+else:
+    if iteration_step == 1:
+        # Copy the temporary prior file to prior file
+        for i in range(nens):
+            subprocess.run("cd {0}; cp {1} {2}".format(dart_data_dir, dart_prior_file_set_temp[i], dart_prior_file_set[i]), shell=True, check=True)
