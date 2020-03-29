@@ -6,6 +6,7 @@ import os
 import sys
 import h5py
 import f90nml
+import subprocess
 from scipy.stats import truncnorm
 import numpy as np
 
@@ -19,6 +20,10 @@ config_nml_file = sys.argv[1]
 configs         = f90nml.read(config_nml_file)
 
 pflotran_para_file = configs["file_cfg"]["pflotran_para_file"]
+pflotran_para_backup_file = configs["file_cfg"]["pflotran_para_backup_file"]
+use_para_backup    = False if configs["da_cfg"]["use_para_initial_at_nth_window"] < 0 else True
+use_default_para_initial = configs["obspara_set_cfg"]["use_default_para_initial"]
+
 para_set           = configs["obspara_set_cfg"]["para_set"]
 para_min_set       = configs["obspara_set_cfg"]["para_min_set"]
 para_max_set       = configs["obspara_set_cfg"]["para_max_set"]
@@ -39,70 +44,83 @@ if not isinstance(para_set, list):
 if not isinstance(para_resampled_set, list):
     para_resampled_set = [para_resampled_set]
 
+
 ###############################
 # Generate ensemble parameters
 ###############################
-if os.path.isfile(pflotran_para_file):
-    os.remove(pflotran_para_file)
+if use_default_para_initial:
+    if not os.path.isfile(pflotran_para_file):
+        raise Exception("No detault parameter initial file exists!")
 
-h5file = h5py.File(pflotran_para_file, 'w')
+else:
+    if os.path.isfile(pflotran_para_file):
+        os.remove(pflotran_para_file)
 
-for i in range(len(para_set)):
-    varn = para_set[i]
-    dist = para_dist_set[i]
+    h5file = h5py.File(pflotran_para_file, 'w')
 
-    mean, std  = para_mean_set[i], para_std_set[i]
-    maxv, minv = para_max_set[i],  para_min_set[i]
+    for i in range(len(para_set)):
+        varn = para_set[i]
+        dist = para_dist_set[i]
 
-    # Generate the ensemble
-    if dist.lower() == 'normal':
-        values = np.random.normal(mean, std, nens)
-        # Exclude those values outside of [minv, maxv]
-        if minv != -99999:
-            values[values < minv] = minv
-        if maxv != 99999:
-            values[values > maxv] = maxv
+        mean, std  = para_mean_set[i], para_std_set[i]
+        maxv, minv = para_max_set[i],  para_min_set[i]
 
-    elif dist.lower() == 'lognormal':
-        # logmean = np.exp(mean + std**2 / 2.)
-        # logstd  = np.exp(2 * mean + std**2) * (np.exp(std**2) - 1)
-        # values  = np.random.lognormal(logmean, logstd)
-        logvalues  = np.random.normal(mean, std, nens)
-        # Exclude those values outside of [minv, maxv]
-        if minv != -99999:
-            logvalues[logvalues < minv] = minv
-        if maxv != 99999:
-            logvalues[logvalues > maxv] = maxv
-        values = np.power(10, logvalues)
+        # Generate the ensemble
+        if dist.lower() == 'normal':
+            values = np.random.normal(mean, std, nens)
+            # Exclude those values outside of [minv, maxv]
+            if minv != -99999:
+                values[values < minv] = minv
+            if maxv != 99999:
+                values[values > maxv] = maxv
 
-    elif dist.lower() == 'truncated_normal':
-        values = truncnorm.rvs(minv, maxv, loc=mean, scale=std, size=nens)
-        # Exclude those values outside of [minv, maxv]
-        if minv != -99999:
-            values[values < minv] = minv
-        if maxv != 99999:
-            values[values > maxv] = maxv
+        elif dist.lower() == 'lognormal':
+            # logmean = np.exp(mean + std**2 / 2.)
+            # logstd  = np.exp(2 * mean + std**2) * (np.exp(std**2) - 1)
+            # values  = np.random.lognormal(logmean, logstd)
+            logvalues  = np.random.normal(mean, std, nens)
+            # Exclude those values outside of [minv, maxv]
+            if minv != -99999:
+                logvalues[logvalues < minv] = minv
+            if maxv != 99999:
+                logvalues[logvalues > maxv] = maxv
+            values = np.power(10, logvalues)
 
-    elif dist.lower() == 'uniform':
-        values = np.random.uniform(minv, maxv, nens)
-        # Exclude those values outside of [minv, maxv]
-        if minv != -99999:
-            values[values < minv] = minv
-        if maxv != 99999:
-            values[values > maxv] = maxv
+        elif dist.lower() == 'truncated_normal':
+            values = truncnorm.rvs(minv, maxv, loc=mean, scale=std, size=nens)
+            # Exclude those values outside of [minv, maxv]
+            if minv != -99999:
+                values[values < minv] = minv
+            if maxv != 99999:
+                values[values > maxv] = maxv
 
-    elif dist.lower() == 'test':
-        values = np.linspace(minv, maxv, nens)
-        # Exclude those values outside of [minv, maxv]
-        if minv != -99999:
-            values[values < minv] = minv
-        if maxv != 99999:
-            values[values > maxv] = maxv
+        elif dist.lower() == 'uniform':
+            values = np.random.uniform(minv, maxv, nens)
+            # Exclude those values outside of [minv, maxv]
+            if minv != -99999:
+                values[values < minv] = minv
+            if maxv != 99999:
+                values[values > maxv] = maxv
 
-    else:
-        raise Exception("unknown distribution %s" % dist)
+        elif dist.lower() == 'test':
+            values = np.linspace(minv, maxv, nens)
+            # Exclude those values outside of [minv, maxv]
+            if minv != -99999:
+                values[values < minv] = minv
+            if maxv != 99999:
+                values[values > maxv] = maxv
+
+        else:
+            raise Exception("unknown distribution %s" % dist)
 
 
-    h5dset = h5file.create_dataset(varn, data=values)
+        h5dset = h5file.create_dataset(varn, data=values)
 
-h5file.close()
+    h5file.close()
+
+
+###############################
+# Need to backup the intial parameters?
+###############################
+if use_para_backup:
+   subprocess.run("cp {} {}".format(pflotran_para_file, pflotran_para_backup_file), shell=True, check=True) 

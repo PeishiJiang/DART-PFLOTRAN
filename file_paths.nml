@@ -24,6 +24,7 @@
     pflotran_sh_file   = '[utils_dir]/pflotran.sh'
     pflotran_in_file   = '[pflotran_in_dir]/pflotran.in'
     pflotran_para_file = '[pflotran_in_dir]/parameter_prior.h5'
+    pflotran_para_backup_file = '[pflotran_in_dir]/parameter_prior_backup.h5'
     pflotran_out_file  = '[pflotran_out_dir]/pflotranR[ENS].h5'
     pflotran_checkpoint_file = '[pflotran_out_dir]/pflotran-restart.chk'
     /

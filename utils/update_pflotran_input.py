@@ -6,6 +6,7 @@ import os
 import sys
 import h5py
 import f90nml
+import subprocess
 import numpy as np
 from scipy.stats import truncnorm
 from netCDF4 import num2date, date2num, Dataset
@@ -21,6 +22,8 @@ configs         = f90nml.read(config_nml_file)
 
 pflotran_in_file         = configs["file_cfg"]["pflotran_in_file"]
 pflotran_para_file       = configs["file_cfg"]["pflotran_para_file"]
+pflotran_para_backup_file = configs["file_cfg"]["pflotran_para_backup_file"]
+use_para_initial_at_nth_window = configs["da_cfg"]["use_para_initial_at_nth_window"]
 pflotran_checkpoint_file = configs["file_cfg"]["pflotran_checkpoint_file"]
 dart_posterior_file      = configs["file_cfg"]["dart_posterior_nc_file"]
 dart_output_list         = configs["file_cfg"]["dart_output_list_file"]
@@ -31,9 +34,9 @@ enks_mda_iteration_step  = configs["da_cfg"]["enks_mda_iteration_step"]
 assim_window_fixed       = configs["da_cfg"]["assim_window_fixed"]
 
 try:
-    update_obs_ens_posterior = configs["da_cfg"]["update_obs_ens_posterior"]
+    update_obs_ens_posterior_now = configs["da_cfg"]["update_obs_ens_posterior_now"]
 except:
-    update_obs_ens_posterior = False
+    update_obs_ens_posterior_now = False
 
 if not isinstance(model_time_list, list):
     model_time_list = [model_time_list]
@@ -93,7 +96,7 @@ is_spinup_length_zero = True if spinup_length == 0 else False
 # (2) The restart file config
 ###############################
 # If it is the first iteration, revise the pflotran.in file
-if enks_mda_iteration_step == 1 and not update_obs_ens_posterior:
+if enks_mda_iteration_step == 1 and not update_obs_ens_posterior_now:
     # Read the current PFLOTRAN.in information
     if not os.path.isfile(pflotran_in_file):
         raise Exception("The pflotran in file does not exist in the path: %s" %
@@ -140,7 +143,7 @@ if enks_mda_iteration_step == 1 and not update_obs_ens_posterior:
 ###############################
 # If it is the first iteration at the initial model time. No further posterior data is required.
 ###############################
-if len(model_time_list) == 1 and enks_mda_iteration_step == 1 and not update_obs_ens_posterior:
+if len(model_time_list) == 1 and enks_mda_iteration_step == 1 and not update_obs_ens_posterior_now:
     print("It is the first iteration at the initial model time. No further conversion from DART posterior is needed.")
     exit()
 
@@ -159,6 +162,16 @@ for i in range(len(dart_posterior_file_list)):
     file_name_old = dart_posterior_file_list[i]
     file_name     = file_name_old.replace("\n", "")
     dart_posterior_file_set.append(file_name)
+
+
+###############################
+# Check whether the parameter file should be adopted from
+# the initial.
+###############################
+if use_para_initial_at_nth_window == len(model_time_list) and not update_obs_ens_posterior_now:
+    subprocess.run("mv {} {}".format(pflotran_para_backup_file, pflotran_para_file), shell=True, check=True)
+    sys.exit()
+
 
 ###############################
 # TODO Modify the parameter from a single value to 3D later on
@@ -207,7 +220,7 @@ for j in range(len(para_set)):
     var_mean, var_std = para_mean_set[j], para_std_set[j]
 
     # resample the prior if it is required and it is not the time for updating observation ensemble posterior
-    if varn in para_resampled_set and not update_obs_ens_posterior:
+    if varn in para_resampled_set and not update_obs_ens_posterior_now:
         var_mean_nc = np.mean(posterior[j, :])
         var_std_nc  = np.std(posterior[j, :])
         # Generate the ensemble
@@ -260,8 +273,13 @@ for j in range(len(para_set)):
     else:
         # Exclude those values outside of [minv, maxv]
         # if var_dist.lower() == 'uniform' or var_dist.lower() == 'truncated_normal':
-        posterior[j, :][posterior[j, :] < var_min] = var_min
-        posterior[j, :][posterior[j, :] > var_max] = var_max
+        if var_dist.lower() == 'lognormal':
+            posterior[j, :][posterior[j, :] < var_min] = var_min
+            posterior[j, :][posterior[j, :] > var_max] = var_max
+            posterior[j, :] = np.power(10, posterior[j, :])
+        else:
+            posterior[j, :][posterior[j, :] < var_min] = var_min
+            posterior[j, :][posterior[j, :] > var_max] = var_max
 
     f_para[varn][:] = posterior[j, :]
     # f_para[varn][:] = posterior[j, :]
