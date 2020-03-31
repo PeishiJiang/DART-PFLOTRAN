@@ -131,6 +131,10 @@ class DaResults(object):
 
         # Observation file in NetCDF
         self.obs_nc = self.configs["file_cfg"]["obs_nc_file"]
+        
+        # Whether immediate mda results are saved
+        self.has_immediate_mda_results = self.configs["file_cfg"]["save_immediate_mda_result"]
+        self.total_mda_iterations = self.configs["da_cfg"]["enks_mda_total_iterations"]
 
         if not self.exceeds_obs_time:
             warnings.warn("The data assimilation is not completed!")
@@ -156,7 +160,8 @@ class DaResults(object):
         pflotran_var_set = self.pflotran_var_set
 
         nvar_state, nvar_para = self.nvar_state, self.nvar_para
-        nvar, nens          = self.nvar, self.nens
+        nvar, nens, niter     = self.nvar, self.nens, self.total_mda_iterations
+        has_immediate_mda_results = self.has_immediate_mda_results
 
         # DART prior and posterior files
         self.dart_posterior_all_ens_file = self.configs["file_cfg"]["dart_posterior_nc_all_ens_file"]
@@ -201,35 +206,55 @@ class DaResults(object):
         state_time_set.sort(); para_time_set.sort()
 
         # Read in the prior data
-        prior['state'] = np.zeros([nvar_state, nens, ntime_state, nloc_state])
-        prior['para'] = np.zeros([nvar_para, nens, ntime_para, nloc_para])
+        if has_immediate_mda_results:
+            prior['state'] = np.zeros([nvar_state, niter, nens, ntime_state, nloc_state])
+            prior['para'] = np.zeros([nvar_para, niter, nens, ntime_para, nloc_para])
+        else:
+            prior['state'] = np.zeros([nvar_state, nens, ntime_state, nloc_state])
+            prior['para'] = np.zeros([nvar_para, nens, ntime_para, nloc_para])
         
         with Dataset(dart_prior_all_ens_file, 'r') as root_prior:
             # State variables
             for i in range(nvar_state):
                 varn      = obs_var_set[i]
                 prior_var = root_prior.variables[varn][:]
-                prior["state"][i, :, :, :] = prior_var[:,state_time_arg_sort,:]
+                if has_immediate_mda_results:
+                    prior["state"][i, :, :, :, :] = prior_var[:, :,state_time_arg_sort,:]
+                else:
+                    prior["state"][i, :, :, :] = prior_var[:,state_time_arg_sort,:]
             # Parameter variables
             for i in range(nvar_para):
                 varn      = para_var_set[i]
                 prior_var = root_prior.variables[varn][:]
-                prior["para"][i, :, :, :] = prior_var[:,para_time_arg_sort,:]
+                if has_immediate_mda_results:
+                    prior["para"][i, :, :, :, :] = prior_var[:, :,para_time_arg_sort,:]
+                else:
+                    prior["para"][i, :, :, :] = prior_var[:,para_time_arg_sort,:]
 
         # Read in the posterior data
-        posterior['state'] = np.zeros([nvar_state, nens, ntime_state, nloc_state])
-        posterior['para'] = np.zeros([nvar_para, nens, ntime_para, nloc_para])
+        if has_immediate_mda_results:
+            posterior['state'] = np.zeros([nvar_state, niter, nens, ntime_state, nloc_state])
+            posterior['para'] = np.zeros([nvar_para, niter, nens, ntime_para, nloc_para])
+        else:
+            posterior['state'] = np.zeros([nvar_state, nens, ntime_state, nloc_state])
+            posterior['para'] = np.zeros([nvar_para, nens, ntime_para, nloc_para])
         with Dataset(dart_posterior_all_ens_file, 'r') as root_posterior:
             # State variables
             for i in range(nvar_state):
                 varn          = obs_var_set[i]
                 posterior_var = root_posterior.variables[varn][:]
-                posterior["state"][i, :, :, :] = posterior_var
+                if has_immediate_mda_results:
+                    posterior["state"][i, :, :, :, :] = posterior_var[:, :,state_time_arg_sort,:]
+                else:
+                    posterior["state"][i, :, :, :] = posterior_var[:,state_time_arg_sort,:]
             # Parameter variables
             for i in range(nvar_para):
                 varn          = para_var_set[i]
                 posterior_var = root_posterior.variables[varn][:]
-                posterior["para"][i, :, :, :] = posterior_var
+                if has_immediate_mda_results:
+                    posterior["para"][i, :, :, :, :] = posterior_var[:, :,para_time_arg_sort,:]
+                else:
+                    posterior["para"][i, :, :, :] = posterior_var[:,para_time_arg_sort,:]
 
         # Read in the observation data
         obs_value_set      = dict.fromkeys(obs_var_set)

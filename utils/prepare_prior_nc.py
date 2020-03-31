@@ -121,7 +121,8 @@ dart_posterior_file_set = [
 ]
 if save_immediate_mda_result:
     dart_posterior_file_set = [
-        re.sub(".nc", "_iter"+str(iteration_step)+".nc", dart_posterior_file_each)
+        # TODO: use re
+        re.sub("[.]nc", "_iter"+str(iteration_step)+".nc", dart_posterior_file_each)
         for dart_posterior_file_each in dart_posterior_file_set
     ]
 
@@ -477,7 +478,7 @@ dart_prior_file_set = [
 
 if save_immediate_mda_result:
     dart_prior_file_set = [
-        re.sub(".nc", "_iter"+str(iteration_step)+".nc", dart_prior_file_each)
+        re.sub("[.]nc", "_iter"+str(iteration_step)+".nc", dart_prior_file_each)
         for dart_prior_file_each in dart_prior_file_set
     ]
     # Copy the temporary prior file to prior file

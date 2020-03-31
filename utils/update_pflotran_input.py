@@ -219,13 +219,18 @@ for j in range(len(para_set)):
     var_min , var_max = para_min_set[j], para_max_set[j]
     var_mean, var_std = para_mean_set[j], para_std_set[j]
 
-    # resample the prior if it is required and it is not the time for updating observation ensemble posterior
-    if varn in para_resampled_set and not update_obs_ens_posterior_now:
+    # resample the prior if 
+    # (1) it is required and 
+    # (2) it is not the time for updating observation ensemble posterior
+    # (3) it is not during ES-MDA iteration 
+    if varn in para_resampled_set and not update_obs_ens_posterior_now and enks_mda_iteration_step == 1:
         var_mean_nc = np.mean(posterior[j, :])
         var_std_nc  = np.std(posterior[j, :])
         # Generate the ensemble
         if rescaled:  # if rescaling the posterior at the previous time step is required
             posterior[j, :] = (posterior[j, :] - var_mean_nc) / var_std_nc * var_std + var_mean_nc
+            if var_dist.lower() == 'lognormal':
+                posterior[j, :] = np.power(10, logvalues)
 
         else:  # if resampling is required.
             if var_dist.lower() == 'normal':
@@ -271,15 +276,17 @@ for j in range(len(para_set)):
 
 
     else:
-        # Exclude those values outside of [minv, maxv]
-        # if var_dist.lower() == 'uniform' or var_dist.lower() == 'truncated_normal':
         if var_dist.lower() == 'lognormal':
-            posterior[j, :][posterior[j, :] < var_min] = var_min
-            posterior[j, :][posterior[j, :] > var_max] = var_max
             posterior[j, :] = np.power(10, posterior[j, :])
-        else:
-            posterior[j, :][posterior[j, :] < var_min] = var_min
-            posterior[j, :][posterior[j, :] > var_max] = var_max
+        # # Exclude those values outside of [minv, maxv]
+        # # if var_dist.lower() == 'uniform' or var_dist.lower() == 'truncated_normal':
+        # if var_dist.lower() == 'lognormal':
+        #     posterior[j, :][posterior[j, :] < var_min] = var_min
+        #     posterior[j, :][posterior[j, :] > var_max] = var_max
+        #     posterior[j, :] = np.power(10, posterior[j, :])
+        # else:
+        #     posterior[j, :][posterior[j, :] < var_min] = var_min
+        #     posterior[j, :][posterior[j, :] > var_max] = var_max
 
     f_para[varn][:] = posterior[j, :]
     # f_para[varn][:] = posterior[j, :]

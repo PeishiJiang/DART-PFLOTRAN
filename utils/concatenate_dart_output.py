@@ -91,11 +91,11 @@ for i in range(nens):
 
             # Get the first prior and posterior files
             dart_prior_temp1    = re.sub(r"\[ENS\]", str(ens).zfill(ndigit_ens), dart_prior_file)
-            dart_prior_temp1    = re.sub(".nc", "_iter"+str(iteration_step)+".nc", dart_prior_temp1)
+            dart_prior_temp1    = re.sub("[.]nc", "_iter"+str(iteration_step)+".nc", dart_prior_temp1)
             dart_prior_temp     = re.sub(r"\[TIME\]", "'" + "." * ndigit_time + "'", dart_prior_temp1)
             dart_prior_temp_rm  = re.sub(r"\[TIME\]", "*", dart_prior_temp1)
             dart_posterior_temp1    = re.sub(r"\[ENS\]", str(ens).zfill(ndigit_ens), dart_posterior_file)
-            dart_posterior_temp1    = re.sub(".nc", "_iter"+str(iteration_step)+".nc", dart_posterior_temp1)
+            dart_posterior_temp1    = re.sub("[.]nc", "_iter"+str(iteration_step)+".nc", dart_posterior_temp1)
             dart_posterior_temp     = re.sub(r"\[TIME\]", "'" + "." * ndigit_time + "'", dart_posterior_temp1)
             dart_posterior_temp_rm  = re.sub(r"\[TIME\]", "*", dart_posterior_temp1)
 
@@ -103,9 +103,9 @@ for i in range(nens):
             dart_posterior_temp = os.path.basename(dart_posterior_temp)
 
             dart_prior_all     = re.sub(r"\[ENS\]", str(ens).zfill(ndigit_ens), dart_prior_all_file)
-            dart_prior_all     = re.sub(".nc", "_iter"+str(iteration_step)+".nc", dart_prior_all)
+            dart_prior_all     = re.sub("[.]nc", "_iter"+str(iteration_step)+".nc", dart_prior_all)
             dart_posterior_all = re.sub(r"\[ENS\]", str(ens).zfill(ndigit_ens), dart_posterior_all_file)
-            dart_posterior_all = re.sub(".nc", "_iter"+str(iteration_step)+".nc", dart_posterior_all)
+            dart_posterior_all = re.sub("[.]nc", "_iter"+str(iteration_step)+".nc", dart_posterior_all)
 
             # Remove them first if exists
             subprocess.run("rm {}".format(dart_prior_all), shell=True) 
@@ -156,15 +156,15 @@ else:
     for i in range(total_iterations):
         iteration_step = i + 1
 
-        dart_prior_all_ens_iter     = re.sub(".nc", "_iter"+str(iteration_step)+".nc", dart_prior_all_ens_file)
-        dart_posterior_all_ens_iter = re.sub(".nc", "_iter"+str(iteration_step)+".nc", dart_posterior_all_ens_file)
+        dart_prior_all_ens_iter     = re.sub("[.]nc", "_iter"+str(iteration_step)+".nc", dart_prior_all_ens_file)
+        dart_posterior_all_ens_iter = re.sub("[.]nc", "_iter"+str(iteration_step)+".nc", dart_posterior_all_ens_file)
 
         # Remove them first if exists
         subprocess.run("rm {}".format(dart_prior_all_ens_iter), shell=True) 
         subprocess.run("rm {}".format(dart_posterior_all_ens_iter), shell=True)
 
-        dart_prior_all_temp1     = re.sub(".nc", "_iter"+str(iteration_step)+".nc", dart_prior_all_file)
-        dart_posterior_all_temp1 = re.sub(".nc", "_iter"+str(iteration_step)+".nc", dart_posterior_all_file)
+        dart_prior_all_temp1     = re.sub("[.]nc", "_iter"+str(iteration_step)+".nc", dart_prior_all_file)
+        dart_posterior_all_temp1 = re.sub("[.]nc", "_iter"+str(iteration_step)+".nc", dart_posterior_all_file)
 
         dart_prior_all_temp     = re.sub(r"\[ENS\]", "'" + "." * ndigit_ens + "'", dart_prior_all_temp1)
         dart_posterior_all_temp = re.sub(r"\[ENS\]", "'" + "." * ndigit_ens + "'", dart_posterior_all_temp1)
@@ -189,8 +189,8 @@ else:
 # Concatenate all the iterations if needed
 ###############################
 if save_immediate_mda_result:
-    dart_prior_iter_temp     = re.sub(".nc", "_iter'.'.nc", dart_prior_all_ens_file)
-    dart_posterior_iter_temp = re.sub(".nc", "_iter'.'.nc", dart_posterior_all_ens_file)
+    dart_prior_iter_temp     = re.sub("[.]nc", "_iter'.'.nc", dart_prior_all_ens_file)
+    dart_posterior_iter_temp = re.sub("[.]nc", "_iter'.'.nc", dart_posterior_all_ens_file)
 
     dart_prior_iter_temp     = os.path.basename(dart_prior_iter_temp)
     dart_posterior_iter_temp = os.path.basename(dart_posterior_iter_temp)
@@ -204,8 +204,8 @@ if save_immediate_mda_result:
     subprocess.run("ncrename -d record,iteration {}".format(dart_posterior_all_ens_file), shell=True, check=False)
 
     # Remove each individual file if needed
-    dart_prior_iter_temp_rm     = re.sub(".nc", "_iter*.nc", dart_prior_all_ens_file)
-    dart_posterior_iter_temp_rm = re.sub(".nc", "_iter*.nc", dart_posterior_all_ens_file)
+    dart_prior_iter_temp_rm     = re.sub("[.]nc", "_iter*.nc", dart_prior_all_ens_file)
+    dart_posterior_iter_temp_rm = re.sub("[.]nc", "_iter*.nc", dart_posterior_all_ens_file)
     if not keep_each_ens_file:    
         subprocess.run("rm {}".format(dart_prior_iter_temp_rm), shell=True)
         subprocess.run("rm {}".format(dart_posterior_iter_temp_rm), shell=True)
