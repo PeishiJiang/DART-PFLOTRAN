@@ -1,0 +1,245 @@
+#Description: 1D thermal
+
+SIMULATION
+  SIMULATION_TYPE SUBSURFACE
+  PROCESS_MODELS
+    SUBSURFACE_FLOW FLOW
+      MODE TH
+      OPTIONS
+        REVERT_PARAMETERS_ON_RESTART
+      /
+    /
+  /
+  CHECKPOINT
+  /
+  RESTART
+    FILENAME 1dthermal-restart.chk  
+    REALIZATION_DEPENDENT
+#    RESET_TO_TIME_ZERO
+  /
+END
+
+SUBSURFACE
+
+#=========================== solver options ===================================
+TIMESTEPPER FLOW
+  TS_ACCELERATION 8
+  MAX_TS_CUTS 50
+END
+
+TIMESTEPPER TRANSPORT
+  TS_ACCELERATION 8
+  MAX_TS_CUTS 50
+END
+
+NEWTON_SOLVER FLOW
+  MAXIT 20
+  RTOL 1.d-50
+  ATOL 1.d-50
+  STOL 1.e-60
+  ITOL_UPDATE 1.d0
+END
+
+LINEAR_SOLVER FLOW
+END
+
+NEWTON_SOLVER TRANSPORT
+  NO_INFINITY_NORM
+END
+
+LINEAR_SOLVER TRANSPORT
+END
+
+
+#=========================== discretization ===================================
+GRID
+  TYPE structured
+  NXYZ 1 1 64
+  BOUNDS
+    0.d0 0.d0 -0.64d0
+    1.d0 1.d0 0.d0
+  /
+END
+
+#=========================== fluid properties =================================
+FLUID_PROPERTY
+  DIFFUSION_COEFFICIENT 1.d-9
+END
+
+#=========================== material properties ==============================
+MATERIAL_PROPERTY Alluvium
+  ID 1
+  POROSITY 0.43
+  TORTUOSITY 1.d0
+  ROCK_DENSITY 2.65d3
+  CHARACTERISTIC_CURVES default
+  PERMEABILITY
+     PERM_ISO 3.86E-11
+  /
+  SPECIFIC_HEAT 9.20d2
+  THERMAL_CONDUCTIVITY_DRY 0.7163971
+  THERMAL_CONDUCTIVITY_WET 0.93
+END
+
+#=========================== characteristic curves ============================
+CHARACTERISTIC_CURVES default
+  DEFAULT
+/
+#=========================== output options ===================================
+OUTPUT
+
+  VARIABLES
+#    LIQUID_SATURATION
+    LIQUID_PRESSURE
+#    LIQUID_MOBILITY
+    TEMPERATURE
+#    PERMEABILITY
+  /
+
+
+ SNAPSHOT_FILE
+    PERIODIC TIME 300.0 s
+   FORMAT HDF5 SINGLE_FILE
+ /
+
+
+#  OBSERVATION_FILE
+#    TIMES sec 10.0
+#  /
+
+# MASS_BALANCE_FILE
+#    PERIODIC TIME 5.0d0 min
+#  /
+
+#  VELOCITY_AT_CENTER
+
+END
+
+#=========================== times ============================================
+TIME
+  FINAL_TIME 2764800.0 sec
+  INITIAL_TIMESTEP_SIZE 6.0d1  min
+  MAXIMUM_TIMESTEP_SIZE 6.0d1 min
+  MINIMUM_TIMESTEP_SIZE 1.0d-2 sec
+END
+
+#=========================== regions ==========================================
+REGION all
+  COORDINATES
+    0.d0 0.d0 -0.64d0
+    1.d0 1.d0 0.d0
+  /
+END
+
+REGION top
+  FACE TOP
+  COORDINATES
+    0.d0 0.d0 0.d0
+    1.d0 1.d0 0.d0
+  /
+END
+
+REGION bottom
+  FACE BOTTOM
+  COORDINATES
+    0.d0 0.d0 -0.64d0
+    1.d0 1.d0 -0.64d0
+  /
+END
+
+# REGION Obs_1
+#   COORDINATE 0.5 0.5 -4.0d-2
+# /
+
+
+# REGION Obs_2
+#   COORDINATE 0.5 0.5 -2.4d-1
+# /
+
+#=========================== dataset  ===============================
+DBASE_FILENAME ./Dbase.h5
+
+#=========================== observation points ===============================
+# OBSERVATION
+#   REGION Obs_1
+#   VELOCITY
+# /
+
+# OBSERVATION
+#   REGION Obs_2
+#   VELOCITY
+# /
+
+
+#=========================== flow conditions ==================================
+
+MINIMUM_HYDROSTATIC_PRESSURE -1.d0
+
+DATASET init_temp
+  FILENAME init_temp.h5
+  HDF5_DATASET_NAME Temperature_C
+END
+
+FLOW_CONDITION initial
+  TYPE
+    PRESSURE DIRICHLET
+    TEMPERATURE dirichlet
+  /
+  PRESSURE 101325.d0
+  TEMPERATURE DATASET init_temp
+END
+
+
+FLOW_CONDITION flow_top
+  TYPE
+    FLUX NEUMANN
+    TEMPERATURE dirichlet
+ /
+
+  FLUX DBASE_VALUE Flux_top m/day
+  TEMPERATURE FILE ../pflotran_inputs/temp_top.dat
+/
+
+
+FLOW_CONDITION flow_bottom
+  TYPE
+    PRESSURE HYDROSTATIC
+    TEMPERATURE dirichlet
+ /
+  DATUM 0. 0. 5.
+  PRESSURE 101325
+  TEMPERATURE FILE ../pflotran_inputs/temp_bottom.dat
+/
+
+#=========================== condition couplers ===============================
+# initial condition
+INITIAL_CONDITION initial
+  FLOW_CONDITION initial
+  REGION all
+END
+
+# Top boundary condition
+BOUNDARY_CONDITION top
+  FLOW_CONDITION flow_top
+  REGION top
+END
+
+# Bottom boundary condition
+BOUNDARY_CONDITION bottom
+  FLOW_CONDITION flow_bottom
+  REGION bottom
+END
+
+#=========================== stratigraphy couplers ============================
+
+STRATA
+  REGION all
+  MATERIAL Alluvium
+END
+
+
+
+
+
+
+END_SUBSURFACE

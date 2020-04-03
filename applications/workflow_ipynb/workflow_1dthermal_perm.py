@@ -372,7 +372,6 @@ run_pflotran, pflotran_out_dir = files_cfg["run_pflotran_file"], dirs_cfg["pflot
 print("\n")
 print("------------------------------------------------------------")
 print("Model spinup...")
-# subprocess.run("{} {}".format(pflotran_sh, config_file), shell=True, check=True)
 if time_cfg['spinup_length'] != 0:
     subprocess.run("python {} {}".format(run_pflotran, config_file), shell=True, check=True)
 

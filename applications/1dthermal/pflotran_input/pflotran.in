@@ -5,20 +5,10 @@ SIMULATION
   PROCESS_MODELS
     SUBSURFACE_FLOW FLOW
       MODE TH
-        OPTIONS 
-            REVERT_PARAMETERS_ON_RESTART 
-        / 
-#      OPTIONS
-#	REVERT_PARAMETERS_ON_RESTART
-#      /
     /
   /
   CHECKPOINT
   /
-  RESTART 
-    FILENAME /Users/jian449/Codes/DART/manhattan/models/pflotran/applications/1dthermal/pflotran_output/pflotran-restart.chk 
-    REALIZATION_DEPENDENT 
-  / 
 #  RESTART
 #    FILENAME 1dthermal-restart.chk
 #    REALIZATION_DEPENDENT
@@ -61,10 +51,10 @@ END
 #=========================== discretization ===================================
 GRID
   TYPE structured
-  NXYZ 1 1 65
+  NXYZ 1 1 64
   BOUNDS
     0.d0 0.d0 -0.65d0
-    1.d0 1.d0 0.d0
+    1.d0 1.d0 -0.01d0
   /
 END
 
@@ -106,17 +96,6 @@ OUTPUT
 
 SNAPSHOT_FILE
    PERIODIC TIME 300.0d0 sec 
-   PERIODIC TIME 300.0d0 sec 
-   PERIODIC TIME 300.0d0 sec 
-   PERIODIC TIME 300.0d0 sec 
-   PERIODIC TIME 300.0d0 sec 
-   PERIODIC TIME 300.0d0 sec 
-   PERIODIC TIME 300.0d0 sec 
-   PERIODIC TIME 300.0d0 sec 
-   PERIODIC TIME 300.0d0 sec 
-   PERIODIC TIME 300.0d0 sec 
-   PERIODIC TIME 300.0d0 sec 
-   PERIODIC TIME 300.0d0 sec 
   FORMAT HDF5 SINGLE_FILE
 #  PERIODIC TIME 300.0d0 sec
 /
@@ -146,15 +125,15 @@ END
 REGION all
   COORDINATES
     0.d0 0.d0 -0.65d0
-    1.d0 1.d0 0.d0
+    1.d0 1.d0 -0.01d0
   /
 END
 
 REGION top
   FACE TOP
   COORDINATES
-    0.d0 0.d0 0.d0
-    1.d0 1.d0 0.d0
+    0.d0 0.d0 -0.01d0
+    1.d0 1.d0 -0.01d0
   /
 END
 
@@ -194,13 +173,18 @@ DBASE_FILENAME parameter_prior.h5
 
 MINIMUM_HYDROSTATIC_PRESSURE -1.d0
 
+DATASET init_temp
+  FILENAME init_temp.h5
+  HDF5_DATASET_NAME Temperature_C
+END
+
 FLOW_CONDITION initial
   TYPE
-    PRESSURE HYDROSTATIC
+    PRESSURE DIRICHLET
     TEMPERATURE dirichlet
   /
   PRESSURE 101325.d0
-  TEMPERATURE 5.444327d0
+  TEMPERATURE DATASET init_temp
 END
 
 
