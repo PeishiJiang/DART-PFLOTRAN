@@ -45,9 +45,9 @@ mpi_exe_da  = '/Users/jian449/Codes/petsc/arch-darwin-c-opt/bin/mpirun'
 mpi_exe_pf  = '/Users/jian449/Codes/petsc/arch-darwin-c-opt/bin/mpirun'
 # mpi_exe_da  = '/software/petsc_v3.11.3/arch-linux2-c-opt/bin/mpirun'  # The location of mpirun
 # mpi_exe_pf  = '/software/petsc_v3.11.3/arch-linux2-c-opt/bin/mpirun'
-ncore_da = 4  # The number of MPI cores used by DART
-ncore_pf = 4  # The number of MPI cores used by PFLOTRAN
-ngroup_pf= 4  # The number of group used by stochastic running in PFLOTRAN
+ncore_da = 1  # The number of MPI cores used by DART
+ncore_pf = 1  # The number of MPI cores used by PFLOTRAN
+ngroup_pf= 1  # The number of group used by stochastic running in PFLOTRAN
 
 # PFLOTRAN executable
 # pflotran_exe  = '/global/project/projectdirs/m1800/pin/pflotran-haswell/src/pflotran/pflotran'
@@ -101,7 +101,7 @@ from utils.read_filepaths_nml import read_filepaths_nml
 
 # %%
 dirs_cfg, files_cfg      = read_filepaths_nml(app_dir=app_dir, dart_pf_dir=dart_pf_dir)
-files_cfg["keep_each_ens_file"] = False   # Whether each ensemble nc file is kept when the DA ends
+files_cfg["keep_each_ens_file"] = True   # Whether each ensemble nc file is kept when the DA ends
 files_cfg["save_immediate_mda_result"] = True   # Indicate whether the results of each MDA iteration will be saved
 configs["other_dir_cfg"] = dirs_cfg
 configs["file_cfg" ]     = files_cfg
@@ -232,8 +232,8 @@ time_cfg["first_obs_time_seconds"] = time_cfg["spinup_length_seconds"]
 time_cfg["first_obs_time_size"] = time_cfg["first_obs_time_days"]+float(time_cfg["first_obs_time_seconds"])/86400. # day
 time_cfg["last_obs_time_days"]    = time_cfg["first_obs_time_days"]
 if da_cfg["assim_window_fixed"]:
-    # time_cfg["last_obs_time_seconds"] = time_cfg["first_obs_time_seconds"] + 3600*5
-    time_cfg["last_obs_time_seconds"] = time_cfg["first_obs_time_seconds"] + 3600*24*31
+    time_cfg["last_obs_time_seconds"] = time_cfg["first_obs_time_seconds"] + 3600*5
+    # time_cfg["last_obs_time_seconds"] = time_cfg["first_obs_time_seconds"] + 3600*24*31
 else:
     time_cfg["last_obs_time_seconds"] = time_cfg["first_obs_time_seconds"] + int(np.sum(da_cfg["assim_window_list"]) * 86400)
 time_cfg["last_obs_time_size"] = time_cfg["last_obs_time_days"]+float(time_cfg["last_obs_time_seconds"])/86400. # day
@@ -255,7 +255,7 @@ configs["time_cfg"] = time_cfg
 # %%
 # Observation error, number of ensembles
 da_cfg["obs_reso"]  = 300.0      # observation resolution (second)
-da_cfg["nens"]      = 100        # number of ensembles
+da_cfg["nens"]      = 3        # number of ensembles
 da_cfg["obs_error"] = 0.05       # the observation error
 da_cfg["obs_error_type"] = "absolute" # the type of observation error (i.e., relative and absolute)
 
@@ -283,8 +283,8 @@ da_cfg["obs_ens_posterior_from_model"] = True
 # The inflation settings used in EnKS-MDA (the alpha value)
 # da_cfg["enks_mda_alpha"] = [4., 4., 4., 4.]  # Note that the summation of the inverse of alpha should be one
 # da_cfg["enks_mda_alpha"] = [3., 3., 3.]  # Note that the summation of the inverse of alpha should be one
-# da_cfg["enks_mda_alpha"] = [2., 2.]  # Note that the summation of the inverse of alpha should be one
-da_cfg["enks_mda_alpha"] = [1.]  # Note that the summation of the inverse of alpha should be one
+da_cfg["enks_mda_alpha"] = [2., 2.]  # Note that the summation of the inverse of alpha should be one
+# da_cfg["enks_mda_alpha"] = [1.]  # Note that the summation of the inverse of alpha should be one
 da_cfg["enks_mda_iteration_step"] = 1  # the ith iteration (1 for the first iteration)
 da_cfg["enks_mda_total_iterations"] = len(da_cfg["enks_mda_alpha"])  # Note that the summation of the inverse of alpha should be one
 

@@ -174,8 +174,12 @@ class DaResults(object):
         # Get the spatial-temporal domains for both model parameters and states
         with Dataset(dart_prior_all_ens_file, 'r') as root_prior:
             # Get the list of assimilation start and end time
-            assim_start_set = root_prior.variables['assim_start_time'][:][0,:]
-            assim_end_set   = root_prior.variables['assim_end_time'][:][0,:]
+            if has_immediate_mda_results:
+                assim_start_set = root_prior.variables['assim_start_time'][:][0,0,:]
+                assim_end_set   = root_prior.variables['assim_end_time'][:][0,0,:]
+            else:
+                assim_start_set = root_prior.variables['assim_start_time'][:][0,:]
+                assim_end_set   = root_prior.variables['assim_end_time'][:][0,:]
 
             # Get the numbers of time steps and model grids
             ntime_state = root_prior.dimensions['state_time'].size
@@ -189,12 +193,20 @@ class DaResults(object):
             # ntime_state, ntime_para = len(state_time_set), len(para_time_set)
 
             # The spatial domain
-            xloc_set_state = root_prior.variables['state_x_location'][:][0,:]
-            yloc_set_state = root_prior.variables['state_y_location'][:][0,:]
-            zloc_set_state = root_prior.variables['state_z_location'][:][0,:]
-            xloc_set_para = root_prior.variables['para_x_location'][:][0,:]
-            yloc_set_para = root_prior.variables['para_y_location'][:][0,:]
-            zloc_set_para = root_prior.variables['para_z_location'][:][0,:]
+            if has_immediate_mda_results:
+                xloc_set_state = root_prior.variables['state_x_location'][:][0,0,:]
+                yloc_set_state = root_prior.variables['state_y_location'][:][0,0,:]
+                zloc_set_state = root_prior.variables['state_z_location'][:][0,0,:]
+                xloc_set_para = root_prior.variables['para_x_location'][:][0,0,:]
+                yloc_set_para = root_prior.variables['para_y_location'][:][0,0,:]
+                zloc_set_para = root_prior.variables['para_z_location'][:][0,0,:]
+            else:
+                xloc_set_state = root_prior.variables['state_x_location'][:][0,:]
+                yloc_set_state = root_prior.variables['state_y_location'][:][0,:]
+                zloc_set_state = root_prior.variables['state_z_location'][:][0,:]
+                xloc_set_para = root_prior.variables['para_x_location'][:][0,:]
+                yloc_set_para = root_prior.variables['para_y_location'][:][0,:]
+                zloc_set_para = root_prior.variables['para_z_location'][:][0,:]
             nxloc_state, nyloc_state, nzloc_state = len(xloc_set_state), len(yloc_set_state), len(zloc_set_state)
             nxloc_para, nyloc_para, nzloc_para = len(xloc_set_para), len(yloc_set_para), len(zloc_set_para)
             # nloc_state = nxloc_state * nyloc_state * nzloc_state
@@ -274,7 +286,7 @@ class DaResults(object):
                 obs_var = obs_var_set[i]
                 obs_value_set[obs_var] = root_obs.variables[obs_var][:]
                 obs_value_set_used[obs_var] = obs_value_set[obs_var][:, obs_used_ind]
-
+                
         self.prior, self.posterior = prior, posterior
         self.assim_start_set, self.assim_end_set = assim_start_set, assim_end_set
         self.state_time_set, self.para_time_set = state_time_set, para_time_set
@@ -287,6 +299,7 @@ class DaResults(object):
         self.obs_value_set_used = obs_value_set_used
         self.obs_time_set_used = obs_time_set_used
         self.obs_loc_set = obs_loc
+        
 
 
     def plot_spatial_average(self, axes, ylim=None, plot_averaged_obs=False):
@@ -302,6 +315,7 @@ class DaResults(object):
         para_time_set         = self.para_time_set
         obs_time_set_used     = self.obs_time_set_used
         obs_value_set_used    = self.obs_value_set_used
+        has_immediate_mda_results = self.has_immediate_mda_results
 
         # The shape of axes has to be (nvar,2)
         if axes.shape != (nvar,2):
@@ -310,7 +324,10 @@ class DaResults(object):
         # Plot states
         for i in range(nvar_state):
             varn = obs_var_set[i]
-            prior_var, posterior_var = prior["state"][i], posterior["state"][i]
+            if has_immediate_mda_results:
+                prior_var, posterior_var = prior["state"][i][0], posterior["state"][i][-1]
+            else:
+                prior_var, posterior_var = prior["state"][i], posterior["state"][i]
 
             # Plot the prior
             ax1 = axes[i, 0]
@@ -341,7 +358,10 @@ class DaResults(object):
         # Plot parameters
         for i in range(nvar_para):
             varn = para_var_set[i]
-            prior_var, posterior_var = prior["para"][i], posterior["para"][i]
+            if has_immediate_mda_results:
+                prior_var, posterior_var = prior["para"][i][0], posterior["para"][i][-1]
+            else:
+                prior_var, posterior_var = prior["para"][i], posterior["para"][i]
 
             # Plot the prior
             ax1 = axes[nvar_state+i, 0]
@@ -394,6 +414,7 @@ class DaResults(object):
         obs_time_set_used     = self.obs_time_set_used
         obs_value_set_used    = self.obs_value_set_used
         obs_loc_set           = self.obs_loc_set
+        has_immediate_mda_results = self.has_immediate_mda_results
 
         xloc_set_state, yloc_set_state, zloc_set_state = self.xloc_set_state, self.yloc_set_state, self.zloc_set_state
 
@@ -422,9 +443,15 @@ class DaResults(object):
         # Plot the prior
         ax1 = axes[0]
         for j in range(nens):
-            prior_var_ens = prior_state[obs_var_ind, j, :, model_loc_ind]
+            if has_immediate_mda_results:
+                prior_var_ens = prior_state[obs_var_ind, 0, j, :, model_loc_ind]
+            else:
+                prior_var_ens = prior_state[obs_var_ind, j, :, model_loc_ind]
             line1, = ax1.plot(state_time_set, prior_var_ens, color='grey', linewidth=0.5, linestyle=':', label='ensemble')
-        prior_var_mean = np.mean(prior_state[obs_var_ind, :, :, model_loc_ind], axis=(0))
+        if has_immediate_mda_results:
+            prior_var_mean = np.mean(prior_state[obs_var_ind, 0, :, :, model_loc_ind], axis=(0))
+        else:
+            prior_var_mean = np.mean(prior_state[obs_var_ind, :, :, model_loc_ind], axis=(0))
         line2, = ax1.plot(state_time_set, prior_var_mean, color='red', linewidth=1, label='mean')
         line3, = ax1.plot(obs_time_set_used, obs_value, color='black', linewidth=1, label='obs')
         ax1.set_ylim(ylim)
@@ -432,9 +459,15 @@ class DaResults(object):
         # Plot the posterior
         ax2 = axes[1]
         for j in range(nens):
-            posterior_var_ens = posterior_state[obs_var_ind, j, :, model_loc_ind]
+            if has_immediate_mda_results:
+                posterior_var_ens = posterior_state[obs_var_ind, -1, j, :, model_loc_ind]
+            else:
+                posterior_var_ens = posterior_state[obs_var_ind, j, :, model_loc_ind]
             ax2.plot(state_time_set, posterior_var_ens, color='grey', linewidth=0.5, linestyle=':', label='ensemble')
-        posterior_var_mean = np.mean(posterior_state[obs_var_ind, :, :, model_loc_ind], axis=(0))
+        if has_immediate_mda_results:
+            posterior_var_mean = np.mean(posterior_state[obs_var_ind, -1, :, :, model_loc_ind], axis=(0))
+        else:
+            posterior_var_mean = np.mean(posterior_state[obs_var_ind, :, :, model_loc_ind], axis=(0))
         ax2.plot(state_time_set, posterior_var_mean, color='red', linewidth=1, label='mean')
         ax2.plot(obs_time_set_used, obs_value, color='black', linewidth=1, label='obs')
         ax2.set_ylim(ylim)
@@ -457,6 +490,7 @@ class DaResults(object):
         obs_time_set_used     = self.obs_time_set_used
         obs_value_set_used    = self.obs_value_set_used
         obs_loc_set           = self.obs_loc_set
+        has_immediate_mda_results = self.has_immediate_mda_results
 
         xloc_set_state, yloc_set_state, zloc_set_state = self.xloc_set_state, self.yloc_set_state, self.zloc_set_state
 
@@ -479,8 +513,12 @@ class DaResults(object):
         obs_var_ind = obs_var_set.index(obs_name)
 
         # Get the difference between the estimated and the true for each realization
-        prior_ens     = prior_state[obs_var_ind, :, :, model_loc_ind]
-        posterior_ens = posterior_state[obs_var_ind, :, :, model_loc_ind]
+        if has_immediate_mda_results:
+            prior_ens     = prior_state[obs_var_ind, 0, :, :, model_loc_ind]
+            posterior_ens = posterior_state[obs_var_ind, -1, :, :, model_loc_ind]
+        else:
+            prior_ens     = prior_state[obs_var_ind, :, :, model_loc_ind]
+            posterior_ens = posterior_state[obs_var_ind, :, :, model_loc_ind]
         diff_prior = prior_ens[:, :] - obs_value[:]
         bias_prior = np.mean(diff_prior, axis=0)
         mae_prior  = np.mean(np.abs(diff_prior), axis=0)
@@ -530,6 +568,7 @@ class DaResults(object):
         assim_end_set = self.assim_end_set
         tunits        = self.tunits
         model_start_str = self.model_start_time
+        has_immediate_mda_results = self.has_immediate_mda_results
 
         if var_name not in para_var_set:
             raise Exception('Unknown analyzed variable name %s' % var_name)
@@ -561,8 +600,12 @@ class DaResults(object):
 
         # Get the spatially averaged analyzed variable (prior and posterior)
         var_ind                = para_var_set.index(var_name)
-        analyzed_prior_ens     = np.mean(prior_para[var_ind, :, :, :], axis=(2))
-        analyzed_posterior_ens = np.mean(posterior_para[var_ind, :, :, :], axis=(2))
+        if has_immediate_mda_results:
+            analyzed_prior_ens     = np.mean(prior_para[var_ind, 0, :, :, :], axis=(2))
+            analyzed_posterior_ens = np.mean(posterior_para[var_ind, -1, :, :, :], axis=(2))
+        else:
+            analyzed_prior_ens     = np.mean(prior_para[var_ind, :, :, :], axis=(2))
+            analyzed_posterior_ens = np.mean(posterior_para[var_ind, :, :, :], axis=(2))
 
         # Plot the prior
         ax1 = axes[0]
@@ -617,6 +660,7 @@ class DaResults(object):
         assim_end_set = self.assim_end_set
         tunits        = self.tunits
         model_start_str = self.model_start_time
+        has_immediate_mda_results = self.has_immediate_mda_results
 
         if var_name not in para_var_set:
             raise Exception('Unknown analyzed variable name %s' % var_name)
@@ -640,8 +684,12 @@ class DaResults(object):
 
         # Get the spatially averaged analyzed variable (prior and posterior)
         var_ind                = para_var_set.index(var_name)
-        analyzed_prior_ens     = np.mean(prior_para[var_ind, :, :, :], axis=(2))
-        analyzed_posterior_ens = np.mean(posterior_para[var_ind, :, :, :], axis=(2))
+        if has_immediate_mda_results:
+            analyzed_prior_ens     = np.mean(prior_para[var_ind, 0, :, :, :], axis=(2))
+            analyzed_posterior_ens = np.mean(posterior_para[var_ind, -1, :, :, :], axis=(2))
+        else:
+            analyzed_prior_ens     = np.mean(prior_para[var_ind, :, :, :], axis=(2))
+            analyzed_posterior_ens = np.mean(posterior_para[var_ind, :, :, :], axis=(2))
 
         # Get the difference between the estimated and the true for each realization
         diff      = analyzed_posterior_ens[:, :] - true_set_used_ave[:]
@@ -682,6 +730,7 @@ class DaResults(object):
         assim_end_set = self.assim_end_set
         tunits        = self.tunits
         model_start_str = self.model_start_time
+        has_immediate_mda_results = self.has_immediate_mda_results
 
         if var_name not in para_var_set:
             raise Exception('Unknown analyzed variable name %s' % var_name)
@@ -707,8 +756,12 @@ class DaResults(object):
 
         # Get the spatially averaged analyzed variable (prior and posterior)
         var_ind                = para_var_set.index(var_name)
-        analyzed_prior_ens     = np.mean(prior_para[var_ind, :, :, :], axis=(2))
-        analyzed_posterior_ens = np.mean(posterior_para[var_ind, :, :, :], axis=(2))
+        if has_immediate_mda_results:
+            analyzed_prior_ens     = np.mean(prior_para[var_ind, 0, :, :, :], axis=(2))
+            analyzed_posterior_ens = np.mean(posterior_para[var_ind, -1, :, :, :], axis=(2))
+        else:
+            analyzed_prior_ens     = np.mean(prior_para[var_ind, :, :, :], axis=(2))
+            analyzed_posterior_ens = np.mean(posterior_para[var_ind, :, :, :], axis=(2))
 
 
         # Get the difference between the estimated and the true for each realization
@@ -763,6 +816,7 @@ class DaResults(object):
         assim_end_set = self.assim_end_set
         tunits        = self.tunits
         model_start_str = self.model_start_time
+        has_immediate_mda_results = self.has_immediate_mda_results
 
         if var_name not in para_var_set:
             raise Exception('Unknown analyzed variable name %s' % var_name)
@@ -788,7 +842,10 @@ class DaResults(object):
 
         # Get the spatially averaged analyzed variable (prior and posterior)
         var_ind                = para_var_set.index(var_name)
-        analyzed_posterior_ens = np.mean(posterior_para[var_ind, :, :, :], axis=(2))
+        if has_immediate_mda_results:
+            analyzed_posterior_ens = np.mean(posterior_para[var_ind, -1, :, :, :], axis=(2))
+        else:
+            analyzed_posterior_ens = np.mean(posterior_para[var_ind, :, :, :], axis=(2))
 
         # Plot the variance
         variance = np.var(analyzed_posterior_ens, axis=0)

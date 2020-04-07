@@ -874,7 +874,10 @@ subroutine end_model()
 
 if (debug) print *, "Now, let's deallocate all the memories used in model_mod.f90..."
 
-call xyz_get_close_destroy(cc_gc)
+if (search_initialized) then
+    call xyz_get_close_destroy(cc_gc)
+    deallocate(loc_set_state_xyz)
+endif
 
 ! More variables allocated in static_init_model() should be deallocated here
 deallocate(parastate_loc_all)
@@ -887,7 +890,6 @@ deallocate(para_time_all_day)
 deallocate(para_time_all_second)
 deallocate(para_time_unique)
 
-deallocate(loc_set_state_xyz)
 deallocate(x_loc_state_all)
 deallocate(y_loc_state_all)
 deallocate(z_loc_state_all)
