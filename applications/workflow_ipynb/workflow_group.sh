@@ -1,8 +1,8 @@
 #!/bin/bash
 
-mda_iter_list=(1 2 3 4)
-app_dir_temp="1dthermal_parastate"
-sort_obs_inc_list=(1)  # zero or one
+mda_iter_list=(2 3 4)
+app_dir_temp="1dthermal_parastate_1month"
+sort_obs_inc_list=(0)  # zero or one
 
 for sort_obs_inc in ${sort_obs_inc_list[@]}; do
     for mda_iter in ${mda_iter_list[@]}; do

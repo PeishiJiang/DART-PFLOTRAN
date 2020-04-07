@@ -398,7 +398,7 @@ class DaResults(object):
                         frameon=False, ncol=3, loc="center", bbox_to_anchor=(0.0, -0.5))
 
 
-    def plot_obs_at_point(self, obs_name, axes, obs_loc_ind=0,
+    def plot_obs_at_point(self, obs_name, axes, obs_loc_ind=0, plot_time_offset=0,
                         #   figsize=None, constrained_layout=True,
                           vmin=None, vmax=None, ylim=None):
         """Plot the temporal evolution of DA results for the observation data along one dimension"""
@@ -447,13 +447,16 @@ class DaResults(object):
                 prior_var_ens = prior_state[obs_var_ind, 0, j, :, model_loc_ind]
             else:
                 prior_var_ens = prior_state[obs_var_ind, j, :, model_loc_ind]
-            line1, = ax1.plot(state_time_set, prior_var_ens, color='grey', linewidth=0.5, linestyle=':', label='ensemble')
+            line1, = ax1.plot(state_time_set[plot_time_offset:], prior_var_ens[plot_time_offset:], 
+                              color='grey', linewidth=0.5, linestyle=':', label='ensemble')
         if has_immediate_mda_results:
             prior_var_mean = np.mean(prior_state[obs_var_ind, 0, :, :, model_loc_ind], axis=(0))
         else:
             prior_var_mean = np.mean(prior_state[obs_var_ind, :, :, model_loc_ind], axis=(0))
-        line2, = ax1.plot(state_time_set, prior_var_mean, color='red', linewidth=1, label='mean')
-        line3, = ax1.plot(obs_time_set_used, obs_value, color='black', linewidth=1, label='obs')
+        line2, = ax1.plot(state_time_set[plot_time_offset:], prior_var_mean[plot_time_offset:], 
+                          color='red', linewidth=1, label='mean')
+        line3, = ax1.plot(obs_time_set_used[plot_time_offset:], obs_value[plot_time_offset:], 
+                          color='black', linewidth=1, label='obs')
         ax1.set_ylim(ylim)
 
         # Plot the posterior
@@ -463,13 +466,16 @@ class DaResults(object):
                 posterior_var_ens = posterior_state[obs_var_ind, -1, j, :, model_loc_ind]
             else:
                 posterior_var_ens = posterior_state[obs_var_ind, j, :, model_loc_ind]
-            ax2.plot(state_time_set, posterior_var_ens, color='grey', linewidth=0.5, linestyle=':', label='ensemble')
+            ax2.plot(state_time_set[plot_time_offset:], posterior_var_ens[plot_time_offset:], 
+                     color='grey', linewidth=0.5, linestyle=':', label='ensemble')
         if has_immediate_mda_results:
             posterior_var_mean = np.mean(posterior_state[obs_var_ind, -1, :, :, model_loc_ind], axis=(0))
         else:
             posterior_var_mean = np.mean(posterior_state[obs_var_ind, :, :, model_loc_ind], axis=(0))
-        ax2.plot(state_time_set, posterior_var_mean, color='red', linewidth=1, label='mean')
-        ax2.plot(obs_time_set_used, obs_value, color='black', linewidth=1, label='obs')
+        ax2.plot(state_time_set[plot_time_offset:], posterior_var_mean[plot_time_offset:], 
+                 color='red', linewidth=1, label='mean')
+        ax2.plot(obs_time_set_used[plot_time_offset:], obs_value[plot_time_offset:], 
+                 color='black', linewidth=1, label='obs')
         ax2.set_ylim(ylim)
 
         return line1, line2, line3

@@ -26,7 +26,6 @@ model_mod_copy.f90
 !/applications/1dthermal/dart_inout/.gitignore
 /applications/1dthermal/pflotran_output/*
 !/applications/1dthermal/pflotran_output/.gitignore
-/applications/1dthermal/pflotran_input/*.nc
 /applications/1dthermal/work/*
 !/applications/1dthermal/work/.gitignore
 
