@@ -2,8 +2,10 @@
 
 # Author: Peishi Jiang
 
+import re
 import os
 import sys
+import glob
 import f90nml
 import subprocess
 import numpy as np
@@ -16,18 +18,23 @@ import numpy as np
 config_nml_file = sys.argv[1]
 configs         = f90nml.read(config_nml_file)
 
-pflotran_exe     = configs["exe_cfg"]["pflotran_exe"]
-mpirun           = configs["exe_cfg"]["mpi_exe_pf"]
-ncore_pf         = configs["exe_cfg"]["ncore_pf"]
-pflotran_in_file = configs["file_cfg"]["pflotran_in_file"]
-pflotran_in_dir  = configs["other_dir_cfg"]["pflotran_in_dir"]
-pflotran_out_dir = configs["other_dir_cfg"]["pflotran_out_dir"]
-nreaz            = configs["da_cfg"]["nens"]
-ngroup           = configs["exe_cfg"]["ngroup_pf"]
-iteration_step   = configs["da_cfg"]["enks_mda_iteration_step"]
-total_iterations = configs["da_cfg"]["enks_mda_total_iterations"]
-is_spinup_done   = configs["time_cfg"]["is_spinup_done"]
-model_time       = float(configs["time_cfg"]["current_model_time"])  # days
+pflotran_exe          = configs["exe_cfg"]["pflotran_exe"]
+mpirun                = configs["exe_cfg"]["mpi_exe_pf"]
+ncore_pf              = configs["exe_cfg"]["ncore_pf"]
+pflotran_in_file      = configs["file_cfg"]["pflotran_in_file"]
+pflotran_in_dir       = configs["other_dir_cfg"]["pflotran_in_dir"]
+pflotran_out_dir      = configs["other_dir_cfg"]["pflotran_out_dir"]
+pflotran_out_prefix   = configs["file_cfg"]["pflotran_out_prefix"]
+pflotran_obs_file     = configs["file_cfg"]["pflotran_obs_file"]
+pflotran_out_file     = configs["file_cfg"]["pflotran_out_file"]
+pflotran_log_file     = configs["file_cfg"]["pflotran_log_file"]
+pflotran_restart_file = configs["file_cfg"]["pflotran_restart_file"]
+nreaz                 = configs["da_cfg"]["nens"]
+ngroup                = configs["exe_cfg"]["ngroup_pf"]
+iteration_step        = configs["da_cfg"]["enks_mda_iteration_step"]
+total_iterations      = configs["da_cfg"]["enks_mda_total_iterations"]
+is_spinup_done        = configs["time_cfg"]["is_spinup_done"]
+model_time            = float(configs["time_cfg"]["current_model_time"])  # days
 
 update_obs_ens_posterior_required = configs["da_cfg"]["obs_ens_posterior_from_model"]
 try:
@@ -41,47 +48,51 @@ except:
 #     print(ncore_pf, model_time_list)
 #     raise Exception("Stop!")
 
+
+###############################
+# Move to PFLOTRAN input folder
+###############################
+os.chdir(pflotran_in_dir)
+
+
 ###############################
 # Run forward simulation
-###############################
+##############################
+# print("{} -n {} {} -pflotranin {} -output_prefix {} -stochastic -num_realizations {} -num_groups {}".format(
+#         mpirun, ncore_pf, pflotran_exe, pflotran_in_file, pflotran_out_prefix, nreaz, ngroup
+#     ))
 if ncore_pf > 1:
-    subprocess.run("{} -n {} {} -pflotranin {} -stochastic -num_realizations {} -num_groups {} -screen_output off".format(
-        mpirun, ncore_pf, pflotran_exe, pflotran_in_file, nreaz, ngroup
+    # subprocess.run("{} -n {} {} -pflotranin {} -output_prefix {} -stochastic -num_realizations {} -num_groups {} -screen_output off".format(
+    subprocess.run("{} -n {} {} -pflotranin {} -output_prefix {} -stochastic -num_realizations {} -num_groups {}".format(
+        mpirun, ncore_pf, pflotran_exe, pflotran_in_file, pflotran_out_prefix, nreaz, ngroup
     ), shell=True, check=True)
 else:
-    subprocess.run("{} -pflotranin {} -stochastic -num_realizations {} -num_groups {} -screen_output off".format(
-        pflotran_exe, pflotran_in_file, nreaz, ngroup
+    subprocess.run("{} -pflotranin {} -stochastic -output_prefix {} -num_realizations {} -num_groups {} -screen_output off".format(
+        pflotran_exe, pflotran_in_file, pflotran_out_prefix, nreaz, ngroup
     ), shell=True, check=True)
 
+print("PFLOTRAN simulation finishes ...")
+
 
 ###############################
-# Remove the original PFLOTRAN outputs files in output folder
-# - Remove all of them if it is the first iteration given a time step 
-# - Remove only .h5 and .out if else 
+# Rename different PFLOTRAN files
 ###############################
-# if is_spinup_done:
-#     # if iteration_step == total_iterations + 1:  ## the final iteration
-#     if iteration_step == total_iterations:  ## the final iteration
-#         # subprocess.run("cd {}; rm pflotran*.h5; rm pflotran*.chk; rm pflotran*.out".format(pflotran_out_dir), shell=True, check=True)
-#         # subprocess.run("cd {}; rm pflotran*.chk; rm pflotran*.out".format(pflotran_out_dir), shell=True, check=True)
-#         if update_obs_ens_posterior_required and not update_obs_ens_posterior_now:
-#             subprocess.run("cd {}; rm pflotran*.out".format(pflotran_out_dir), shell=True, check=True)
-#             # subprocess.run("cd {}; rm pflotran*.out; rm pflotran*.h5".format(pflotran_out_dir), shell=True, check=True)
-#         elif update_obs_ens_posterior_required and update_obs_ens_posterior_now:
-#             # print("Come here")
-#             subprocess.run("cd {}; rm pflotran*.chk; rm pflotran*.out".format(pflotran_out_dir), shell=True, check=True)
-#             # subprocess.run("cd {}; rm pflotran*.chk; rm pflotran*.out; rm pflotran*.h5".format(pflotran_out_dir), shell=True, check=True)
-#         else:
-#             # subprocess.run("cd {}; rm pflotran*.out".format(pflotran_out_dir), shell=True, check=True)
-#             subprocess.run("cd {}; rm pflotran*.chk; rm pflotran*.out".format(pflotran_out_dir), shell=True, check=True)
-#             # subprocess.run("cd {}; rm pflotran*.chk; rm pflotran*.out; rm pflotran*.h5".format(pflotran_out_dir), shell=True, check=True)
+# PFLOTRAN output file
+pflotran_out_file = re.sub(r"\[ENS\]", "*", pflotran_out_file)
+pflotran_out_file = os.path.basename(pflotran_out_file)
 
-#     else:  ## the other iterations
-#         subprocess.run("cd {}; rm pflotran*.out".format(pflotran_out_dir), shell=True, check=True)
-#         # subprocess.run("cd {}; rm pflotran*.out; rm pflotran*.h5".format(pflotran_out_dir), shell=True, check=True)
+# PFLOTRAN observation file
+pflotran_obs_file = re.sub(r"\[ENS\]", "*", pflotran_obs_file)
+pflotran_obs_file = re.sub(r"\[ANY\]", "*", pflotran_obs_file)
+pflotran_obs_file = os.path.basename(pflotran_obs_file)
 
-# else:  
-#     subprocess.run("cd {}; rm pflotran*.chk; rm pflotran*.out".format(pflotran_out_dir), shell=True, check=False)
+# PFLOTRAN restart file
+pflotran_restart_file = re.sub(r"\[ENS\]", "*", pflotran_restart_file)
+pflotran_restart_file = os.path.basename(pflotran_restart_file)
+
+# PFLOTRAN log file
+pflotran_log_file = re.sub(r"\[ENS\]", "*", pflotran_log_file)
+pflotran_log_file = os.path.basename(pflotran_log_file)
 
 
 ###############################
@@ -96,31 +107,56 @@ if update_obs_ens_posterior_required:
 if is_spinup_done:
     # If iteration is done and model state is not required to be updated
     if not update_obs_ens_posterior_required and iteration_step == total_iterations:
-        # copy the latest .h5 from pflotran_in to pflotran_out
-        # move the latest checkout point file from pflotran_in to pflotran_out
-        subprocess.run("cd {0}; cp pflotran*.h5 {1}; mv pflotran*.chk {1}; mv pflotran*.out {1}".format(pflotran_in_dir, pflotran_out_dir), shell=True, check=True)
+        # copy the latest output from either snapshot file from pflotran_in to pflotran_out
+        subprocess.run("cd {0}; cp {1} {2}".format(pflotran_in_dir, pflotran_out_file, pflotran_out_dir), shell=True, check=True)
+        # move the observation file from pflotran_in to pflotran_out if exits
+        if len(glob.glob(pflotran_obs_file)) != 0:
+            subprocess.run("cd {0}; mv {1} {2}".format(pflotran_in_dir, pflotran_obs_file, pflotran_out_dir), shell=True, check=True)
+        # move the latest checkout/restart file from pflotran_in to pflotran_out
+        subprocess.run("cd {0}; mv {1} {3}; mv {2} {3}".format(pflotran_in_dir, pflotran_restart_file, pflotran_log_file, pflotran_out_dir), shell=True, check=True)
+        # subprocess.run("cd {0}; cp pflotran*.h5 {1}; mv pflotran*.chk {1}; mv pflotran*.out {1}".format(
+        #     pflotran_in_dir, pflotran_out_dir), shell=true, check=true)
 
     # If iteration is done and mode state needs update (note that iteration_step would be total_iteration + 1)
     elif update_obs_ens_posterior_required and iteration_step == total_iterations:
-        if update_obs_ens_posterior_now:
         # when model state has been updated:
-        # move the latest checkout point file in pflotran_in to pflotran_out
-        # copy the latest .h5 from pflotran_in to pflotran_out
-            subprocess.run("cd {0}; cp pflotran*.h5 {1}; mv pflotran*.chk {1}; mv pflotran*.out {1}".format(pflotran_in_dir, pflotran_out_dir), shell=True, check=True)
+        if update_obs_ens_posterior_now:
+            # copy the latest output from either snapshot file from pflotran_in to pflotran_out
+            subprocess.run("cd {0}; cp {1} {2}".format(pflotran_in_dir, pflotran_out_file, pflotran_out_dir), shell=True, check=True)
+            # move the observation file from pflotran_in to pflotran_out if exits
+            if len(glob.glob(pflotran_obs_file)) != 0:
+                subprocess.run("cd {0}; mv {1} {2}".format(pflotran_in_dir, pflotran_obs_file, pflotran_out_dir), shell=True, check=True)
+            # move the latest checkout/restart file from pflotran_in to pflotran_out
+            subprocess.run("cd {0}; mv {1} {3}; mv {2} {3}".format(pflotran_in_dir, pflotran_restart_file, pflotran_log_file, pflotran_out_dir), shell=True, check=True)
+            # subprocess.run("cd {0}; cp pflotran*.h5 {1}; mv pflotran*.chk {1}; mv pflotran*.out {1}".format(
+            #     pflotran_in_dir, pflotran_out_dir), shell=True, check=True)
         else:
             raise Exception("Model can't be run happen when iteration is done and update_obs_ens_posterior_now is false!")
 
     # If iteration is not done
-    # remove the latest checkout point file in pflotran_in to pflotran_out
-    # copy the latest .h5 from pflotran_in to pflotran_out
     elif (not update_obs_ens_posterior_required and iteration_step < total_iterations) or \
          (update_obs_ens_posterior_required and iteration_step < total_iterations):
-        subprocess.run("cd {0}; rm pflotran*.chk; cp pflotran*.h5 {1}; mv pflotran*.out {1}".format(pflotran_in_dir, pflotran_out_dir), shell=True, check=True)
+        # copy the latest output from either snapshot file from pflotran_in to pflotran_out
+        subprocess.run("cd {0}; cp {1} {2}".format(pflotran_in_dir, pflotran_out_file, pflotran_out_dir), shell=True, check=False)
+        # move the observation file from pflotran_in to pflotran_out if exits
+        if len(glob.glob(pflotran_obs_file)) != 0:
+            subprocess.run("cd {0}; mv {1} {2}".format(pflotran_in_dir, pflotran_obs_file, pflotran_out_dir), shell=True, check=False)
+        # remove the latest checkout/restart file
+        subprocess.run("cd {0}; rm {1}; mv {2} {3}".format(pflotran_in_dir, pflotran_restart_file, pflotran_log_file, pflotran_out_dir), shell=True, check=False)
+        # subprocess.run("cd {0}; rm pflotran*.chk; cp pflotran*.h5 {1}; mv pflotran*.out {1}".format(
+        #     pflotran_in_dir, pflotran_out_dir), shell=True, check=True)
 
     else:
         print(iteration_step, update_obs_ens_posterior_required)
         raise Exception("The following situation shouldn't happen -- iteration step: {}; update_obs_ens_posterior_required: {}".format(iteration_step, update_obs_ens_posterior_required))
 
 else:
-    # subprocess.run("cd {}; rm pflotran*.chk; rm pflotran*.out".format(pflotran_out_dir), shell=True, check=False)
-    subprocess.run("cd {0}; cp pflotran*.h5 {1}; mv pflotran*.chk {1}; mv pflotran*.out {1}".format(pflotran_in_dir, pflotran_out_dir), shell=True, check=True)
+    # copy the latest output from either snapshot file from pflotran_in to pflotran_out
+    subprocess.run("cd {0}; cp {1} {2}".format(pflotran_in_dir, pflotran_out_file, pflotran_out_dir), shell=True, check=True)
+    # move the observation file from pflotran_in to pflotran_out if exits
+    if len(glob.glob(pflotran_obs_file)) != 0:
+        subprocess.run("cd {0}; mv {1} {2}".format(pflotran_in_dir, pflotran_obs_file, pflotran_out_dir), shell=True, check=True)
+    # move the latest checkout/restart file from pflotran_in to pflotran_out
+    subprocess.run("cd {0}; mv {1} {3}; mv {2} {3}".format(pflotran_in_dir, pflotran_restart_file, pflotran_log_file, pflotran_out_dir), shell=True, check=True)
+    # subprocess.run("cd {0}; cp pflotran*.h5 {1}; mv pflotran*.chk {1}; mv pflotran*.out {1}".format(
+    #     pflotran_in_dir, pflotran_out_dir), shell=True, check=True)

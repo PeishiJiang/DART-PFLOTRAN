@@ -484,10 +484,14 @@ integer, parameter, public :: &
   QTY_PFLOTRAN_LIQUID_SATURATION  = 370, &
   QTY_PFLOTRAN_LIQUID_PRESSURE  = 371, &
   QTY_PFLOTRAN_FLOW_FLUX  = 372, &
-  QTY_PFLOTRAN_THERMAL_CONDUCTIVITY  = 373
+  QTY_PFLOTRAN_THERMAL_CONDUCTIVITY  = 373, &
+  QTY_PFLOTRAN_HANFORD_PERMEABILITY  = 374, &
+  QTY_PFLOTRAN_ALLUVIUM_PERMEABILITY  = 375, &
+  QTY_PFLOTRAN_WATER_LEVEL  = 376, &
+  QTY_PFLOTRAN_GROUNDWATER_TRACER  = 377
 
 
-integer, parameter :: max_defined_quantities = 373
+integer, parameter :: max_defined_quantities = 377
 
 
 !----------------------------------------------------------------------------
@@ -908,6 +912,10 @@ obs_kind_names(370) = obs_kind_type(QTY_PFLOTRAN_LIQUID_SATURATION, 'QTY_PFLOTRA
 obs_kind_names(371) = obs_kind_type(QTY_PFLOTRAN_LIQUID_PRESSURE, 'QTY_PFLOTRAN_LIQUID_PRESSURE')
 obs_kind_names(372) = obs_kind_type(QTY_PFLOTRAN_FLOW_FLUX, 'QTY_PFLOTRAN_FLOW_FLUX')
 obs_kind_names(373) = obs_kind_type(QTY_PFLOTRAN_THERMAL_CONDUCTIVITY, 'QTY_PFLOTRAN_THERMAL_CONDUCTIVITY')
+obs_kind_names(374) = obs_kind_type(QTY_PFLOTRAN_HANFORD_PERMEABILITY, 'QTY_PFLOTRAN_HANFORD_PERMEABILITY')
+obs_kind_names(375) = obs_kind_type(QTY_PFLOTRAN_ALLUVIUM_PERMEABILITY, 'QTY_PFLOTRAN_ALLUVIUM_PERMEABILITY')
+obs_kind_names(376) = obs_kind_type(QTY_PFLOTRAN_WATER_LEVEL, 'QTY_PFLOTRAN_WATER_LEVEL')
+obs_kind_names(377) = obs_kind_type(QTY_PFLOTRAN_GROUNDWATER_TRACER, 'QTY_PFLOTRAN_GROUNDWATER_TRACER')
 
 ! count here, then output below
 

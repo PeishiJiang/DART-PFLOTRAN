@@ -10,7 +10,7 @@ import subprocess
 from scipy.stats import truncnorm
 import numpy as np
 
-# TODO: For now, a single value for each variable is assumed, it should be more generic in the future by considering the 3D case.
+from parse_pflotran_files_utils import pflotran_files
 
 ###############################
 # Parameters
@@ -29,7 +29,8 @@ para_min_set       = configs["obspara_set_cfg"]["para_min_set"]
 para_max_set       = configs["obspara_set_cfg"]["para_max_set"]
 para_mean_set      = configs["obspara_set_cfg"]["para_mean_set"]
 para_std_set       = configs["obspara_set_cfg"]["para_std_set"]
-para_dist_set      = configs["obspara_set_cfg"]["para_dist_set"]
+# para_dist_set      = configs["obspara_set_cfg"]["para_dist_set"]
+para_sample_method_set = configs["obspara_set_cfg"]["para_sample_method_set"]
 para_resampled_set = configs["obspara_set_cfg"]["para_resampled_set"]
 nens               = configs["da_cfg"]["nens"]
 
@@ -49,74 +50,77 @@ if not isinstance(para_resampled_set, list):
 # Generate ensemble parameters
 ###############################
 if use_default_para_initial:
+    print("Use the defaul parameter file as the initial")
     if not os.path.isfile(pflotran_para_file):
         raise Exception("No detault parameter initial file exists!")
 
 else:
-    if os.path.isfile(pflotran_para_file):
-        os.remove(pflotran_para_file)
+# TODO: For now, a single value for each variable is assumed, it should be more generic in the future by considering the 3D case.
+    raise Exception("Generating the initial parameters needs to be implemented!")
+    # if os.path.isfile(pflotran_para_file):
+    #     os.remove(pflotran_para_file)
 
-    h5file = h5py.File(pflotran_para_file, 'w')
+    # h5file = h5py.File(pflotran_para_file, 'w')
 
-    for i in range(len(para_set)):
-        varn = para_set[i]
-        dist = para_dist_set[i]
+    # for i in range(len(para_set)):
+    #     varn = para_set[i]
+    #     dist = para_dist_set[i]
 
-        mean, std  = para_mean_set[i], para_std_set[i]
-        maxv, minv = para_max_set[i],  para_min_set[i]
+    #     mean, std  = para_mean_set[i], para_std_set[i]
+    #     maxv, minv = para_max_set[i],  para_min_set[i]
 
-        # Generate the ensemble
-        if dist.lower() == 'normal':
-            values = np.random.normal(mean, std, nens)
-            # Exclude those values outside of [minv, maxv]
-            if minv != -99999:
-                values[values < minv] = minv
-            if maxv != 99999:
-                values[values > maxv] = maxv
+    #     # Generate the ensemble
+    #     if dist.lower() == 'normal':
+    #         values = np.random.normal(mean, std, nens)
+    #         # Exclude those values outside of [minv, maxv]
+    #         if minv != -99999:
+    #             values[values < minv] = minv
+    #         if maxv != 99999:
+    #             values[values > maxv] = maxv
 
-        elif dist.lower() == 'lognormal':
-            # logmean = np.exp(mean + std**2 / 2.)
-            # logstd  = np.exp(2 * mean + std**2) * (np.exp(std**2) - 1)
-            # values  = np.random.lognormal(logmean, logstd)
-            logvalues  = np.random.normal(mean, std, nens)
-            # Exclude those values outside of [minv, maxv]
-            if minv != -99999:
-                logvalues[logvalues < minv] = minv
-            if maxv != 99999:
-                logvalues[logvalues > maxv] = maxv
-            values = np.power(10, logvalues)
+    #     elif dist.lower() == 'lognormal':
+    #         # logmean = np.exp(mean + std**2 / 2.)
+    #         # logstd  = np.exp(2 * mean + std**2) * (np.exp(std**2) - 1)
+    #         # values  = np.random.lognormal(logmean, logstd)
+    #         logvalues  = np.random.normal(mean, std, nens)
+    #         # Exclude those values outside of [minv, maxv]
+    #         if minv != -99999:
+    #             logvalues[logvalues < minv] = minv
+    #         if maxv != 99999:
+    #             logvalues[logvalues > maxv] = maxv
+    #         values = np.power(10, logvalues)
 
-        elif dist.lower() == 'truncated_normal':
-            values = truncnorm.rvs(minv, maxv, loc=mean, scale=std, size=nens)
-            # Exclude those values outside of [minv, maxv]
-            if minv != -99999:
-                values[values < minv] = minv
-            if maxv != 99999:
-                values[values > maxv] = maxv
+    #     elif dist.lower() == 'truncated_normal':
+    #         values = truncnorm.rvs(minv, maxv, loc=mean, scale=std, size=nens)
+    #         # Exclude those values outside of [minv, maxv]
+    #         if minv != -99999:
+    #             values[values < minv] = minv
+    #         if maxv != 99999:
+    #             values[values > maxv] = maxv
 
-        elif dist.lower() == 'uniform':
-            values = np.random.uniform(minv, maxv, nens)
-            # Exclude those values outside of [minv, maxv]
-            if minv != -99999:
-                values[values < minv] = minv
-            if maxv != 99999:
-                values[values > maxv] = maxv
+    #     elif dist.lower() == 'uniform':
+    #         values = np.random.uniform(minv, maxv, nens)
+    #         # Exclude those values outside of [minv, maxv]
+    #         if minv != -99999:
+    #             values[values < minv] = minv
+    #         if maxv != 99999:
+    #             values[values > maxv] = maxv
 
-        elif dist.lower() == 'test':
-            values = np.linspace(minv, maxv, nens)
-            # Exclude those values outside of [minv, maxv]
-            if minv != -99999:
-                values[values < minv] = minv
-            if maxv != 99999:
-                values[values > maxv] = maxv
+    #     elif dist.lower() == 'test':
+    #         values = np.linspace(minv, maxv, nens)
+    #         # Exclude those values outside of [minv, maxv]
+    #         if minv != -99999:
+    #             values[values < minv] = minv
+    #         if maxv != 99999:
+    #             values[values > maxv] = maxv
 
-        else:
-            raise Exception("unknown distribution %s" % dist)
+    #     else:
+    #         raise Exception("unknown distribution %s" % dist)
 
 
-        h5dset = h5file.create_dataset(varn, data=values)
+    #     h5dset = h5file.create_dataset(varn, data=values)
 
-    h5file.close()
+    # h5file.close()
 
 
 ###############################

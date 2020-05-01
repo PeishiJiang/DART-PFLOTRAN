@@ -14,9 +14,13 @@ from netCDF4 import num2date, date2num, Dataset
 config_nml = sys.argv[1]
 configs    = f90nml.read(config_nml)
 
+obs_set               = configs["obspara_set_cfg"]["obs_set"]
 obs_nc                = configs["file_cfg"]["obs_nc_file"]
 convert_file          = configs["file_cfg"]["convert_nc_file"]
 convert_template_file = configs["file_cfg"]["convert_nc_template_file"]
+
+if isinstance(obs_set, str):
+    obs_set = [obs_set]
 
 ###############################
 # Read the obs_nc file
@@ -26,7 +30,7 @@ root_nc = Dataset(obs_nc, 'r')
 var_set = []
 for v in root_nc.variables.keys():
     vtype = root_nc.variables[v].type
-    if vtype == 'observation_value':
+    if vtype == 'observation_value' and v in obs_set:
         var_set.append(v)
 
 # print(var_set)
