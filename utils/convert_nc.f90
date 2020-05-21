@@ -34,7 +34,7 @@ use obs_utilities_mod, only : getvar_real, get_or_fill_QC, add_obs_to_seq, &
 
 use           netcdf
 
-use obs_kind_mod, only: WATER_LEVEL_SENSOR,SPC_SENSOR
+use obs_kind_mod, only: WATER_LEVEL_SENSOR,NORMALIZED_SPC_SENSOR
 
 implicit none
 
@@ -78,13 +78,13 @@ character(len=128), parameter :: revdate  = "$Date: 2019-09-17 08:48:00 -0700 (T
 
 character(len=512) :: string1, string2, string3
 
-real(r8), allocatable :: water_level_sensor_val(:,:),spc_sensor_val(:,:)
-real(r8), allocatable :: water_level_sensor_err(:,:),spc_sensor_err(:,:)
+real(r8), allocatable :: water_level_sensor_val(:,:),normalized_spc_sensor_val(:,:)
+real(r8), allocatable :: water_level_sensor_err(:,:),normalized_spc_sensor_err(:,:)
 
-real(r8) :: water_level_sensor_miss,spc_sensor_miss
-real(r8) :: water_level_sensor_err_miss,spc_sensor_err_miss
+real(r8) :: water_level_sensor_miss,normalized_spc_sensor_miss
+real(r8) :: water_level_sensor_err_miss,normalized_spc_sensor_err_miss
 
-integer, allocatable :: qc_water_level_sensor(:,:),qc_spc_sensor(:,:)
+integer, allocatable :: qc_water_level_sensor(:,:),qc_normalized_spc_sensor(:,:)
 
 integer, parameter :: nvar=2
 
@@ -205,9 +205,9 @@ allocate(tobs(ntime)); allocate(tobsu(nloc*ntime))
 allocate(water_level_sensor_val(ntime,nloc))
 allocate(water_level_sensor_err(ntime,nloc))
 allocate(qc_water_level_sensor(ntime,nloc))
-allocate(spc_sensor_val(ntime,nloc))
-allocate(spc_sensor_err(ntime,nloc))
-allocate(qc_spc_sensor(ntime,nloc))
+allocate(normalized_spc_sensor_val(ntime,nloc))
+allocate(normalized_spc_sensor_err(ntime,nloc))
+allocate(qc_normalized_spc_sensor(ntime,nloc))
 
 ! read in the data arrays
 call getvar_real(ncid, "time",  tobs      ) ! time index
@@ -217,16 +217,16 @@ call getvar_real(ncid, "z_location",  zloc) ! z location or latitude
 
 call getvar_real_2d(ncid, 'WATER_LEVEL_SENSOR',water_level_sensor_val,water_level_sensor_miss)
 call getvar_real_2d(ncid, 'WATER_LEVEL_SENSOR_ERR',water_level_sensor_err,water_level_sensor_miss)
-call getvar_real_2d(ncid, 'SPC_SENSOR',spc_sensor_val,spc_sensor_miss)
-call getvar_real_2d(ncid, 'SPC_SENSOR_ERR',spc_sensor_err,spc_sensor_miss)
+call getvar_real_2d(ncid, 'NORMALIZED_SPC_SENSOR',normalized_spc_sensor_val,normalized_spc_sensor_miss)
+call getvar_real_2d(ncid, 'NORMALIZED_SPC_SENSOR_ERR',normalized_spc_sensor_err,normalized_spc_sensor_miss)
 
 ! Define or get the quality control value for each observation variable
 if (use_input_qc) then
 call getvar_int_2d(ncid, 'WATER_LEVEL_SENSORQCR', qc_water_level_sensor)
-call getvar_int_2d(ncid, 'SPC_SENSORQCR', qc_spc_sensor)
+call getvar_int_2d(ncid, 'NORMALIZED_SPC_SENSORQCR', qc_normalized_spc_sensor)
 else
 qc_water_level_sensor = 0
-qc_spc_sensor = 0
+qc_normalized_spc_sensor = 0
 endif
 
 !  either read existing obs_seq or create a new one
@@ -304,10 +304,10 @@ locloop: do k = 1, nloc
 ! Add each observation value here
 if ( &
   water_level_sensor_val(n,k) /= water_level_sensor_miss .and. qc_water_level_sensor(n,k) == 0 .and. &
-  spc_sensor_val(n,k) /= spc_sensor_miss .and. qc_spc_sensor(n,k) == 0) then
+  normalized_spc_sensor_val(n,k) /= normalized_spc_sensor_miss .and. qc_normalized_spc_sensor(n,k) == 0) then
    call create_3d_obs(xloc(k), yloc(k), zloc(k), 0, water_level_sensor_val(n,k), WATER_LEVEL_SENSOR, water_level_sensor_err(n,k)*inflation_coefficient, oday, osec, qc, obs)
    call add_obs_to_seq(obs_seq, obs, time_obs, prev_obs, prev_time, first_obs)
-   call create_3d_obs(xloc(k), yloc(k), zloc(k), 0, spc_sensor_val(n,k), SPC_SENSOR, spc_sensor_err(n,k)*inflation_coefficient, oday, osec, qc, obs)
+   call create_3d_obs(xloc(k), yloc(k), zloc(k), 0, normalized_spc_sensor_val(n,k), NORMALIZED_SPC_SENSOR, normalized_spc_sensor_err(n,k)*inflation_coefficient, oday, osec, qc, obs)
    call add_obs_to_seq(obs_seq, obs, time_obs, prev_obs, prev_time, first_obs)
 endif
 

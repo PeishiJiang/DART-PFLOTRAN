@@ -196,10 +196,14 @@ if save_immediate_mda_result:
     dart_posterior_iter_temp = os.path.basename(dart_posterior_iter_temp)
 
     # Concatanate the prior data
+    if os.path.isfile(dart_prior_all_ens_file):
+        subprocess.run("rm {}".format(dart_prior_all_ens_file), shell=True)
     subprocess.run("ls | grep {} | ncecat -o {}".format(dart_prior_iter_temp, dart_prior_all_ens_file), shell=True, check=True)
     subprocess.run("ncrename -d record,iteration {}".format(dart_prior_all_ens_file), shell=True, check=False)
 
     # Concatanate the posterior data
+    if os.path.isfile(dart_posterior_all_ens_file):
+        subprocess.run("rm {}".format(dart_posterior_all_ens_file), shell=True)
     subprocess.run("ls | grep {} | ncecat -o {}".format(dart_posterior_iter_temp, dart_posterior_all_ens_file), shell=True, check=True)
     subprocess.run("ncrename -d record,iteration {}".format(dart_posterior_all_ens_file), shell=True, check=False)
 

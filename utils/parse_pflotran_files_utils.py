@@ -6,6 +6,7 @@ import re
 import h5py
 import f90nml
 import glob
+import json
 import numpy as np
 import pandas as pd
 from scipy.stats import truncnorm
@@ -403,6 +404,7 @@ class pflotran_files:
                 y_loc_state  = y_loc_all[cell_ids_indices]
                 z_loc_state  = z_loc_all[cell_ids_indices]
                 nloc_state   = len(cell_ids_tec)
+            # print(time_state, start_time, end_time, i)
 
             # Get the data within the start and end time
             tec_data = tec_data[(tec_data['Time'] >= start_time*time_conversion) & (tec_data['Time'] <= end_time*time_conversion)]
@@ -416,7 +418,7 @@ class pflotran_files:
             # Check the shape
             if tec_data.shape[0] != ntime_state*nloc_state:
                 print(os.getcwd())
-                tec_data.to_csv("tec_data_wrong.csv")
+                # tec_data.to_csv("tec_data_wrong.csv")
                 raise Exception("The number of value {} does not match with the shape ({}, {})".format(tec_data.shape[0],nloc_state,ntime_state))
 
             # Get the required model states
@@ -483,7 +485,9 @@ class pflotran_files:
         para_homogeneous           = self.para_homogeneous
         para_isotropic_set         = self.para_isotropic_set
         para_anisotropic_ratio_set = self.para_anisotropic_ratio_set
+        model_time                 = self.model_time
         reconditioned_cellid_file  = self.para_reconditioned_cell_file
+        # reconditioned_cellid_file_format  = self.para_reconditioned_cell_file
 
         # Get the MDA step
         try:
@@ -516,6 +520,13 @@ class pflotran_files:
             para_resampled               = para_resampled_set[i]
 
             print("Updating {} in PFLOTRAN parameter file now ...".format(varn))
+
+            # Correct the original posterior first
+            if para_sample_method.lower() != "rescale":
+                if para_min != -99999:
+                    original_para_posterior_varn[original_para_posterior_varn < para_min] = para_min
+                if para_max != 99999:
+                    original_para_posterior_varn[original_para_posterior_varn > para_max] = para_max
 
             # When the parameters are homogeneous
             if para_homogeneous:
@@ -560,22 +571,44 @@ class pflotran_files:
                 # (1) it is required and
                 # (2) it is not the time for updating observation ensemble posterior
                 # (3) it is not during ES-MDA iteration
-                print(enks_mda_iteration_step)
+                # print(enks_mda_iteration_step)
                 # raise Exception("Stop")
-                if para_resampled and not update_obs_ens_posterior_now and enks_mda_iteration_step == 1:
                 # if para_resampled and not update_obs_ens_posterior_now:
-                    reconditioned_cellid_file = re.sub(r"\[PARA\]", varn, reconditioned_cellid_file)
+                if para_resampled and not update_obs_ens_posterior_now and enks_mda_iteration_step == 1:
+                    # reconditioned_cellid_file = re.sub(r"\[PARA\]", varn, reconditioned_cellid_file_format)
                     posterior_varn = update_para_prior_from_original_posterior_heterogeneous(
-                        para_prior_varn, original_para_posterior_varn,
-                        para_loc_set_varn, para_cell_ids_varn, reconditioned_cellid_file,
+                        para_prior_varn, original_para_posterior_varn, varn,
+                        para_loc_set_varn, para_cell_ids_varn, reconditioned_cellid_file, model_time,
                         para_sample_method, para_min, para_max, para_mean, para_std, para_take_log)
                 else:
                     print("No sampling is required for updating parameters at this stage ...")
                     posterior_varn = original_para_posterior_varn
 
+                # Quality control
+                print("How many invalid values do we got here ...")
+                print(para_min, para_max, posterior_varn.max(), posterior_varn.min())
+                print(np.sum((posterior_varn<=para_min)|(posterior_varn>=para_max)))
+                if np.sum((posterior_varn<=para_min)|(posterior_varn>=para_max)) != 0:
+                    print("Correct those invalid values")
+                    # posterior_varn[posterior_varn<=para_min] = para_min
+                    # posterior_varn[posterior_varn>=para_max] = para_max
+                    posterior_varn[posterior_varn<=para_min] = original_para_posterior_varn.mean()
+                    posterior_varn[posterior_varn>=para_max] = original_para_posterior_varn.mean()
+                # if np.sum(posterior_varn == np.inf) != 0:
+
                 # Convert from the logarithmic form
+                posterior_varn_o = np.copy(posterior_varn)
                 if para_take_log:
                     posterior_varn = np.power(10, posterior_varn, dtype=float)
+                
+                # print("How many improper values do we got here ...")
+                # print(np.sum((posterior_varn<=1e-30)|(posterior_varn>1)))
+                # if np.sum((posterior_varn<=1e-30)|(posterior_varn>1)) != 0:
+                # if np.sum(posterior_varn == np.inf) != 0:
+                    # print(posterior_varn_o[(posterior_varn<=1e-30)|(posterior_varn>1)])
+                    # print(original_para_posterior_varn[(posterior_varn<=1e-30)|(posterior_varn>1)])
+                    # print(original_para_posterior_varn.max(), original_para_posterior_varn.min())
+                    # raise Exception('Stop for check!')
 
                 # Assign the posterior to pflotran parameter file
                 with h5py.File(pflotran_para_file, "r+") as h5file:
@@ -616,6 +649,8 @@ class pflotran_files:
                             h5file[para_hdf_dataset_name+'Z'+str(j+1)][:] = para_from_h5file
                         else:
                             raise Exception("Unknown parameter HDF dataset name: {}".format(para_hdf_dataset_name))
+                
+        # raise Exception('Stop for check!')
 
 
 
@@ -771,8 +806,8 @@ def update_para_prior_from_original_posterior_homogeneous(
 # (heterogeneous parameter)
 ##############################################################
 def update_para_prior_from_original_posterior_heterogeneous(
-    para_prior, original_para_posterior,
-    para_loc_set, para_cell_ids, reconditioned_cellid_file,
+    para_prior, original_para_posterior, para_name,
+    para_loc_set, para_cell_ids, reconditioned_cellid_file, model_time,
     para_sample_method, para_min, para_max, para_mean, para_std, para_take_log):
 
     # Get the number of ensemble member
@@ -818,18 +853,46 @@ def update_para_prior_from_original_posterior_heterogeneous(
         print("Sampling method -- {} -- is used ...".format(para_sample_method))
         # Look for the new reconditioned points
         new_reconditioned_cell_ids = get_reconditioned_points(para_prior, original_para_posterior, para_cell_ids)
+        new_reconditioned_cell_ids = new_reconditioned_cell_ids.tolist() # Convert it to python list
         # Add the new reconditioned points to the existing pool
         if os.path.exists(reconditioned_cellid_file):
-            reconditioned_cell_ids = np.loadtxt(reconditioned_cellid_file, dtype=int)
-            reconditioned_cell_ids = np.concatenate([reconditioned_cell_ids, new_reconditioned_cell_ids])
+            # reconditioned_cell_ids = np.loadtxt(reconditioned_cellid_file, dtype=int)
+            # reconditioned_cell_ids = np.concatenate([reconditioned_cell_ids, new_reconditioned_cell_ids])
+            with open(reconditioned_cellid_file, "r+") as f:
+                all_reconditioned_cellids = json.load(f)
+                if para_name not in all_reconditioned_cellids.keys():
+                    reconditioned_cell_ids = new_reconditioned_cell_ids
+                    # all_reconditioned_cellids[para_name] = {}
+                    all_reconditioned_cellids[para_name] = {"initial":[], 
+                                                         str(model_time):reconditioned_cell_ids,
+                                                         "total":list(reconditioned_cell_ids)}
+                else:
+                    # Get the total ids
+                    previous_total_reconditioned_cell_ids = all_reconditioned_cellids[para_name]["total"]
+                    reconditioned_cell_ids = list(set(previous_total_reconditioned_cell_ids+new_reconditioned_cell_ids))
+                    # Update the all_reconditioned_cellids
+                    all_reconditioned_cellids[para_name][str(model_time)] = new_reconditioned_cell_ids
+                    all_reconditioned_cellids[para_name]["total"] = reconditioned_cell_ids
+                    # all_reconditioned_cellids[para_name] = {str(model_time):new_reconditioned_cell_ids,
+                    #                                     "total":updated_total_reconditioned_cell_ids}
+                f.seek(0)
+                json.dump(all_reconditioned_cellids, f)
+                f.truncate()
         else:
             reconditioned_cell_ids = new_reconditioned_cell_ids
-        reconditioned_cell_ids = np.unique(reconditioned_cell_ids)
+            with open(reconditioned_cellid_file, "w") as f:
+                all_reconditioned_cellids = {para_name: {"initial":[], "total":list(reconditioned_cell_ids)}}
+                json.dump(all_reconditioned_cellids, f)
+        # reconditioned_cell_ids = np.unique(reconditioned_cell_ids)
+        reconditioned_cell_ids = np.array(reconditioned_cell_ids)  # Convert it back to numpy array
+        # Check whether the reconditioned_cell_ids are within para_cell_ids
+        if np.sum(np.isin(reconditioned_cell_ids, para_cell_ids)) != reconditioned_cell_ids.size:
+            raise Exception("Only {} of {} reconditioned cells are within parameter cells".format(np.sum(np.isin(reconditioned_cell_ids, para_cell_ids)), reconditioned_cell_ids.size))
         print("The total number of conditioned point: {}".format(len(reconditioned_cell_ids)))
         print("Saving the conditioned points to file {} ...".format(reconditioned_cellid_file))
-        np.savetxt(reconditioned_cellid_file, reconditioned_cell_ids, fmt="%d")
+        # np.savetxt(reconditioned_cellid_file, reconditioned_cell_ids, fmt="%d")
         # Generate the ensemble from the conditioning simulation
-        posterior = conditional_simulation(original_para_posterior, para_loc_set, para_cell_ids, reconditioned_cell_ids)
+        posterior = conditional_simulation(original_para_posterior, para_loc_set, para_cell_ids, reconditioned_cell_ids, para_min, para_max)
 
     else:
         raise Exception("Unknown resampling method: {}".format(para_sample_method))
@@ -840,6 +903,7 @@ def update_para_prior_from_original_posterior_heterogeneous(
             posterior[posterior < para_min] = para_min
         if para_max != 99999 and para_max != None:
             posterior[posterior > para_max] = para_max
+    print(posterior.max(axis=1), posterior.min(axis=1))
 
     return posterior
 
@@ -881,14 +945,17 @@ def get_reconditioned_points(prior, posterior, cell_ids):
         reconditioned_pool_second = reconditioned_pool_first[np.argsort(ks_v_set_filtered_first)[-n_pool_second:]]
         print("The number of conditioned points at the second round: {}".format(len(reconditioned_pool_second)))
 
-    return cell_ids[reconditioned_pool_second]
+    # cell_ids = cell_ids.astype(int)
+    reconditioned_cell_ids = cell_ids[reconditioned_pool_second]
+
+    return reconditioned_cell_ids
 
 
 #TODO
 ##############################################################
-# Function for conducting conditional simulation
+# Function for conducting Kriging for each realization
 ##############################################################
-def conditional_simulation(original_posterior, para_loc_set, para_cell_ids, reconditioned_cell_ids):
+def krige_per_realization(i, conditioned, estimated, original_posterior):
     from rpy2 import robjects
     from rpy2.robjects import r, pandas2ri
     from rpy2.robjects import Formula, Environment
@@ -913,6 +980,51 @@ def conditional_simulation(original_posterior, para_loc_set, para_cell_ids, reco
     datasets = importr('datasets')
     stats = importr('stats')
     automap = importr('automap')
+    print('a')
+
+    conditioned["para"] = original_posterior
+    # Convert to R objects
+    conditioned_r = pandas2ri.py2rpy(conditioned)
+    estimated_r   = pandas2ri.py2rpy(estimated)
+
+    est_grids = 'est.grids'+str(i)
+    obs_values = 'obs.values'+str(i)
+    varig_m   = 'm'+str(i)
+    est_values = 'sim_df'+str(i)
+
+    robjects.globalenv[est_grids] = estimated_r
+    robjects.globalenv[obs_values] = conditioned_r
+
+    # Conditional simulation
+    robjects.r("coordinates("+obs_values+") = ~x+y+z")
+    robjects.r("coordinates("+est_grids+") = ~x+y+z")
+    robjects.r("{} <- autofitVariogram(para~1,{},model=c('Sph','Exp','Gau','Ste'))".format(varig_m,obs_values))
+    robjects.r("{} <- krige(para~1, {}, {}, model={}[['var_model']], nmax=20)".format(
+        est_values, obs_values, est_grids, varig_m
+    ))
+    robjects.r("{} <- as.data.frame({})".format(est_values, est_values))
+    sim_df = robjects.globalenv[est_values]
+
+    # Remove variables
+    robjects.r("rm("+est_grids+")")
+    robjects.r("rm("+obs_values+")")
+    # robjects.r("rm("+est_values+")")
+    del conditioned, estimated
+    print('d')
+
+    # print(sim_df.shape)
+    # print(sim_df.head())
+    return i, sim_df["var1.pred"]
+
+
+##############################################################
+# Function for conducting conditional simulation
+##############################################################
+kriging_results = []
+def call_back_from_poolapply(results):
+    kriging_results.append(results)
+
+def conditional_simulation(original_posterior, para_loc_set, para_cell_ids, reconditioned_cell_ids, para_min, para_max):
 
     nens, nloc = original_posterior.shape
     posterior  = np.zeros([nens, nloc])
@@ -922,10 +1034,12 @@ def conditional_simulation(original_posterior, para_loc_set, para_cell_ids, reco
         print("use the original posterior generated from DART directly.")
         return original_posterior
         # raise Exception("There is no reconditioned points for conducting conditional simulation")
+    else:
+        from multiprocessing import Pool
 
 
     # Get the conditioned value and locations
-    conditioned_loc_ind = para_cell_ids.searchsorted(reconditioned_cell_ids)
+    conditioned_loc_ind = np.searchsorted(para_cell_ids, reconditioned_cell_ids)
     conditioned_loc_set = para_loc_set[:, conditioned_loc_ind]
     conditioned         = pd.DataFrame(conditioned_loc_set.T, columns=["x","y","z"])
 
@@ -934,32 +1048,83 @@ def conditional_simulation(original_posterior, para_loc_set, para_cell_ids, reco
     estimated_loc_ind   = np.setxor1d(np.arange(0,nloc), conditioned_loc_ind)
     estimated_loc_set   = para_loc_set[:, estimated_loc_ind]
     estimated           = pd.DataFrame(estimated_loc_set.T, columns=["x","y","z"])
-
-    # Conduct the simulation for each realization using Kriging or one-time SGS
-    # TODO: to enable parallel computing to speed it up
+    
+    # conditioned["para"] = original_posterior[i, conditioned_loc_ind]
+    # Conduct the kriging parallelly using multiprocessing Pool
+    # with Pool() as p:
+        # kriging_results = p.map(krig_per_realization, range(nens))
+    global kriging_results
+    kriging_results = []
+    p = Pool()
+    back = []
     for i in range(nens):
-        conditioned["para"] = original_posterior[i, conditioned_loc_ind]
-        # Convert to R objects
-        conditioned_r = pandas2ri.py2rpy(conditioned)
-        estimated_r   = pandas2ri.py2rpy(estimated)
+        b = p.apply_async(krige_per_realization, 
+                          args=(i,conditioned.copy(),estimated.copy(),original_posterior[i, conditioned_loc_ind]), 
+                          callback=call_back_from_poolapply)
+        back.append(b)
+        # p.apply(krige_per_realization, args=(i,conditioned.copy(),estimated.copy(),original_posterior[i]), callback=call_back_from_poolapply)
+    p.close()
+    # p.terminate()
+    p.join()
 
-        robjects.globalenv['est.grids'] = estimated_r
-        robjects.globalenv['obs.values'] = conditioned_r
+    # Check whether each subprocess is successful
+    for b in back:
+        if not b.successful():
+            print(b.get())
+    
+    # Re-sort kriging_results
+    # if len(kriging_results) != nens:
+    #     print("Something Wrong !!!")
+    #     raise Exception("The number of kriging results {} does not equal to the realization number {}".format(len(kriging_results), nens))
+    kriging_results_sorted = sorted(kriging_results, key=lambda tup: tup[0])
+    kriging_results_sorted = [r[1] for r in kriging_results_sorted]
+    print(os.cpu_count())
+    # print(kriging_results)
 
-        # Conditional simulation
-        robjects.r("coordinates(obs.values) = ~x+y+z")
-        robjects.r("coordinates(est.grids) = ~x+y+z")
-        robjects.r("m <- autofitVariogram(para~1,obs.values,model=c('Sph','Exp','Gau','Ste'))")
-        robjects.r("test.sim <- krige(para~1, obs.values, est.grids, model=m[['var_model']], nmax=100 )")
-        robjects.r("test.sim_df <- as.data.frame(test.sim)")
-        sim_df = robjects.globalenv['test.sim_df']
-
+    for i in range(nens):
         posterior[i,conditioned_loc_ind] = original_posterior[i,conditioned_loc_ind]
-        posterior[i,estimated_loc_ind] = sim_df["var1.pred"]
+        posterior[i,estimated_loc_ind]   = kriging_results_sorted[i]
+        # Conduct quality control
+        # This is because kriging might result in some unreasonable values.
+        # To avoid that, we convert those outliers to the mean of the conditional points
+        improper_ind =(posterior[i,:]<=para_min)|(posterior[i,:]>=para_max)|(np.isnan(posterior[i,:]))
+        posterior[i, improper_ind] = original_posterior[i,conditioned_loc_ind].mean()
+        print(original_posterior[i,conditioned_loc_ind].mean(), posterior[i,:].mean())
+
+    # print(posterior[:5,:10])
+    # print(np.sum(posterior==0))
+
+    # # Conduct the simulation for each realization using Kriging or one-time SGS
+    # # TODO: to enable parallel computing to speed it up
+    # for i in range(nens):
+    #     conditioned["para"] = original_posterior[i, conditioned_loc_ind]
+    #     # print(conditioned)
+    #     # print(estimated)
+    #     # Convert to R objects
+    #     conditioned_r = pandas2ri.py2rpy(conditioned)
+    #     estimated_r   = pandas2ri.py2rpy(estimated)
+
+    #     robjects.globalenv['est.grids'] = estimated_r
+    #     robjects.globalenv['obs.values'] = conditioned_r
+
+    #     # Conditional simulation
+    #     robjects.r("coordinates(obs.values) = ~x+y+z")
+    #     robjects.r("coordinates(est.grids) = ~x+y+z")
+    #     robjects.r("m <- autofitVariogram(para~1,obs.values,model=c('Sph','Exp','Gau','Ste'))")
+    #     robjects.r("test.sim <- krige(para~1, obs.values, est.grids, model=m[['var_model']], nmax=100 )")
+    #     robjects.r("test.sim_df <- as.data.frame(test.sim)")
+    #     sim_df = robjects.globalenv['test.sim_df']
+    #     # print(sim_df.shape)
+    #     # print(sim_df.head())
+
+    #     posterior[i,conditioned_loc_ind] = original_posterior[i,conditioned_loc_ind]
+    #     posterior[i,estimated_loc_ind] = sim_df["var1.pred"]
+        # raise Exception("stop")
 
     return posterior
 
 
+    
 ###############################
 # Conversion from PFLOTRAN output to the required state variables
 # LIQUID_PRESSURE --> WATER_LEVEL

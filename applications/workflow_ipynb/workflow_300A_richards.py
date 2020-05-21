@@ -47,7 +47,7 @@ mpi_exe_pf  = 'srun'
 # mpi_exe_pf  = '/software/petsc_v3.11.3/arch-linux2-c-opt/bin/mpirun'
 ncore_da = 10  # The number of MPI cores used by DART
 ncore_pf = 380  # The number of MPI cores used by PFLOTRAN
-ngroup_pf= 5  # The number of group used by stochastic running in PFLOTRAN
+ngroup_pf= 10  # The number of group used by stochastic running in PFLOTRAN
 
 # PFLOTRAN executable
 # pflotran_exe  = '/global/project/projectdirs/m1800/pin/pflotran-haswell/src/pflotran/pflotran'
@@ -67,7 +67,7 @@ pflotran_exe  = '/global/project/projectdirs/m1800/pin/pflotran/pflotran-dev/src
 # temp_app_dir = "/global/cscratch1/sd/peishi89/DART_PFLOTRAN_APP/applications/template"          # The template for application folder
 # app_dir      = "/global/cscratch1/sd/peishi89/DART_PFLOTRAN_APP/applications/1dthermal"          # The application folder name
 temp_app_dir = "/global/cscratch1/sd/peishi89/DART_PFLOTRAN_APP/applications/template"          # The template for application folder
-app_dir      = "/global/project/projectdirs/m1800/peishi/300A_analysis"          # The template for application folder
+app_dir      = "/global/project/projectdirs/m1800/peishi/300A_analysis/Richards_av_std1.5"          # The template for application folder
 dart_dir     = "/global/homes/p/peishi89/DART/manhattan"
 dart_pf_dir  = "/global/homes/p/peishi89/DART/manhattan/models/pflotran"     # The dart pflotran utitlity folder name
 
@@ -121,7 +121,7 @@ subprocess.run("cd {}; ls | xargs rm".format(dart_inout_dir), shell=True, check=
 # Some PFLOTRAN-related and observation files
 
 # PFLOTRAN parameter file and material id file
-files_cfg["pflotran_para_file"] = os.path.join(pflotran_in_dir, "parameter_prior.h5")
+files_cfg["pflotran_para_file"] = os.path.join(pflotran_in_dir, "parameter_prior_av_std1.5.h5")
 files_cfg["material_id_file"] = os.path.join(pflotran_in_dir, "AT-mesh-alluvium-rivershape.h5")
 
 # PFLOTRAN output, where the state prior can be read from
@@ -135,7 +135,7 @@ files_cfg["pflotran_obs_file"] = os.path.join(pflotran_out_dir, "pflotranR[ENS]-
 files_cfg["use_obs_tecfile_for_prior"] = True
 
 # Observation file
-files_cfg["obs_nc_original_file"] = os.path.join(pflotran_in_dir, "SFA_300a_all.nc")
+files_cfg["obs_nc_original_file"] = os.path.join(pflotran_in_dir, "SFA_300a_all_2017-2019.nc")
 files_cfg["obs_nc_file"] = os.path.join(pflotran_in_dir, "SFA_300a_clipped.nc")
 
 configs["other_dir_cfg"] = dirs_cfg
@@ -154,7 +154,7 @@ configs["file_cfg" ]     = files_cfg
 # %%
 # Observation data to be assimilated
 # Note that the names should be identical to the variable names in the corresponding netCDF file
-obs_set  = ['WATER_LEVEL_SENSOR', 'SPC_SENSOR']
+obs_set  = ['WATER_LEVEL_SENSOR', 'NORMALIZED_SPC_SENSOR']
 
 # The corresponding observation variable in PFLOTRAN
 # Note that if it is WATER_LEVEL, it is converted from LIQUID_PRESSURE output from PFLOTRAN;
@@ -180,8 +180,8 @@ else:
 # The statistics of the parameters
 # The index order follows para_set
 para_sample_method_set = ["SGS", "SGS"]  # the parameter sampling method, including: SGS, US, SIS, rescale, normal, lognormal, truncated_normal, uniform
-para_min_set  = [None, None]  # The minimum values (-99999 means no lower bound limit)
-para_max_set  = [None, None]  # The maximum values (99999 means no upper bound limit)
+para_min_set  = [-12, -18]  # The minimum values (-99999 means no lower bound limit)
+para_max_set  = [-4, -4]  # The maximum values (99999 means no upper bound limit)
 para_mean_set = [None, None]  # The mean values
 para_std_set  = [None, None]  # The standard deviation values
 # para_dist_set = ["lognormal", "lognormal"]  # The assumed distribution to be sampled if SAMPLING is indicated in para_sample_method
@@ -226,7 +226,7 @@ da_cfg = {}
 # Assimilation window
 da_cfg["assim_window_fixed"]   = True # whether the assimilation window is fixed (day)
 da_cfg["assim_window_days"]    = 0     # assimilation time window/step (day)
-da_cfg["assim_window_seconds"] = 3*3600  # assimilation time window/step  (second)
+da_cfg["assim_window_seconds"] = 12*3600  # assimilation time window/step  (second)
 da_cfg["assim_window_size"] = da_cfg["assim_window_days"]+float(da_cfg["assim_window_seconds"])/86400. # day
 first_assim_window_size = da_cfg["assim_window_size"]
 # da_cfg["assim_window_list"] = [2., (4000.*60+10)/86400.] # day
@@ -270,7 +270,7 @@ time_cfg["first_obs_time_seconds"] = time_cfg["spinup_length_seconds"]
 time_cfg["first_obs_time_size"] = time_cfg["first_obs_time_days"]+float(time_cfg["first_obs_time_seconds"])/86400. # day
 if da_cfg["assim_window_fixed"]:
     time_cfg["last_obs_time_days"]    = time_cfg["first_obs_time_days"]
-    time_cfg["last_obs_time_seconds"] = time_cfg["first_obs_time_seconds"] + 2*da_cfg["assim_window_seconds"]
+    time_cfg["last_obs_time_seconds"] = time_cfg["first_obs_time_seconds"] + 3*da_cfg["assim_window_seconds"]
     # time_cfg["last_obs_time_seconds"] = time_cfg["first_obs_time_seconds"] + 3600*24*31
 else:
     total_time = np.sum(da_cfg["assim_window_list"])
@@ -294,7 +294,7 @@ configs["time_cfg"] = time_cfg
 
 # %%
 # Observation error, number of ensembles
-da_cfg["nens"]      = 5        # number of ensembles
+da_cfg["nens"]      = 10        # number of ensembles
 da_cfg["obs_error"] = [0.001, 0.05]       # the observation error (with the order corresponding to the obs_set)
 da_cfg["obs_error_type"] = ["relative", "relative"] # the type of observation error (i.e., relative and absolute)
 

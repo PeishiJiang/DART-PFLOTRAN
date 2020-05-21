@@ -34,7 +34,8 @@
     /
 
 &data_file_nml
-    pflotran_reconditioned_cell_file = '[pflotran_in_dir]/reconditioned_cell_[PARA]_file.txt'
+    pflotran_reconditioned_cell_file = '[pflotran_in_dir]/reconditioned_cell_file.json'
+    pflotran_reconditioned_cell_file_unused = '[pflotran_in_dir]/reconditioned_cell_[PARA]_file.txt'
     obs_raw_file                   = '[pflotran_in_dir]/temperature_1d_3.30-5.1.csv'
     obs_nc_original_file           = '[pflotran_in_dir]/obs_pflotran_original.nc'
     obs_nc_file                    = '[pflotran_in_dir]/obs_pflotran_clipped.nc'

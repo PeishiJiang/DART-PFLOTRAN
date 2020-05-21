@@ -10,6 +10,7 @@ import f90nml
 import subprocess
 import numpy as np
 from scipy.stats import truncnorm
+from math import ceil, log10
 from netCDF4 import num2date, date2num, Dataset
 
 from parse_pflotran_files_utils import pflotran_files
@@ -28,15 +29,20 @@ pflotran_para_file             = configs["file_cfg"]["pflotran_para_file"]
 pflotran_para_backup_file      = configs["file_cfg"]["pflotran_para_backup_file"]
 use_para_initial_at_nth_window = configs["da_cfg"]["use_para_initial_at_nth_window"]
 pflotran_restart_file          = configs["file_cfg"]["pflotran_restart_file"]
+dart_prior_file                = configs["file_cfg"]["dart_prior_nc_file"]
+dart_posterior_file            = configs["file_cfg"]["dart_posterior_nc_file"]
 dart_input_list                = configs["file_cfg"]["dart_input_list_file"]
 dart_output_list               = configs["file_cfg"]["dart_output_list_file"]
 use_obs_tecfile_for_prior      = configs["file_cfg"]["use_obs_tecfile_for_prior"]
+save_immediate_mda_result      = configs["file_cfg"]["save_immediate_mda_result"]
 
-spinup_length                  = configs["time_cfg"]["spinup_length"]
-model_time_list                = configs["time_cfg"]["model_time_list"]
-current_model_time             = configs["time_cfg"]["current_model_time"]
-enks_mda_iteration_step        = configs["da_cfg"]["enks_mda_iteration_step"]
-assim_window_fixed             = configs["da_cfg"]["assim_window_fixed"]
+spinup_length           = configs["time_cfg"]["spinup_length"]
+model_time_list         = configs["time_cfg"]["model_time_list"]
+current_model_time      = configs["time_cfg"]["current_model_time"]
+enks_mda_iteration_step = configs["da_cfg"]["enks_mda_iteration_step"]
+assim_window_fixed      = configs["da_cfg"]["assim_window_fixed"]
+total_iterations        = configs["da_cfg"]["enks_mda_total_iterations"]
+iteration_step          = configs["da_cfg"]["enks_mda_iteration_step"]
 
 try:
     update_obs_ens_posterior_now = configs["da_cfg"]["update_obs_ens_posterior_now"]
@@ -67,23 +73,6 @@ spinup_length_hr           = spinup_length * 24
 
 para_set           = configs["obspara_set_cfg"]["para_set"]
 nens               = configs["da_cfg"]["nens"]
-# para_take_log      = configs["obspara_set_cfg"]["para_take_log"]
-# para_min_set       = configs["obspara_set_cfg"]["para_min_set"]
-# para_max_set       = configs["obspara_set_cfg"]["para_max_set"]
-# para_mean_set      = configs["obspara_set_cfg"]["para_mean_set"]
-# para_std_set       = configs["obspara_set_cfg"]["para_std_set"]
-# para_dist_set      = configs["obspara_set_cfg"]["para_dist_set"]
-# rescaled           = configs["obspara_set_cfg"]["para_prior_rescaled"]
-# para_resampled_set = configs["obspara_set_cfg"]["para_resampled_set"]
-# if not isinstance(para_resampled_set, list):
-#     para_resampled_set = [para_resampled_set]
-# if not isinstance(para_set, list):
-#     para_set      = [para_set]
-#     para_min_set  = [para_min_set]
-#     para_max_set  = [para_max_set]
-#     para_mean_set = [para_mean_set]
-#     para_std_set  = [para_std_set]
-#     para_dist_set = [para_dist_set]
 
 # Check whether this is the first time to update pflotran input files
 first_time_update = True if len(model_time_list) == 1 else False
@@ -94,6 +83,20 @@ second_time_update = True if len(model_time_list) == 2 else False
 # Check whether the spinup was conducted before
 is_spinup_length_zero = True if spinup_length == 0 else False
 
+# Get some constants
+# TODO: ntimestep will change when more restarts are involved.
+ntimestep      = int(configs["da_cfg"]["ntimestep"])
+nens           = configs["da_cfg"]["nens"]
+ndigit_time    = int(ceil(log10(ntimestep))) + 1
+ndigit_ens     = int(ceil(log10(nens))) + 1
+ens_set        = np.arange(1, nens + 1)  # the set of ensembles
+# Get the right iteration step for posterior file
+if iteration_step == 1:
+    model_time_ind = len(model_time_list)-1  # the ith model step
+    post_file_iteration_step = total_iterations
+else:
+    model_time_ind = len(model_time_list)  # the ith model step
+    post_file_iteration_step = iteration_step-1
 
 ###############################
 # Update the following in PFLOTRAN.in
@@ -127,25 +130,29 @@ if enks_mda_iteration_step == 1 and not update_obs_ens_posterior_now:
             
             if "CHECKPOINT" in s and "#" not in s:
                 is_checkpoint_on, k = True, 1
-                while "/" not in pflotranin[i+k]: k += 1
+                # while "/" not in pflotranin[i+k]: k += 1
+                while not pflotranin[i+k].strip().startswith("/"): k += 1
             
             if "RESTART" in s.split() and "#" not in s:
                 is_restart_on, k = True, 1
-                while "/" not in pflotranin[i+k]:
+                # while "/" not in pflotranin[i+k]:
+                while not pflotranin[i+k].strip().startswith("/"):
                     if "REALIZATION_DEPENDENT" in pflotranin[i+k] and "#" not in pflotranin[i+k]: is_restart_realization_dependent_on = True
                     if "FILENAME" in pflotranin[i+k] and "#" not in pflotranin[i+k]: restart_filename_nrow = k
                     k += 1
             
             if "SNAPSHOT_FILE" in s and "#" not in s:
                 is_snap_on, k = True, 1
-                while "/" not in pflotranin[i+k]:
+                # while "/" not in pflotranin[i+k]:
+                while not pflotranin[i+k].strip().startswith("/"):
                     if "TIMES" in pflotranin[i+k].split() and "#" not in pflotranin[i+k]: snap_time_nrow = k
                     if set(["PERIODIC","TIME"]).issubset(set(pflotranin[i+k].split())) and "#" not in pflotranin[i+k]: snap_periodtime_nrow = k
                     k += 1
 
             if "OBSERVATION_FILE" in s and "#" not in s:
                 is_snap_on, k = True, 1
-                while "/" not in pflotranin[i+k]:
+                # while "/" not in pflotranin[i+k]:
+                while not pflotranin[i+k].strip().startswith("/"):
                     if "TIMES" in pflotranin[i+k].split() and "#" not in pflotranin[i+k]: obs_time_nrow = k
                     if set(["PERIODIC","TIME"]).issubset(set(pflotranin[i+k].split())) and "#" not in pflotranin[i+k]: obs_periodtime_nrow = k
                     k += 1
@@ -181,7 +188,7 @@ if enks_mda_iteration_step == 1 and not update_obs_ens_posterior_now:
                 if (first_time_update and not is_spinup_length_zero) or (second_time_update and is_spinup_length_zero):
                     pflotranin.insert(i + checkpoint_section_nrow + 1, "  RESTART \n")
                     if "[ENS]" in pflotran_restart_file:
-                        pflotran_restart_file = re.sub(r"\[ENS\]", "", pflotran_restart_file)
+                        pflotran_restart_file = re.sub(r"R\[ENS\]", "", pflotran_restart_file)
                         pflotranin.insert(i + checkpoint_section_nrow + 2, "    FILENAME " + pflotran_restart_file + " \n")
                         pflotranin.insert(i + checkpoint_section_nrow + 3, "    REALIZATION_DEPENDENT \n")
                         pflotranin.insert(i + checkpoint_section_nrow + 4, "  / \n")
@@ -193,10 +200,14 @@ if enks_mda_iteration_step == 1 and not update_obs_ens_posterior_now:
                 if restart_filename_nrow == 0:
                     raise Exception("There is no FILENAME in the original RESTART card in pflotran!")
                 if "[ENS]" in pflotran_restart_file and not is_restart_realization_dependent_on:
-                    pflotran_restart_file = re.sub(r"\[ENS\]", "", pflotran_restart_file)
+                    pflotran_restart_file = re.sub(r"R\[ENS\]", "", pflotran_restart_file)
                     # pflotranin.insert(i + restart_filename_nrow, "    FILENAME " + pflotran_restart_file + " \n")
                     pflotranin[i + restart_filename_nrow] = "    FILENAME " + pflotran_restart_file + " \n"
                     pflotranin.insert(i + restart_filename_nrow + 1, "    REALIZATION_DEPENDENT \n")
+                elif "[ENS]" in pflotran_restart_file:
+                    pflotran_restart_file = re.sub(r"R\[ENS\]", "", pflotran_restart_file)
+                    # pflotranin.insert(i + restart_filename_nrow, "    FILENAME " + pflotran_restart_file + " \n")
+                    pflotranin[i + restart_filename_nrow] = "    FILENAME " + pflotran_restart_file + " \n"
                 else:
                     pflotranin[i + restart_filename_nrow] = "    FILENAME " + pflotran_restart_file + " \n"
                     # pflotranin.insert(i + restart_filename_nrow, "    FILENAME " + pflotran_restart_file + " \n")
@@ -229,31 +240,68 @@ if len(model_time_list) == 1 and enks_mda_iteration_step == 1 and not update_obs
 
 
 ###############################
-# Get the list of DART prior and posterior files
+# Get the lists of netcdf file names for DART inputs and outputs
 ###############################
-# prior
-dart_prior_file_set = []
-if not os.path.isfile(dart_input_list):
-    raise Exception("The DART output list file does not exist in the path: %s" % dart_input_list)
-with open(dart_input_list, "r") as f:
-    dart_prior_file_list = f.readlines()
+# Get the file names of all ensembles for DART restart file
+dart_prior_file_set = [
+    # re.sub(r"\[ENS\]", str(ens) + "_time" + str(model_time_ind), dart_prior_file)
+    re.sub(r"\[ENS\]", str(ens).zfill(ndigit_ens), dart_prior_file)
+    for ens in ens_set
+]
+dart_prior_file_set = [
+    re.sub(r"\[TIME\]", str(model_time_ind).zfill(ndigit_time), dart_prior_file_each)
+    for dart_prior_file_each in dart_prior_file_set
+]
+dart_posterior_file_set = [
+    # re.sub(r"\[ENS\]", str(ens) + "_time" + str(model_time_ind), dart_posterior_file)
+    re.sub(r"\[ENS\]", str(ens).zfill(ndigit_ens), dart_posterior_file)
+    for ens in ens_set
+]
+dart_posterior_file_set = [
+    re.sub(r"\[TIME\]", str(model_time_ind).zfill(ndigit_time), dart_posterior_file_each)
+    for dart_posterior_file_each in dart_posterior_file_set
+]
+if save_immediate_mda_result:
+    dart_prior_file_set = [
+        re.sub("[.]nc", "_iter"+str(1)+".nc", dart_prior_file_each)
+        for dart_prior_file_each in dart_prior_file_set
+    ]
+    dart_posterior_file_set = [
+        # TODO: use re
+        # re.sub("[.]nc", "_iter"+str(total_iterations)+".nc", dart_posterior_file_each)
+        re.sub("[.]nc", "_iter"+str(post_file_iteration_step)+".nc", dart_posterior_file_each)
+        for dart_posterior_file_each in dart_posterior_file_set
+    ]
 
-for i in range(len(dart_prior_file_list)):
-    file_name_old = dart_prior_file_list[i]
-    file_name     = file_name_old.replace("\n", "")
-    dart_prior_file_set.append(file_name)
+# print(dart_posterior_file_set)
+# print(dart_prior_file_set)
+# exit()
+# ###############################
+# # Get the list of DART prior and posterior files
+# ###############################
+# # prior
+# dart_prior_file_set = []
+# if not os.path.isfile(dart_input_list):
+#     raise Exception("The DART output list file does not exist in the path: %s" % dart_input_list)
+# with open(dart_input_list, "r") as f:
+#     dart_prior_file_list = f.readlines()
 
-# posterior
-dart_posterior_file_set = []
-if not os.path.isfile(dart_output_list):
-    raise Exception("The DART output list file does not exist in the path: %s" % dart_output_list)
-with open(dart_output_list, "r") as f:
-    dart_posterior_file_list = f.readlines()
+# for i in range(len(dart_prior_file_list)):
+#     file_name_old = dart_prior_file_list[i]
+#     file_name     = file_name_old.replace("\n", "")
+#     dart_prior_file_set.append(file_name)
 
-for i in range(len(dart_posterior_file_list)):
-    file_name_old = dart_posterior_file_list[i]
-    file_name     = file_name_old.replace("\n", "")
-    dart_posterior_file_set.append(file_name)
+# # posterior
+# dart_posterior_file_set = []
+# if not os.path.isfile(dart_output_list):
+#     raise Exception("The DART output list file does not exist in the path: %s" % dart_output_list)
+# with open(dart_output_list, "r") as f:
+#     dart_posterior_file_list = f.readlines()
+
+# for i in range(len(dart_posterior_file_list)):
+#     file_name_old = dart_posterior_file_list[i]
+#     file_name     = file_name_old.replace("\n", "")
+#     dart_posterior_file_set.append(file_name)
 
 
 ###############################

@@ -38,6 +38,7 @@ dart_dir_old          = main_dir_cfg["dart_dir"]
 application_dir_old   = main_dir_cfg["app_dir"]
 
 
+# ------------------------------------- Update config.nml -------------------------------
 ###############################
 # Change the locations in the other_dir_cfg and file_cfg
 ###############################
@@ -71,3 +72,23 @@ configs["main_dir_cfg"]["dart_dir"]    = dart_dir
 configs["main_dir_cfg"]["app_dir"]     = application_dir
 
 configs.write(config_nml, force=True)
+
+
+# ------------------------------------- Update input.nml -------------------------------
+###############################
+# Change the configurations in input.nml
+###############################
+input_nml = configs['file_cfg']['input_nml_file']
+dart_configs = f90nml.read(input_nml)
+
+for key in dart_configs.keys():
+    for cfg in dart_configs[key]:
+        loc = dart_configs[key][cfg]
+        if not isinstance(loc, str):
+            continue
+        if application_dir_old in loc:
+            dart_configs[key][cfg] = loc.replace(application_dir_old, application_dir)
+        # elif dart_pflotran_dir_old in loc:
+        #     dart_configs[key][cfg] = loc.replace(dart_pflotran_dir_old, dart_pflotran_dir)
+
+dart_configs.write(input_nml, force=True)

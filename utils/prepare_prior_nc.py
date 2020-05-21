@@ -235,8 +235,8 @@ for i in range(nens):
         xloc_para_v        = root_nc_prior.createVariable('para_x_location', 'f8', ('para_location', ))
         yloc_para_v        = root_nc_prior.createVariable('para_y_location', 'f8', ('para_location', ))
         zloc_para_v        = root_nc_prior.createVariable('para_z_location', 'f8', ('para_location', ))
-        state_cell_ids_v   = root_nc_prior.createVariable('state_cell_ids', 'f8', ('state_location', ))
-        para_cell_ids_v    = root_nc_prior.createVariable('para_cell_ids', 'f8', ('para_location', ))
+        state_cell_ids_v   = root_nc_prior.createVariable('state_cell_ids', 'i8', ('state_location', ))
+        para_cell_ids_v    = root_nc_prior.createVariable('para_cell_ids', 'i8', ('para_location', ))
 
         # Get the center of the assimilation window in unit day, as required by DART's read_model_time() subroutine time_v.units    = "day"
         time_v.units = "day"
@@ -339,8 +339,8 @@ for i in range(nens):
         xloc_para_v        = root_nc_posterior.createVariable('para_x_location', 'f8', ('para_location', ))
         yloc_para_v        = root_nc_posterior.createVariable('para_y_location', 'f8', ('para_location', ))
         zloc_para_v        = root_nc_posterior.createVariable('para_z_location', 'f8', ('para_location', ))
-        state_cell_ids_v   = root_nc_prior.createVariable('state_cell_ids', 'f8', ('state_location', ))
-        para_cell_ids_v    = root_nc_prior.createVariable('para_cell_ids', 'f8', ('para_location', ))
+        state_cell_ids_v   = root_nc_prior.createVariable('state_cell_ids', 'i8', ('state_location', ))
+        para_cell_ids_v    = root_nc_prior.createVariable('para_cell_ids', 'i8', ('para_location', ))
 
         # Get the center of the assimilation window in unit day, as required by DART's read_model_time() subroutine time_v.units    = "day"
         time_v.units = "day"

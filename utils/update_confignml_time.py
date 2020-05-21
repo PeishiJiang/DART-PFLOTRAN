@@ -28,6 +28,10 @@ assim_end_seconds         = configs["da_cfg"]["assim_end_seconds"]
 assim_window_fixed        = configs["da_cfg"]["assim_window_fixed"]
 enks_mda_iteration_step   = configs["da_cfg"]["enks_mda_iteration_step"]
 enks_mda_total_iterations = configs["da_cfg"]["enks_mda_total_iterations"]
+update_obs_ens_posterior_required = configs["da_cfg"]["obs_ens_posterior_from_model"]
+
+if update_obs_ens_posterior_required:
+    enks_mda_total_iterations = enks_mda_total_iterations + 1
 
 if not isinstance(model_time_list, list):
     model_time_list = [model_time_list]
@@ -60,13 +64,6 @@ else:
         current_model_time += old_assim_window_size / 2 + new_assim_window_size / 2
 
 
-###############################
-# Change the EnKS-MDA iteration step back to 1
-###############################
-if enks_mda_iteration_step - 1 != enks_mda_total_iterations:
-    raise Exception("The current iteration step {} is not the same as the total iterations {}".format(enks_mda_iteration_step, enks_mda_total_iterations))
-configs["da_cfg"]["enks_mda_iteration_step"] = 1
-
 
 ###############################
 # Check if the updated current_model_time exceeds the last_obs_time
@@ -81,6 +78,14 @@ if current_model_time >= (last_obs_time - 1e-8):
     configs.write(config_nml_file, force=True)
 
 else:
+    ###############################
+    # Change the EnKS-MDA iteration step back to 1
+    ###############################
+    # if enks_mda_iteration_step - 1 != enks_mda_total_iterations:
+    if enks_mda_iteration_step != enks_mda_total_iterations:
+        raise Exception("The current iteration step {} is not the same as the total iterations {}".format(enks_mda_iteration_step, enks_mda_total_iterations))
+    configs["da_cfg"]["enks_mda_iteration_step"] = 1
+
     ###############################
     # Update the model/obs window times in config.nml
     ###############################

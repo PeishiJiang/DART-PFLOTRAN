@@ -74,26 +74,25 @@ assim_start, assim_end = start_obs_sec / 86400, end_obs_sec / 86400
 
 
 ###############################
-# Remove the temporary prior files
-###############################
-last_obs_time = configs['time_cfg']['last_obs_time_size']
-# DART prior
-if last_obs_time <= assim_end:
-    dart_prior_file_set = []
-    if not os.path.isfile(dart_input_list):
-        raise Exception("The DART input list file does not exist in the path: %s" % dart_input_list)
-    with open(dart_input_list, "r") as f:
-        dart_prior_file_list = f.readlines()
-    for i in range(len(dart_prior_file_list)):
-        file_name_old = dart_prior_file_list[i]
-        file_name     = file_name_old.replace("\n", "")
-        subprocess.run("cd {0}; rm {1}".format(dart_data_dir, file_name), shell=True, check=True)
-
-
-###############################
 # Check whether the observation ens posterior should be obtained from rerunning the model
 ###############################
 if not required:
+    ###############################
+    # Remove the temporary prior files
+    ###############################
+    last_obs_time = configs['time_cfg']['last_obs_time_size']
+    # DART prior
+    if last_obs_time <= assim_end:
+        dart_prior_file_set = []
+        if not os.path.isfile(dart_input_list):
+            raise Exception("The DART input list file does not exist in the path: %s" % dart_input_list)
+        with open(dart_input_list, "r") as f:
+            dart_prior_file_list = f.readlines()
+        for i in range(len(dart_prior_file_list)):
+            file_name_old = dart_prior_file_list[i]
+            file_name     = file_name_old.replace("\n", "")
+            subprocess.run("cd {0}; rm {1}".format(dart_data_dir, file_name), shell=True, check=True)
+
     exit()
 
 print("Now update the observation ensemble posterior from rerunning the model.")
@@ -223,6 +222,22 @@ for i in range(nens):
 
     # Close the posterior NetCDF file
     nc_posterior.close()
+
+###############################
+# Remove the temporary prior files
+###############################
+last_obs_time = configs['time_cfg']['last_obs_time_size']
+# DART prior
+if last_obs_time <= assim_end:
+    dart_prior_file_set = []
+    if not os.path.isfile(dart_input_list):
+        raise Exception("The DART input list file does not exist in the path: %s" % dart_input_list)
+    with open(dart_input_list, "r") as f:
+        dart_prior_file_list = f.readlines()
+    for i in range(len(dart_prior_file_list)):
+        file_name_old = dart_prior_file_list[i]
+        file_name     = file_name_old.replace("\n", "")
+        subprocess.run("cd {0}; rm {1}".format(dart_data_dir, file_name), shell=True, check=True)
 
 
 # Once it is done, switch the update back to False

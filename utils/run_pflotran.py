@@ -61,6 +61,7 @@ os.chdir(pflotran_in_dir)
 # print("{} -n {} {} -pflotranin {} -output_prefix {} -stochastic -num_realizations {} -num_groups {}".format(
 #         mpirun, ncore_pf, pflotran_exe, pflotran_in_file, pflotran_out_prefix, nreaz, ngroup
 #     ))
+print("PFLOTRAN simulation starts ...")
 if ncore_pf > 1:
     # subprocess.run("{} -n {} {} -pflotranin {} -output_prefix {} -stochastic -num_realizations {} -num_groups {} -screen_output off".format(
     subprocess.run("{} -n {} {} -pflotranin {} -output_prefix {} -stochastic -num_realizations {} -num_groups {}".format(
@@ -104,6 +105,10 @@ pflotran_log_file = os.path.basename(pflotran_log_file)
 if update_obs_ens_posterior_required:
     total_iterations = total_iterations + 1
 
+# print(pflotran_out_file)
+# print(pflotran_restart_file)
+# print(pflotran_obs_file)
+# print(is_spinup_done, update_obs_ens_posterior_required, update_obs_ens_posterior_now, iteration_step, total_iterations)
 if is_spinup_done:
     # If iteration is done and model state is not required to be updated
     if not update_obs_ens_posterior_required and iteration_step == total_iterations:
@@ -121,6 +126,7 @@ if is_spinup_done:
     elif update_obs_ens_posterior_required and iteration_step == total_iterations:
         # when model state has been updated:
         if update_obs_ens_posterior_now:
+            # print("Cleaning after updating the model states from rerunning the model using posterior parameters ...")
             # copy the latest output from either snapshot file from pflotran_in to pflotran_out
             subprocess.run("cd {0}; cp {1} {2}".format(pflotran_in_dir, pflotran_out_file, pflotran_out_dir), shell=True, check=True)
             # move the observation file from pflotran_in to pflotran_out if exits
@@ -136,13 +142,14 @@ if is_spinup_done:
     # If iteration is not done
     elif (not update_obs_ens_posterior_required and iteration_step < total_iterations) or \
          (update_obs_ens_posterior_required and iteration_step < total_iterations):
+        # It's important to remove the unused restart file first!
+        # remove the latest checkout/restart file
+        subprocess.run("cd {0}; rm {1}; mv {2} {3}".format(pflotran_in_dir, pflotran_restart_file, pflotran_log_file, pflotran_out_dir), shell=True, check=False)
         # copy the latest output from either snapshot file from pflotran_in to pflotran_out
         subprocess.run("cd {0}; cp {1} {2}".format(pflotran_in_dir, pflotran_out_file, pflotran_out_dir), shell=True, check=False)
         # move the observation file from pflotran_in to pflotran_out if exits
         if len(glob.glob(pflotran_obs_file)) != 0:
             subprocess.run("cd {0}; mv {1} {2}".format(pflotran_in_dir, pflotran_obs_file, pflotran_out_dir), shell=True, check=False)
-        # remove the latest checkout/restart file
-        subprocess.run("cd {0}; rm {1}; mv {2} {3}".format(pflotran_in_dir, pflotran_restart_file, pflotran_log_file, pflotran_out_dir), shell=True, check=False)
         # subprocess.run("cd {0}; rm pflotran*.chk; cp pflotran*.h5 {1}; mv pflotran*.out {1}".format(
         #     pflotran_in_dir, pflotran_out_dir), shell=True, check=True)
 
