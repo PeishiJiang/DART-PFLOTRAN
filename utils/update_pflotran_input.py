@@ -2,8 +2,12 @@
 
 # Author: Peishi Jiang
 
-import re
 import os
+# Put the following before importing numpy is to avoid the following error
+# OpenBLAS blas_thread_init: pthread_create failed for thread 19 of 64: Resource temporarily unavailable
+# See more at: https://stackoverflow.com/questions/52026652/openblas-blas-thread-init-pthread-create-resource-temporarily-unavailable
+os.environ['OPENBLAS_NUM_THREADS'] = '1'
+import re
 import sys
 import h5py
 import f90nml

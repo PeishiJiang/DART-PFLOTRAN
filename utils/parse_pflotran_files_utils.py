@@ -2,6 +2,10 @@
 # Author: Peishi Jiang
 
 import os
+# Put the following before importing numpy is to avoid the following error
+# OpenBLAS blas_thread_init: pthread_create failed for thread 19 of 64: Resource temporarily unavailable
+# See more at: https://stackoverflow.com/questions/52026652/openblas-blas-thread-init-pthread-create-resource-temporarily-unavailable
+os.environ['OPENBLAS_NUM_THREADS'] = '1'
 import re
 import h5py
 import f90nml
@@ -51,6 +55,23 @@ class pflotran_files:
             self.para_material_id_set = [self.para_material_id_set]
         if not isinstance(self.model_time_list, list):
             self.model_time_list = [self.model_time_list]
+        if not isinstance(self.obs_set, list):
+            self.obs_set = [self.obs_set]
+            self.obs_pflotran_set = [self.obs_pflotran_set]
+        if not isinstance(self.para_set, list):
+            self.para_set                   = [self.para_set]
+            self.para_take_log_set          = [self.para_take_log_set]
+            self.para_homogeneous           = [self.para_homogeneous]
+            self.para_material_id_set       = [self.para_material_id_set]
+            self.para_hdf_dataset_name_set  = [self.para_hdf_dataset_name_set]
+            self.para_isotropic_set         = [self.para_isotropic_set]
+            self.para_anisotropic_ratio_set = [self.para_anisotropic_ratio_set]
+            self.para_min_set               = [self.para_min_set]
+            self.para_max_set               = [self.para_max_set]
+            self.para_mean_set              = [self.para_mean_set]
+            self.para_std_set               = [self.para_std_set]
+            self.para_resampled_set         = [self.para_resampled_set]
+            self.para_sample_method_set     = [self.para_sample_method_set]
 
 
     ###############################
@@ -966,6 +987,7 @@ def krige_per_realization(i, conditioned, estimated, original_posterior):
     # from rpy2.rinterface import RRuntimeError
 
     # Activate and load the required R packages
+    # print(os.environ['OPENBLAS_NUM_THREADS'])
     pandas2ri.activate()
     packageNames = ('ggplot2', 'gstat', 'sp','lazyeval', 'automap', 'stats')
     utils = importr('utils')
@@ -1055,7 +1077,12 @@ def conditional_simulation(original_posterior, para_loc_set, para_cell_ids, reco
         # kriging_results = p.map(krig_per_realization, range(nens))
     global kriging_results
     kriging_results = []
+    print(os.cpu_count())
     p = Pool()
+    # if os.cpu_count() >= 32:
+    #     p = Pool(processes=32)
+    # else:
+    #     p = Pool()
     back = []
     for i in range(nens):
         b = p.apply_async(krige_per_realization, 
@@ -1078,7 +1105,6 @@ def conditional_simulation(original_posterior, para_loc_set, para_cell_ids, reco
     #     raise Exception("The number of kriging results {} does not equal to the realization number {}".format(len(kriging_results), nens))
     kriging_results_sorted = sorted(kriging_results, key=lambda tup: tup[0])
     kriging_results_sorted = [r[1] for r in kriging_results_sorted]
-    print(os.cpu_count())
     # print(kriging_results)
 
     for i in range(nens):
