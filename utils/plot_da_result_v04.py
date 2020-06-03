@@ -74,6 +74,7 @@ class DaResults(object):
         # Whether immediate mda results are saved
         self.has_immediate_mda_results = self.configs["file_cfg"]["save_immediate_mda_result"]
         self.total_mda_iterations = self.configs["da_cfg"]["enks_mda_total_iterations"]
+        self.enks_mda_iteration_step   = self.configs["da_cfg"]["enks_mda_iteration_step"]
 
         if not self.exceeds_obs_time:
             warnings.warn("The data assimilation is not completed!")
@@ -102,6 +103,12 @@ class DaResults(object):
         nvar_state, nvar_para = self.nvar_state, self.nvar_para
         nvar, nens, niter     = self.nvar, self.nens, self.total_mda_iterations
         has_immediate_mda_results = self.has_immediate_mda_results
+
+        # If the assimilation is not done
+        if not self.exceeds_obs_time:
+            # When the first time step is not finished.
+            if len(self.model_time_list) == 1:
+                niter = self.enks_mda_iteration_step - 1
 
         # Get all the reconditioned points
         self.reconditioned_file = self.configs["file_cfg"]["pflotran_reconditioned_cell_file"]
@@ -250,6 +257,25 @@ class DaResults(object):
         self.obs_time_set_used = obs_time_set_used
         self.obs_loc_set = obs_loc
         
+
+    def get_unfinished_realizations(self):
+        if self.exceeds_obs_time:
+            print("All the assimilations are done!")
+            return []
+
+        nens = self.nens
+        pflotran_input = self.configs["other_dir_cfg"]["pflotran_in_dir"]
+
+        # Iterate over each pflotranR*.out to see whether it is completed
+        unfinished_reals = []
+        for i in range(1, nens+1):
+            # Read the output file
+            f_output = os.path.join(pflotran_input, "pflotranR{}.out".format(i))
+            with open(f_output, "r") as f:
+                lines = f.readlines()
+            if "Wall Clock Time:" not in lines[-1]:
+                unfinished_reals.append(i)
+        return unfinished_reals
 
 
     def plot_spatial_average(self, axes, ylim=None, plot_averaged_obs=False):
