@@ -488,10 +488,11 @@ integer, parameter, public :: &
   QTY_PFLOTRAN_HANFORD_PERMEABILITY  = 374, &
   QTY_PFLOTRAN_ALLUVIUM_PERMEABILITY  = 375, &
   QTY_PFLOTRAN_WATER_LEVEL  = 376, &
-  QTY_PFLOTRAN_GROUNDWATER_TRACER  = 377
+  QTY_PFLOTRAN_GROUNDWATER_TRACER  = 377, &
+  QTY_PFLOTRAN_RIVER_TRACER  = 378
 
 
-integer, parameter :: max_defined_quantities = 377
+integer, parameter :: max_defined_quantities = 378
 
 
 !----------------------------------------------------------------------------
@@ -916,6 +917,7 @@ obs_kind_names(374) = obs_kind_type(QTY_PFLOTRAN_HANFORD_PERMEABILITY, 'QTY_PFLO
 obs_kind_names(375) = obs_kind_type(QTY_PFLOTRAN_ALLUVIUM_PERMEABILITY, 'QTY_PFLOTRAN_ALLUVIUM_PERMEABILITY')
 obs_kind_names(376) = obs_kind_type(QTY_PFLOTRAN_WATER_LEVEL, 'QTY_PFLOTRAN_WATER_LEVEL')
 obs_kind_names(377) = obs_kind_type(QTY_PFLOTRAN_GROUNDWATER_TRACER, 'QTY_PFLOTRAN_GROUNDWATER_TRACER')
+obs_kind_names(378) = obs_kind_type(QTY_PFLOTRAN_RIVER_TRACER, 'QTY_PFLOTRAN_RIVER_TRACER')
 
 ! count here, then output below
 

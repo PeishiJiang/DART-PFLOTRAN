@@ -402,7 +402,7 @@ class pflotran_files:
             # Delete duplicates (it is possible that some wells are interpolated to the same cell)
             tec_data = tec_data.drop_duplicates()
 
-            # Get the time and space
+            # Get the time
             if i == 0:
                 # ------------ time -------------
                 # Convert the time to the units of day
@@ -417,14 +417,23 @@ class pflotran_files:
                 time_state = time_state[(time_state>=start_time) & (time_state<=end_time)]
                 # Get the number of time steps
                 ntime_state = len(time_state)
-                # ------------ space -------------
-                cell_ids_tec = tec_data["cell_id"].unique()
-                # cell_ids_indices = [cell_ids.index(cell) for cell in cell_ids_tec]
-                cell_ids_indices = cell_ids.searchsorted(cell_ids_tec)
-                x_loc_state  = x_loc_all[cell_ids_indices]
-                y_loc_state  = y_loc_all[cell_ids_indices]
-                z_loc_state  = z_loc_all[cell_ids_indices]
-                nloc_state   = len(cell_ids_tec)
+            
+            # Get the space
+            # ------------ space -------------
+            cell_ids_tec = tec_data["cell_id"].unique()
+            # cell_ids_indices = [cell_ids.index(cell) for cell in cell_ids_tec]
+            cell_ids_indices = cell_ids.searchsorted(cell_ids_tec)
+            x_loc_state  = x_loc_all[cell_ids_indices]
+            y_loc_state  = y_loc_all[cell_ids_indices]
+            z_loc_state  = z_loc_all[cell_ids_indices]
+            nloc_state   = len(cell_ids_tec)
+            # TODO: sort according to the cell id
+            sort_cell_idx = np.argsort(cell_ids_tec)
+            cell_ids_tec = cell_ids_tec[sort_cell_idx]
+            x_loc_state  = x_loc_state[sort_cell_idx]
+            y_loc_state  = y_loc_state[sort_cell_idx]
+            z_loc_state  = z_loc_state[sort_cell_idx]
+
             # print(time_state, start_time, end_time, i)
 
             # Get the data within the start and end time
@@ -448,6 +457,8 @@ class pflotran_files:
                     tec_data_varn = tec_data[['Time', varn, 'cell_id']]
                     # TODO: reorganize the data
                     tec_data_varn_values = tec_data_varn[varn].values.reshape(nloc_state,ntime_state).T
+                    # Sort it
+                    tec_data_varn_values = tec_data_varn_values[:, sort_cell_idx]
                     # save it
                     pflotran_state_dict[varn]["value"][i,:,:] = tec_data_varn_values
                     pflotran_state_dict[varn]["unit"] = state_unit[state_names.index(varn)]
@@ -462,10 +473,21 @@ class pflotran_files:
                     tec_data_varn["WATER_LEVEL"] =(tec_data_varn['LIQUID_PRESSURE'] - patm)/(rho*g) + z_loc_varn
                     # TODO: reorganize the data
                     tec_data_varn_values = tec_data_varn["WATER_LEVEL"].values.reshape(nloc_state,ntime_state).T
+                    # Sort it
+                    tec_data_varn_values = tec_data_varn_values[:, sort_cell_idx]
                     # save it
                     pflotran_state_dict[varn]["value"][i,:,:] = tec_data_varn_values
                     # pflotran_state_dict[varn]["unit"] = state_unit[state_names.index('LIQUID_PRESSURE')]
                     pflotran_state_dict[varn]["unit"] = "m"
+                elif varn == "RIVER_TRACER":
+                    tec_data_varn = tec_data[['Time', 'TOTAL_TRACER_RIVER', 'cell_id']]
+                    # TODO: reorganize the data
+                    tec_data_varn_values = tec_data_varn['TOTAL_TRACER_RIVER'].values.reshape(nloc_state,ntime_state).T
+                    # Sort it
+                    tec_data_varn_values = tec_data_varn_values[:, sort_cell_idx]
+                    # save it
+                    pflotran_state_dict[varn]["value"][i,:,:] = tec_data_varn_values
+                    pflotran_state_dict[varn]["unit"] = state_unit[state_names.index('TOTAL_TRACER_RIVER')]
                 elif varn == "GROUNDWATER_TRACER":
                     tec_data_varn = tec_data[['Time', 'TOTAL_TRACER_RIVER', "QLX", "QLY", 'cell_id']]
                     # TODO: convert total river tracer to groundwater tracer
@@ -473,6 +495,8 @@ class pflotran_files:
                     tec_data_varn["GROUNDWATER_TRACER"] = 1 - tec_data_varn["TOTAL_TRACER_RIVER"]
                     # TODO: reorganize the data
                     tec_data_varn_values = tec_data_varn["GROUNDWATER_TRACER"].values.reshape(nloc_state,ntime_state).T
+                    # Sort it
+                    tec_data_varn_values = tec_data_varn_values[:, sort_cell_idx]
                     # save it
                     pflotran_state_dict[varn]["value"][i,:,:] = tec_data_varn_values
                     pflotran_state_dict[varn]["unit"] = state_unit[state_names.index('TOTAL_TRACER_RIVER')]
@@ -696,6 +720,7 @@ def parse_unstructured_hdf5(cells, vertices):
 ###############################
 def read_tec_file(f_tec_file):
     # Get the data and head
+    print(f_tec_file)
     data_all = np.loadtxt(f_tec_file, skiprows=1)
     data, time = data_all[:,1:], data_all[:,0]
     time = np.expand_dims(time, axis=1)

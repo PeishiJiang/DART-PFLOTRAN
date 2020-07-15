@@ -6,6 +6,7 @@
 !TEMPERATURE,  QTY_PFLOTRAN_TEMPERATURE
 !WATER_LEVEL_SENSOR, QTY_PFLOTRAN_WATER_LEVEL
 !NORMALIZED_SPC_SENSOR, QTY_PFLOTRAN_GROUNDWATER_TRACER
+!RIVER_TRACER_SENSOR, QTY_PFLOTRAN_RIVER_TRACER
 ! END DART PREPROCESS KIND LIST
 
 
@@ -19,6 +20,8 @@
 !            call get_expected_pflotran_ref(state_handle, ens_size, location, obs_def%time, obs_def%kind, expected_obs, istatus)
 !         case(NORMALIZED_SPC_SENSOR)
 !            call get_expected_pflotran_ref(state_handle, ens_size, location, obs_def%time, obs_def%kind, expected_obs, istatus)
+!         case(RIVER_TRACER_SENSOR)
+!            call get_expected_pflotran_ref(state_handle, ens_size, location, obs_def%time, obs_def%kind, expected_obs, istatus)
 !         case(WATER_LEVEL_SENSOR)
 !            call get_expected_pflotran_ref(state_handle, ens_size, location, obs_def%time, obs_def%kind, expected_obs, istatus)
 ! END DART PREPROCESS GET_EXPECTED_OBS_FROM_DEF
@@ -28,6 +31,8 @@
 !         case(TEMPERATURE)
 !            continue
 !         case(NORMALIZED_SPC_SENSOR)
+!            continue
+!         case(RIVER_TRACER_SENSOR)
 !            continue
 !         case(WATER_LEVEL_SENSOR)
 !            continue
@@ -39,6 +44,8 @@
 !            continue
 !         case(NORMALIZED_SPC_SENSOR)
 !            continue
+!         case(RIVER_TRACER_SENSOR)
+!            continue
 !         case(WATER_LEVEL_SENSOR)
 !            continue
 ! END DART PREPROCESS WRITE_OBS_DEF
@@ -48,6 +55,8 @@
 !         case(TEMPERATURE)
 !            continue
 !         case(NORMALIZED_SPC_SENSOR)
+!            continue
+!         case(RIVER_TRACER_SENSOR)
 !            continue
 !         case(WATER_LEVEL_SENSOR)
 !            continue

@@ -441,3 +441,5 @@ else:
         # Copy the temporary prior file to prior file
         for i in range(nens):
             subprocess.run("cd {0}; cp {1} {2}".format(dart_data_dir, dart_prior_file_set_temp[i], dart_prior_file_set[i]), shell=True, check=True)
+
+# raise Exception("Stop here for now!")
