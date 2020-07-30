@@ -562,7 +562,7 @@ class pflotran_files:
             para_sample_method           = para_sample_method_set[i]
             # para_rescaled                = para_rescaled_set[i]
             para_take_log                = para_take_log_set[i]
-            para_resampled               = para_resampled_set[i]
+            # para_resampled               = para_resampled_set[i]
 
             print("Updating {} in PFLOTRAN parameter file now ...".format(varn))
 
@@ -580,7 +580,8 @@ class pflotran_files:
                 # (1) it is required and
                 # (2) it is not the time for updating observation ensemble posterior
                 # (3) it is not during ES-MDA iteration
-                if para_resampled and not update_obs_ens_posterior_now and enks_mda_iteration_step == 1:
+                # if para_resampled and not update_obs_ens_posterior_now and enks_mda_iteration_step == 1:
+                if varn in para_resampled_set and not update_obs_ens_posterior_now and enks_mda_iteration_step == 1:
                     posterior_varn = update_para_prior_from_original_posterior_homogeneous(
                         para_prior_varn, original_para_posterior_varn,
                         para_sample_method, para_min, para_max, para_mean, para_std, para_take_log)
@@ -619,7 +620,8 @@ class pflotran_files:
                 # print(enks_mda_iteration_step)
                 # raise Exception("Stop")
                 # if para_resampled and not update_obs_ens_posterior_now:
-                if para_resampled and not update_obs_ens_posterior_now and enks_mda_iteration_step == 1:
+                # if para_resampled and not update_obs_ens_posterior_now and enks_mda_iteration_step == 1:
+                if varn in para_resampled_set and not update_obs_ens_posterior_now and enks_mda_iteration_step == 1:
                     # reconditioned_cellid_file = re.sub(r"\[PARA\]", varn, reconditioned_cellid_file_format)
                     posterior_varn = update_para_prior_from_original_posterior_heterogeneous(
                         para_prior_varn, original_para_posterior_varn, varn,
