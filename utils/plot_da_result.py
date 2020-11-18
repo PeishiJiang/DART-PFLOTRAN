@@ -400,7 +400,7 @@ class DaResults(object):
 
     def plot_obs_at_point(self, obs_name, axes, obs_loc_ind=0, plot_time_offset=0,
                         #   figsize=None, constrained_layout=True,
-                          vmin=None, vmax=None, ylim=None):
+                          vmin=None, vmax=None, ylim=None, option='both'):
         """Plot the temporal evolution of DA results for the observation data along one dimension"""
         nvar, nens = self.nvar, self.nens
         prior_state, posterior_state = self.prior["state"], self.posterior["state"]
@@ -440,47 +440,206 @@ class DaResults(object):
         # Plot the temporal evolution of the ensemble, the mean, and the observation
         # at the given observed location
         # Get the locations of observation and the corresponding index of DA results
-        # Plot the prior
-        ax1 = axes[0]
-        for j in range(nens):
+        if option == 'both':
+            # Plot the prior
+            ax1 = axes[0]
+            for j in range(nens):
+                if has_immediate_mda_results:
+                    prior_var_ens = prior_state[obs_var_ind, 0, j, :, model_loc_ind]
+                else:
+                    prior_var_ens = prior_state[obs_var_ind, j, :, model_loc_ind]
+                line1, = ax1.plot(state_time_set[plot_time_offset:], prior_var_ens[plot_time_offset:], 
+                                  color='grey', linewidth=0.5, linestyle=':', label='ensemble')
             if has_immediate_mda_results:
-                prior_var_ens = prior_state[obs_var_ind, 0, j, :, model_loc_ind]
+                prior_var_mean = np.mean(prior_state[obs_var_ind, 0, :, :, model_loc_ind], axis=(0))
             else:
-                prior_var_ens = prior_state[obs_var_ind, j, :, model_loc_ind]
-            line1, = ax1.plot(state_time_set[plot_time_offset:], prior_var_ens[plot_time_offset:], 
-                              color='grey', linewidth=0.5, linestyle=':', label='ensemble')
-        if has_immediate_mda_results:
-            prior_var_mean = np.mean(prior_state[obs_var_ind, 0, :, :, model_loc_ind], axis=(0))
-        else:
-            prior_var_mean = np.mean(prior_state[obs_var_ind, :, :, model_loc_ind], axis=(0))
-        line2, = ax1.plot(state_time_set[plot_time_offset:], prior_var_mean[plot_time_offset:], 
-                          color='red', linewidth=1, label='mean')
-        line3, = ax1.plot(obs_time_set_used[plot_time_offset:], obs_value[plot_time_offset:], 
-                          color='black', linewidth=1, label='obs')
-        ax1.set_ylim(ylim)
+                prior_var_mean = np.mean(prior_state[obs_var_ind, :, :, model_loc_ind], axis=(0))
+            line2, = ax1.plot(state_time_set[plot_time_offset:], prior_var_mean[plot_time_offset:], 
+                              color='red', linewidth=1, label='mean')
+            line3, = ax1.plot(obs_time_set_used[plot_time_offset:], obs_value[plot_time_offset:], 
+                              color='black', linewidth=1, label='obs')
+            ax1.set_ylim(ylim)
 
-        # Plot the posterior
-        ax2 = axes[1]
-        for j in range(nens):
+            # Plot the posterior
+            ax2 = axes[1]
+            for j in range(nens):
+                if has_immediate_mda_results:
+                    posterior_var_ens = posterior_state[obs_var_ind, -1, j, :, model_loc_ind]
+                else:
+                    posterior_var_ens = posterior_state[obs_var_ind, j, :, model_loc_ind]
+                ax2.plot(state_time_set[plot_time_offset:], posterior_var_ens[plot_time_offset:], 
+                         color='grey', linewidth=0.5, linestyle=':', label='ensemble')
             if has_immediate_mda_results:
-                posterior_var_ens = posterior_state[obs_var_ind, -1, j, :, model_loc_ind]
+                posterior_var_mean = np.mean(posterior_state[obs_var_ind, -1, :, :, model_loc_ind], axis=(0))
             else:
-                posterior_var_ens = posterior_state[obs_var_ind, j, :, model_loc_ind]
-            ax2.plot(state_time_set[plot_time_offset:], posterior_var_ens[plot_time_offset:], 
-                     color='grey', linewidth=0.5, linestyle=':', label='ensemble')
-        if has_immediate_mda_results:
-            posterior_var_mean = np.mean(posterior_state[obs_var_ind, -1, :, :, model_loc_ind], axis=(0))
-        else:
-            posterior_var_mean = np.mean(posterior_state[obs_var_ind, :, :, model_loc_ind], axis=(0))
-        ax2.plot(state_time_set[plot_time_offset:], posterior_var_mean[plot_time_offset:], 
-                 color='red', linewidth=1, label='mean')
-        ax2.plot(obs_time_set_used[plot_time_offset:], obs_value[plot_time_offset:], 
-                 color='black', linewidth=1, label='obs')
-        ax2.set_ylim(ylim)
+                posterior_var_mean = np.mean(posterior_state[obs_var_ind, :, :, model_loc_ind], axis=(0))
+            ax2.plot(state_time_set[plot_time_offset:], posterior_var_mean[plot_time_offset:], 
+                     color='red', linewidth=1, label='mean')
+            ax2.plot(obs_time_set_used[plot_time_offset:], obs_value[plot_time_offset:], 
+                     color='black', linewidth=1, label='obs')
+            ax2.set_ylim(ylim)
+        
+        elif option == 'prior':
+            ax1 = axes[0]
+            for j in range(nens):
+                if has_immediate_mda_results:
+                    prior_var_ens = prior_state[obs_var_ind, 0, j, :, model_loc_ind]
+                else:
+                    prior_var_ens = prior_state[obs_var_ind, j, :, model_loc_ind]
+                line1, = ax1.plot(state_time_set[plot_time_offset:], prior_var_ens[plot_time_offset:], 
+                                  color='grey', linewidth=0.5, linestyle=':', label='ensemble')
+            if has_immediate_mda_results:
+                prior_var_mean = np.mean(prior_state[obs_var_ind, 0, :, :, model_loc_ind], axis=(0))
+            else:
+                prior_var_mean = np.mean(prior_state[obs_var_ind, :, :, model_loc_ind], axis=(0))
+            line2, = ax1.plot(state_time_set[plot_time_offset:], prior_var_mean[plot_time_offset:], 
+                              color='red', linewidth=1, label='mean')
+            line3, = ax1.plot(obs_time_set_used[plot_time_offset:], obs_value[plot_time_offset:], 
+                              color='black', linewidth=1, label='obs')
+            ax1.set_ylim(ylim)
+            
+        elif option == 'posterior':
+            ax2 = axes[0]
+            for j in range(nens):
+                if has_immediate_mda_results:
+                    posterior_var_ens = posterior_state[obs_var_ind, -1, j, :, model_loc_ind]
+                else:
+                    posterior_var_ens = posterior_state[obs_var_ind, j, :, model_loc_ind]
+                line1, = ax2.plot(state_time_set[plot_time_offset:], posterior_var_ens[plot_time_offset:], 
+                         color='grey', linewidth=0.5, linestyle=':', label='ensemble')
+            if has_immediate_mda_results:
+                posterior_var_mean = np.mean(posterior_state[obs_var_ind, -1, :, :, model_loc_ind], axis=(0))
+            else:
+                posterior_var_mean = np.mean(posterior_state[obs_var_ind, :, :, model_loc_ind], axis=(0))
+            line2, = ax2.plot(state_time_set[plot_time_offset:], posterior_var_mean[plot_time_offset:], 
+                     color='red', linewidth=1, label='mean')
+            line3, = ax2.plot(obs_time_set_used[plot_time_offset:], obs_value[plot_time_offset:], 
+                     color='black', linewidth=1, label='obs')
+            ax2.set_ylim(ylim)
 
         return line1, line2, line3
 
+    
+    def plot_1to1_obs_at_point(self, obs_name, axes, obs_loc_ind=0, plot_time_offset=0,
+                        #   figsize=None, constrained_layout=True,
+                          vmin=None, vmax=None, ylim=None, option='prior'):
+        """Plot the temporal evolution of DA results for the observation data along one dimension"""
+        nvar, nens = self.nvar, self.nens
+        prior_state, posterior_state = self.prior["state"], self.posterior["state"]
 
+        ntime_state, ntime_para = self.ntime_state, self.ntime_para
+        nvar_state, nvar_para = self.nvar_state, self.nvar_para
+        obs_var_set           = self.obs_var_set
+        para_var_set          = self.para_var_set
+        state_time_set        = self.state_time_set
+        para_time_set         = self.para_time_set
+        obs_time_set_used     = self.obs_time_set_used
+        obs_value_set_used    = self.obs_value_set_used
+        obs_loc_set           = self.obs_loc_set
+        has_immediate_mda_results = self.has_immediate_mda_results
+
+        xloc_set_state, yloc_set_state, zloc_set_state = self.xloc_set_state, self.yloc_set_state, self.zloc_set_state
+
+        model_loc_set = np.array([xloc_set_state, yloc_set_state, zloc_set_state]).T
+
+        if obs_name not in obs_var_set:
+            raise Exception('Unknown observation variable name %s' % obs_name)
+
+        # Get the observation point and values
+        obs_value = obs_value_set_used[obs_name][obs_loc_ind, :]
+        obs_loc   = obs_loc_set[obs_loc_ind]
+
+        # Find the closest location in the model grids for this observation
+        dist, model_loc_ind = spatial.KDTree(model_loc_set).query(obs_loc)
+        model_loc = model_loc_set[model_loc_ind]
+        print("The observation location of interest is {}".format(obs_loc))
+        print("The corresponding model grid is {}".format(model_loc))
+
+        # Get the index of observation
+        obs_var_ind = obs_var_set.index(obs_name)
+
+        ##############################
+        # Plot the temporal evolution of the ensemble, the mean, and the observation
+        # at the given observed location
+        # Get the locations of observation and the corresponding index of DA results
+        if option == 'both':
+            # Plot the prior
+            ax1 = axes[0]
+            ax1.plot(ylim, ylim, 'k--')
+            for j in range(nens):
+                if has_immediate_mda_results:
+                    prior_var_ens = prior_state[obs_var_ind, 0, j, :, model_loc_ind]
+                else:
+                    prior_var_ens = prior_state[obs_var_ind, j, :, model_loc_ind]
+                line1, = ax1.plot(obs_value[plot_time_offset:], prior_var_ens[plot_time_offset:], '.',
+                                  color='grey', linewidth=0.5, linestyle=':', label='ensemble')
+            if has_immediate_mda_results:
+                prior_var_mean = np.mean(prior_state[obs_var_ind, 0, :, :, model_loc_ind], axis=(0))
+            else:
+                prior_var_mean = np.mean(prior_state[obs_var_ind, :, :, model_loc_ind], axis=(0))
+            line2, = ax1.plot(obs_value[plot_time_offset:], prior_var_mean[plot_time_offset:], '.',
+                              color='red', linewidth=1, label='mean')
+            ax1.set_xlim(ylim); ax1.set_ylim(ylim)
+
+            # Plot the posterior
+            ax2 = axes[1]
+            ax2.plot(ylim, ylim, 'k--')
+            for j in range(nens):
+                if has_immediate_mda_results:
+                    posterior_var_ens = posterior_state[obs_var_ind, -1, j, :, model_loc_ind]
+                else:
+                    posterior_var_ens = posterior_state[obs_var_ind, j, :, model_loc_ind]
+#                 ax2.plot(state_time_set[plot_time_offset:], posterior_var_ens[plot_time_offset:], 
+                ax2.plot(obs_value[plot_time_offset:], posterior_var_ens[plot_time_offset:], '.',
+                         color='grey', linewidth=0.5, linestyle=':', label='ensemble')
+            if has_immediate_mda_results:
+                posterior_var_mean = np.mean(posterior_state[obs_var_ind, -1, :, :, model_loc_ind], axis=(0))
+            else:
+                posterior_var_mean = np.mean(posterior_state[obs_var_ind, :, :, model_loc_ind], axis=(0))
+#             ax2.plot(state_time_set[plot_time_offset:], posterior_var_mean[plot_time_offset:],
+            ax2.plot(obs_value[plot_time_offset:], posterior_var_mean[plot_time_offset:], '.',
+                     color='red', linewidth=1, label='mean')
+            ax2.set_xlim(ylim); ax2.set_ylim(ylim)
+        
+        elif option == 'prior':
+            ax1 = axes[0]
+            ax1.plot(ylim, ylim, 'k--')
+            for j in range(nens):
+                if has_immediate_mda_results:
+                    prior_var_ens = prior_state[obs_var_ind, 0, j, :, model_loc_ind]
+                else:
+                    prior_var_ens = prior_state[obs_var_ind, j, :, model_loc_ind]
+                line1, = ax1.plot(obs_value[plot_time_offset:], prior_var_ens[plot_time_offset:], '.',
+                                  color='grey', linewidth=0.5, linestyle=':', label='ensemble')
+            if has_immediate_mda_results:
+                prior_var_mean = np.mean(prior_state[obs_var_ind, 0, :, :, model_loc_ind], axis=(0))
+            else:
+                prior_var_mean = np.mean(prior_state[obs_var_ind, :, :, model_loc_ind], axis=(0))
+            line2, = ax1.plot(obs_value[plot_time_offset:], prior_var_mean[plot_time_offset:], '.',
+                              color='red', linewidth=1, label='mean')
+            ax1.set_xlim(ylim); ax1.set_ylim(ylim)
+            
+        elif option == 'posterior':
+            ax2 = axes[0]
+            ax2.plot(ylim, ylim, 'k--')
+            for j in range(nens):
+                if has_immediate_mda_results:
+                    posterior_var_ens = posterior_state[obs_var_ind, -1, j, :, model_loc_ind]
+                else:
+                    posterior_var_ens = posterior_state[obs_var_ind, j, :, model_loc_ind]
+                line1, = ax2.plot(obs_value[plot_time_offset:], posterior_var_ens[plot_time_offset:], '.',
+                         color='grey', linewidth=0.5, linestyle=':', label='ensemble')
+            if has_immediate_mda_results:
+                posterior_var_mean = np.mean(posterior_state[obs_var_ind, -1, :, :, model_loc_ind], axis=(0))
+            else:
+                posterior_var_mean = np.mean(posterior_state[obs_var_ind, :, :, model_loc_ind], axis=(0))
+            line2, = ax2.plot(obs_value[plot_time_offset:], posterior_var_mean[plot_time_offset:], '.',
+                     color='red', linewidth=1, label='mean')
+            ax2.set_xlim(ylim); ax2.set_ylim(ylim)
+
+        return line1, line2
+
+    
     def compare_obs_at_point_bias(self, obs_name, axes, obs_loc_ind=0, constrained_layout=True, 
                                   plot_time_offset=0, ylim=None, xlim=None):
         """Plot the temporal evolution of the bias and MAE of the updated observation variables against the true value."""
@@ -559,7 +718,7 @@ class DaResults(object):
 
 
     def compare_univar_spatial_average(self, var_name, true_file_name, axes, constrained_layout=True, 
-                                       model_time_offset=0, plot_time_offset=0, ylim=None, xlim=None):
+                                       model_time_offset=0, plot_time_offset=0, ylim=None, xlim=None, option='both'):
         """Plot the temporal evolution of a spatial averaged analyzed variable against the true values from other source.
            Note that the true_file_name has to be a csv file with two columns (the first for time and the second for the values)
         """
@@ -613,40 +772,177 @@ class DaResults(object):
             analyzed_prior_ens     = np.mean(prior_para[var_ind, :, :, :], axis=(2))
             analyzed_posterior_ens = np.mean(posterior_para[var_ind, :, :, :], axis=(2))
 
-        # Plot the prior
-        ax1 = axes[0]
-        for j in range(nens):
-            prior_ens = analyzed_prior_ens[j, :]
-            line1, = ax1.plot(para_time_set[plot_time_offset:], prior_ens[plot_time_offset:], color='grey', linewidth=0.5, linestyle=':', label='ensemble')
-        prior_mean = np.mean(analyzed_prior_ens, axis=(0))
-        line2, = ax1.plot(para_time_set[plot_time_offset:], prior_mean[plot_time_offset:], color='red', linewidth=1, label='mean')
-        # line3, = ax1.plot(true_set_time_used[plot_time_offset:], true_set_used[plot_time_offset:], 
-        line3, = ax1.plot(para_time_set[plot_time_offset:], true_set_used_ave[plot_time_offset:], color='black', linewidth=1, label='obs')
+        # If plotting both prior and posterior
+        if option == 'both':
+            # Plot the prior
+            ax1 = axes[0]
+            for j in range(nens):
+                prior_ens = analyzed_prior_ens[j, :]
+                line1, = ax1.plot(para_time_set[plot_time_offset:], prior_ens[plot_time_offset:], color='grey', linewidth=0.5, linestyle=':', label='ensemble')
+            prior_mean = np.mean(analyzed_prior_ens, axis=(0))
+            line2, = ax1.plot(para_time_set[plot_time_offset:], prior_mean[plot_time_offset:], color='red', linewidth=1, label='mean')
+            # line3, = ax1.plot(true_set_time_used[plot_time_offset:], true_set_used[plot_time_offset:], 
+            line3, = ax1.plot(para_time_set[plot_time_offset:], true_set_used_ave[plot_time_offset:], color='black', linewidth=1, label='obs')
 
-        # Plot the posterior
-        ax2 = axes[1]
-        for j in range(nens):
-            posterior_ens = analyzed_posterior_ens[j, :]
-            line1, = ax2.plot(para_time_set[plot_time_offset:], posterior_ens[plot_time_offset:], color='grey', linewidth=0.5, linestyle=':', label='ensemble')
-        posterior_mean = np.mean(analyzed_posterior_ens, axis=(0))
-        line2, = ax2.plot(para_time_set[plot_time_offset:], posterior_mean[plot_time_offset:], color='red', linewidth=1, label='mean')
-        line3, = ax2.plot(para_time_set[plot_time_offset:], true_set_used_ave[plot_time_offset:], color='black', linewidth=1, label='obs')
+            # Plot the posterior
+            ax2 = axes[1]
+            for j in range(nens):
+                posterior_ens = analyzed_posterior_ens[j, :]
+                line1, = ax2.plot(para_time_set[plot_time_offset:], posterior_ens[plot_time_offset:], color='grey', linewidth=0.5, linestyle=':', label='ensemble')
+            posterior_mean = np.mean(analyzed_posterior_ens, axis=(0))
+            line2, = ax2.plot(para_time_set[plot_time_offset:], posterior_mean[plot_time_offset:], color='red', linewidth=1, label='mean')
+            line3, = ax2.plot(para_time_set[plot_time_offset:], true_set_used_ave[plot_time_offset:], color='black', linewidth=1, label='obs')
 
-        # # Plot the legends
-        # plt.legend((line1, line2, line3), ('ensemble', 'mean', 'obs'),
-        #            frameon=False, ncol=3, loc="center", bbox_to_anchor=(0.0, -0.5))
+            # # Plot the legends
+            # plt.legend((line1, line2, line3), ('ensemble', 'mean', 'obs'),
+            #            frameon=False, ncol=3, loc="center", bbox_to_anchor=(0.0, -0.5))
 
-        # Plot the labels and titles
-        # ax1.set_title("Prior ({})".format(var_name))
-        # ax2.set_title("Posterior ({})".format(var_name))
-        ax1.set_xlabel("Time (day)")
-        ax2.set_xlabel("Time (day)")
-        ax1.set_ylim(ylim)
-        ax2.set_ylim(ylim)
-        ax1.set_xlim(xlim)
-        ax2.set_xlim(xlim)
+            # Plot the labels and titles
+            # ax1.set_title("Prior ({})".format(var_name))
+            # ax2.set_title("Posterior ({})".format(var_name))
+            ax1.set_xlabel("Time (day)")
+            ax2.set_xlabel("Time (day)")
+            ax1.set_ylim(ylim)
+            ax2.set_ylim(ylim)
+            ax1.set_xlim(xlim)
+            ax2.set_xlim(xlim)
+        
+        # If plotting only prior
+        elif option == 'prior':
+            ax1 = axes[0]
+            for j in range(nens):
+                prior_ens = analyzed_prior_ens[j, :]
+                line1, = ax1.plot(para_time_set[plot_time_offset:], prior_ens[plot_time_offset:], color='grey', linewidth=0.5, linestyle=':', label='ensemble')
+            prior_mean = np.mean(analyzed_prior_ens, axis=(0))
+            line2, = ax1.plot(para_time_set[plot_time_offset:], prior_mean[plot_time_offset:], color='red', linewidth=1, label='mean')
+            # line3, = ax1.plot(true_set_time_used[plot_time_offset:], true_set_used[plot_time_offset:], 
+            line3, = ax1.plot(para_time_set[plot_time_offset:], true_set_used_ave[plot_time_offset:], color='black', linewidth=1, label='obs')
+
+            # Plot the labels and titles
+            ax1.set_xlabel("Time (day)")
+            ax1.set_ylim(ylim)
+            ax1.set_xlim(xlim)
+        
+        # If plotting only posterior
+        elif option == 'posterior':
+            # Plot the posterior
+            ax2 = axes[0]
+            for j in range(nens):
+                posterior_ens = analyzed_posterior_ens[j, :]
+                line1, = ax2.plot(para_time_set[plot_time_offset:], posterior_ens[plot_time_offset:], color='grey', linewidth=0.5, linestyle=':', label='ensemble')
+            posterior_mean = np.mean(analyzed_posterior_ens, axis=(0))
+            line2, = ax2.plot(para_time_set[plot_time_offset:], posterior_mean[plot_time_offset:], color='red', linewidth=1, label='mean')
+            line3, = ax2.plot(para_time_set[plot_time_offset:], true_set_used_ave[plot_time_offset:], color='black', linewidth=1, label='obs')
+
+            # Plot the labels and titles
+            ax2.set_xlabel("Time (day)")
+            ax2.set_ylim(ylim)
+            ax2.set_xlim(xlim)
 
         return line1, line2, line3
+
+    
+    def compare_univar_1to1_spatial_average(self, var_name, true_file_name, axes, constrained_layout=True, 
+                                           model_time_offset=0, plot_time_offset=0, ylim=None, xlim=None, option='both'):
+        """Plot the temporal evolution of a spatial averaged analyzed variable against the true values from other source.
+           Note that the true_file_name has to be a csv file with two columns (the first for time and the second for the values)
+        """
+        nvar, nens = self.nvar, self.nens
+        prior_para, posterior_para = self.prior["para"], self.posterior["para"]
+
+        ntime_para    = self.ntime_para
+        nvar_para     = self.nvar_para
+        para_var_set  = self.para_var_set
+        para_time_set = self.para_time_set
+        assim_start_set = self.assim_start_set
+        assim_end_set = self.assim_end_set
+        tunits        = self.tunits
+        model_start_str = self.model_start_time
+        has_immediate_mda_results = self.has_immediate_mda_results
+
+        if var_name not in para_var_set:
+            raise Exception('Unknown analyzed variable name %s' % var_name)
+
+        # Get the reference, start and end dates
+        ref_time = datetime.strptime(model_start_str, "%Y-%m-%d %H:%M:%S")
+        # model_start_date, model_end_date = model_time_dates_list[0], model_time_dates_list[-1]
+
+        # Read the true value from file_name
+        true_set           = pd.read_csv(true_file_name)
+        true_set_raw_time  = true_set.iloc[:, 0].values
+        true_set_dates     = [datetime.strptime(t, '%m/%d/%Y %H:%M') for t in true_set_raw_time]
+        dates_ref          = [t-ref_time for t in true_set_dates]
+        true_set_time      = np.array([t.days+float(t.seconds)/86400. for t in dates_ref])
+        true               = true_set.iloc[:, 1].values
+        true_set_used_ind  = (true_set_time >= para_time_set[0]) & (true_set_time <= para_time_set[-1])
+        true_set_time_used = true_set_time[true_set_used_ind]
+        true_set_used      = true[true_set_used_ind]
+        # # TODO: fix the lag in plotting the true values
+        # print(true_set_used_ind)
+        # print(np.where(true_set_used_ind)[0]-12)
+        # true_set_used      = true[np.where(true_set_used_ind)[0]-24]
+        # TODO: fix the true flux
+        true_set_used_ave = [np.mean(true[(true_set_time >  (assim_start_set[i]+model_time_offset)) &
+                                          (true_set_time <= (assim_end_set[i]+model_time_offset))])
+                            #  if i != 0 else np.mean(true[(true_set_time <= (para_time_set[i]+model_time_offset))])
+                             for i in range(len(para_time_set))]
+        true_set_used_ave = np.array(true_set_used_ave)
+
+        # Get the spatially averaged analyzed variable (prior and posterior)
+        var_ind                = para_var_set.index(var_name)
+        if has_immediate_mda_results:
+            analyzed_prior_ens     = np.mean(prior_para[var_ind, 0, :, :, :], axis=(2))
+            analyzed_posterior_ens = np.mean(posterior_para[var_ind, -1, :, :, :], axis=(2))
+        else:
+            analyzed_prior_ens     = np.mean(prior_para[var_ind, :, :, :], axis=(2))
+            analyzed_posterior_ens = np.mean(posterior_para[var_ind, :, :, :], axis=(2))
+
+        # If plotting both prior and posterior
+        if option == 'both':
+            # Plot the prior
+            ax1 = axes[0]
+            ax1.plot(xlim, ylim, 'k--')
+            for j in range(nens):
+                prior_ens = analyzed_prior_ens[j, :]
+                line1, = ax1.plot(true_set_used_ave[plot_time_offset:], prior_ens[plot_time_offset:], '.', color='grey', label='ensemble')
+            prior_mean = np.mean(analyzed_prior_ens, axis=(0))
+            line2, = ax1.plot(true_set_used_ave[plot_time_offset:], prior_mean[plot_time_offset:], '.', color='red', label='mean')
+            ax1.set_xlim(xlim); ax1.set_ylim(ylim)
+
+            # Plot the posterior
+            ax2 = axes[1]
+            ax2.plot(xlim, ylim, 'k--')
+            for j in range(nens):
+                posterior_ens = analyzed_posterior_ens[j, :]
+                line1, = ax2.plot(true_set_used_ave[plot_time_offset:], posterior_ens[plot_time_offset:], '.', color='grey', label='ensemble')
+            posterior_mean = np.mean(analyzed_posterior_ens, axis=(0))
+            line2, = ax2.plot(true_set_used_ave[plot_time_offset:], posterior_mean[plot_time_offset:], '.', color='red', label='mean')
+            ax2.set_xlim(xlim); ax2.set_ylim(ylim)
+        
+        # If plotting only prior
+        elif option == 'prior':
+            ax1 = axes[0]
+            ax1.plot(xlim, ylim, 'k--')
+            for j in range(nens):
+                prior_ens = analyzed_prior_ens[j, :]
+                line1, = ax1.plot(true_set_used_ave[plot_time_offset:], prior_ens[plot_time_offset:], '.', color='grey', label='ensemble')
+            prior_mean = np.mean(analyzed_prior_ens, axis=(0))
+            line2, = ax1.plot(true_set_used_ave[plot_time_offset:], prior_mean[plot_time_offset:], '.', color='red', label='mean')
+            ax1.set_xlim(xlim); ax1.set_ylim(ylim)
+        
+        # If plotting only posterior
+        elif option == 'posterior':
+            ax2 = axes[0]
+            ax2.plot(xlim, ylim, 'k--')
+            for j in range(nens):
+                posterior_ens = analyzed_posterior_ens[j, :]
+                line1, = ax2.plot(true_set_used_ave[plot_time_offset:], posterior_ens[plot_time_offset:], '.', color='grey', label='ensemble')
+            posterior_mean = np.mean(analyzed_posterior_ens, axis=(0))
+            line2, = ax2.plot(true_set_used_ave[plot_time_offset:], posterior_mean[plot_time_offset:], '.', color='red', label='mean')
+            ax2.set_xlim(xlim); ax2.set_ylim(ylim)
+
+        return line1, line2
+    
 
 
     def compare_univar_spatial_average_diff(self, var_name, true_file_name, ax, plot_time_offset=0,
@@ -807,8 +1103,7 @@ class DaResults(object):
 
     def compare_univar_spatial_average_variance(self, var_name, true_file_name, ax, plot_time_offset=None,
                                             model_time_offset=0., constrained_layout=True, ylim=None, xlim=None, unit=''):
-        """Plot the temporal evolution of the bias between a spatial averaged analyzed variable
-           and the true values from other source.
+        """Plot the temporal evolution of the variance of a spatial averaged analyzed variable.
            Note that the true_file_name has to be a csv file with two columns (the first for time and the second for the values)
         """
         nvar, nens = self.nvar, self.nens
@@ -855,9 +1150,71 @@ class DaResults(object):
 
         # Plot the variance
         variance = np.var(analyzed_posterior_ens, axis=0)
-        line1, = ax.plot(para_time_set[plot_time_offset:], variance[plot_time_offset:], color='blue', linewidth=1, label='VAR')
+        line1, = ax.plot(para_time_set[plot_time_offset:], variance[plot_time_offset:], color='black', linewidth=1, label='VAR')
         ax.axhline(y=0, color='black', linestyle='--')
         ax.set_title("$\mu_{VAR}: %.3f;$" % (np.mean(variance[plot_time_offset:])))
+
+        # Plot the labels and titles
+        ax.set_xlabel("Time (day)")
+        ax.set_ylim(ylim)
+        ax.set_xlim(xlim)
+
+        # return
+        return line1
+
+
+    def compare_univar_spatial_average_sd(self, var_name, true_file_name, ax, plot_time_offset=None,
+                                           model_time_offset=0., constrained_layout=True, ylim=None, xlim=None, unit=''):
+        """Plot the temporal evolution of the std of a spatial averaged analyzed variable.
+           Note that the true_file_name has to be a csv file with two columns (the first for time and the second for the values)
+        """
+        nvar, nens = self.nvar, self.nens
+        prior_para, posterior_para = self.prior["para"], self.posterior["para"]
+
+        ntime_para    = self.ntime_para
+        nvar_para     = self.nvar_para
+        para_var_set  = self.para_var_set
+        para_time_set = self.para_time_set
+        assim_start_set = self.assim_start_set
+        assim_end_set = self.assim_end_set
+        tunits        = self.tunits
+        model_start_str = self.model_start_time
+        has_immediate_mda_results = self.has_immediate_mda_results
+
+        if var_name not in para_var_set:
+            raise Exception('Unknown analyzed variable name %s' % var_name)
+
+        # Get the reference, start and end dates
+        ref_time = datetime.strptime(model_start_str, "%Y-%m-%d %H:%M:%S")
+        # model_start_date, model_end_date = model_time_dates_list[0], model_time_dates_list[-1]
+
+        # Read the true value from file_name
+        true_set           = pd.read_csv(true_file_name)
+        true_set_raw_time  = true_set.iloc[:, 0].values
+        true_set_dates     = [datetime.strptime(t, '%m/%d/%Y %H:%M') for t in true_set_raw_time]
+        dates_ref          = [t-ref_time for t in true_set_dates]
+        true_set_time      = np.array([t.days+float(t.seconds)/86400. for t in dates_ref])
+        true               = true_set.iloc[:, 1].values
+
+        # Compute the temporal averaged true values
+        true_set_used_ave = [np.mean(true[(true_set_time >  (assim_start_set[i]+model_time_offset)) &
+                                          (true_set_time <= (assim_end_set[i]+model_time_offset))])
+                            #  if i != 0 else np.mean(true[(true_set_time <= (model_time_list[i]+model_time_offset))])
+                             for i in range(len(para_time_set))]
+        true_set_used_ave = np.array(true_set_used_ave)
+
+        # Get the spatially averaged analyzed variable (prior and posterior)
+        var_ind                = para_var_set.index(var_name)
+        if has_immediate_mda_results:
+            analyzed_posterior_ens = np.mean(posterior_para[var_ind, -1, :, :, :], axis=(2))
+        else:
+            analyzed_posterior_ens = np.mean(posterior_para[var_ind, :, :, :], axis=(2))
+
+        # Plot the variance
+        variance = np.std(analyzed_posterior_ens, axis=0)
+        line1, = ax.plot(para_time_set[plot_time_offset:], variance[plot_time_offset:], color='black', linewidth=1, label='SD')
+        ax.axhline(y=0, color='black', linestyle='--')
+        ax.set_title("$\mu_{SD}: %.3f;$" % (np.mean(variance[plot_time_offset:])))
 
         # Plot the labels and titles
         ax.set_xlabel("Time (day)")
