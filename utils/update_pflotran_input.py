@@ -78,6 +78,9 @@ spinup_length_hr           = spinup_length * 24
 para_set           = configs["obspara_set_cfg"]["para_set"]
 nens               = configs["da_cfg"]["nens"]
 
+if not isinstance(para_set, list):
+    para_set = [para_set]
+
 # Check whether this is the first time to update pflotran input files
 first_time_update = True if len(model_time_list) == 1 else False
 
@@ -188,7 +191,7 @@ if enks_mda_iteration_step == 1 and not update_obs_ens_posterior_now:
 
             #  --------- Add RESTART card ----------
             # if RESTART is not there, add it after CHECKPOINT card
-            if not is_restart_on and "CHECKPOINT" in s:
+            if not is_restart_on and "CHECKPOINT" in s and "#" not in s:
                 if (first_time_update and not is_spinup_length_zero) or (second_time_update and is_spinup_length_zero):
                     pflotranin.insert(i + checkpoint_section_nrow + 1, "  RESTART \n")
                     if "[ENS]" in pflotran_restart_file:
@@ -200,7 +203,7 @@ if enks_mda_iteration_step == 1 and not update_obs_ens_posterior_now:
                         pflotranin.insert(i + checkpoint_section_nrow + 2, "    FILENAME " + pflotran_restart_file + " \n")
                         pflotranin.insert(i + checkpoint_section_nrow + 3, "  / \n")
             # if RESTART is on, check whether realization dependent is on and add it if not
-            if is_restart_on and "RESTART" in s.split() and len(model_time_list) != 1:
+            if is_restart_on and "RESTART" in s.split() and len(model_time_list) != 1 and "#" not in s:
                 if restart_filename_nrow == 0:
                     raise Exception("There is no FILENAME in the original RESTART card in pflotran!")
                 if "[ENS]" in pflotran_restart_file and not is_restart_realization_dependent_on:
@@ -218,12 +221,13 @@ if enks_mda_iteration_step == 1 and not update_obs_ens_posterior_now:
 
             #  --------- Revised the SNAPSHOT_FILE ----------
             # TODO: irregular time point should be added later on
+            # TODO: flexible edits on time periods should be done here.
             if not use_obs_tecfile_for_prior and "SNAPSHOT_FILE" in s:
-                # pflotranin.insert(i + snap_periodtime_nrow, "   PERIODIC TIME 1.0d0 d \n")
+                # pflotranin.insert(i + snap_periodtime_nrow, "   PERIODIC TIME 300.0d0 sec \n")
                 if snap_periodtime_nrow != 0:
-                    pflotranin[i + snap_periodtime_nrow] = "   PERIODIC TIME 1.0d0 d \n"
+                    pflotranin[i + snap_periodtime_nrow] = "   PERIODIC TIME 300.0d0 sec \n"
                 else:
-                    pflotranin.insert(i + 1, "   PERIODIC TIME 1.0d0 d \n")
+                    pflotranin.insert(i + 1, "   PERIODIC TIME 300.0d0 sec \n")
             elif use_obs_tecfile_for_prior and "OBSERVATION_FILE" in s:
                 # pflotranin.insert(i + 1, "   PERIODIC TIME 300.0d0 sec \n")
                 # pflotranin.insert(i + obs_periodtime_nrow, "   PERIODIC TIME 1.0d0 h \n")
@@ -372,8 +376,12 @@ for i in range(nens):  # For each ensemble...
                 zloc_para    = nc_prior.variables['para_z_location'][:]
                 para_loc_set = np.array([xloc_para, yloc_para, zloc_para])
 
-                cell_ids_varn     = cell_ids[~prior_data.mask[0,:]]
-                para_loc_set_varn = para_loc_set[:,~prior_data.mask[0,:]]
+                if prior_data.mask != False:
+                    cell_ids_varn     = cell_ids[~prior_data.mask[0,:]]
+                    para_loc_set_varn = para_loc_set[:,~prior_data.mask[0,:]]
+                else:
+                    cell_ids_varn = cell_ids
+                    para_loc_set_varn = para_loc_set
                 nloc_varn         = len(cell_ids_varn)
 
                 prior[varn] = {"value": np.zeros([nens, nloc_varn]), 
@@ -415,8 +423,12 @@ for i in range(nens):  # For each ensemble...
                 zloc_para    = nc_posterior.variables['para_z_location'][:]
                 para_loc_set = np.array([xloc_para, yloc_para, zloc_para])
 
-                cell_ids_varn     = cell_ids[~posterior_data.mask[0,:]]
-                para_loc_set_varn = para_loc_set[:,~posterior_data.mask[0,:]]
+                if posterior_data.mask != False:
+                    cell_ids_varn     = cell_ids[~posterior_data.mask[0,:]]
+                    para_loc_set_varn = para_loc_set[:,~posterior_data.mask[0,:]]
+                else:
+                    cell_ids_varn = cell_ids
+                    para_loc_set_varn = para_loc_set
                 nloc_varn         = len(cell_ids_varn)
 
                 posterior[varn] = {"value": np.zeros([nens, nloc_varn]), 

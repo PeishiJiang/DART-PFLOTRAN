@@ -170,6 +170,8 @@ pflotran_file_reader = pflotran_files(config_nml)
 ###############################
 dart_state_dict, ntime_state, time_state, nloc_state, x_loc_state, y_loc_state, z_loc_state, cell_ids_state = \
     pflotran_file_reader.read_pflotran_output(assim_start, assim_end, missing_value)
+# print(time_state)
+# raise Exception('stop')
 
 
 ###############################

@@ -41,7 +41,7 @@ mv {DART-PFLOTRAN} {DART}/manhattan/models/pflotran
 
 
 
-## File structure
+## Folder structure
 
 The following is the the main structure of the {DART-PFLOTRAN} repository:
 

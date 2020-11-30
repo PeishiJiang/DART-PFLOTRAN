@@ -19,6 +19,7 @@ model_mod_copy.f90
 /applications/*
 !/applications/1dthermal
 !/applications/1dthermal_perm
+!/applications/1dthermal_flow
 !/applications/template
 !/applications/workflow_ipynb
 

@@ -184,7 +184,7 @@ class pflotran_files:
                 para_hdf_dataset_name = para_hdf_dataset_name_set[i]
                 para_take_log         = para_take_log_set[i]
 
-                values = np.zeros([nens, 0, nloc_para]) + missing_value
+                values = np.zeros([nens, 1, nloc_para]) + missing_value
                 if para_hdf_dataset_name in h5file.keys():
                     para_values = h5file[para_hdf_dataset_name][:]
                 else:
@@ -282,6 +282,15 @@ class pflotran_files:
                 time_set   = np.array([t.split()[1:] for t in time_set_o])
                 time_vset  = np.array([float(t[0]) for t in time_set])
                 time_unit  = time_set[0][1]
+                
+                # Convert from seconds to fractional days
+                if time_unit in ["s", "sec", "second"]: # Convert from seconds to fractional days
+                    time_vset = time_vset / 86400.
+                elif time_unit.lower() in ["h", "hr"]:
+                    time_vset = time_vset / 24.
+                elif time_unit.lower() not in ["d", "day"]:
+                    raise Exception("Unknown time unit: {}".format(time_unit))
+#                     time_vset_assim_day  = time_vset_assim / 86400.
 
                 # Get the time steps within the assimilation window
                 # print(time_vset, start_obs_sec, end_obs_sec)
@@ -289,9 +298,6 @@ class pflotran_files:
                 time_vset_assim    = time_vset[time_set_assim_ind]
                 time_set_o_assim   = time_set_o[time_set_assim_ind]
                 # time_set_assim     = time_set[time_set_assim_ind]
-
-                if time_unit in ["s", "sec", "second"]: # Convert from seconds to fractional days
-                    time_vset_assim_day  = time_vset_assim / 86400.
 
                 ntime_state = len(time_vset_assim)
 
@@ -335,14 +341,14 @@ class pflotran_files:
                                 raise Exception("The following variable is not found in PFLOTRAN output: {}".format(varn))
 
         # Get cell ids
-        if os.path.isfile(material_id_file):
+        if material_id_file is not None and os.path.isfile(material_id_file):
             with h5py.File(material_id_file, "r") as h5file:
                 cell_ids = list(h5file['Materials']['cell_ids'][:])
         else:
             cell_ids = np.arange(1, nloc_state+1)
 
         # Times steps for the model states
-        time_state  = time_vset_assim_day
+        time_state  = time_vset_assim
         ntime_state = len(time_state)
 
         return pflotran_state_dict, ntime_state, time_state, nloc_state, x_loc_state, y_loc_state, z_loc_state, cell_ids
@@ -581,6 +587,7 @@ class pflotran_files:
                 # (2) it is not the time for updating observation ensemble posterior
                 # (3) it is not during ES-MDA iteration
                 # if para_resampled and not update_obs_ens_posterior_now and enks_mda_iteration_step == 1:
+                original_para_posterior_varn = original_para_posterior_varn.flatten()
                 if varn in para_resampled_set and not update_obs_ens_posterior_now and enks_mda_iteration_step == 1:
                     posterior_varn = update_para_prior_from_original_posterior_homogeneous(
                         para_prior_varn, original_para_posterior_varn,

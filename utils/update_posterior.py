@@ -55,6 +55,9 @@ end_obs_sec   = assim_end_days * 86400 + assim_end_seconds
 # Get the list of all required PFLOTRAN variables
 if not isinstance(obs_pflotran_set, list):
     obs_pflotran_set = [obs_pflotran_set]
+    
+if not isinstance(model_time_list, list):
+    model_time_list = [model_time_list]
 
 # Get some constants
 missing_value  = 99999

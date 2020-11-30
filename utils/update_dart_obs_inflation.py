@@ -45,6 +45,8 @@ nml.write(input_nml_file, force=True)
 ###############################
 # Generate the corresponding DART obs data
 ###############################
+print(os.getcwd())
+print(convert_nc_exe)
 subprocess.run(convert_nc_exe, shell=True, check=True)
 
 
