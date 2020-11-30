@@ -1,9 +1,9 @@
-&filter_nml
-   input_state_file_list        = '[app_dir]/dart_inout/filter_input_list.txt'
+&smoother_nml
+   input_state_file_list        = '[app_dir]/dart_inout/da_input_list.txt'
 
    single_file_in               = .false.,
    single_file_out              = .false.,
-   output_state_file_list       = '[app_dir]/dart_inout/filter_output_list.txt'
+   output_state_file_list       = '[app_dir]/dart_inout/da_output_list.txt'
    output_interval              = 1,
    output_members               = .true.
    num_output_state_members     = 0,
@@ -17,13 +17,9 @@
    perturbation_amplitude       = 0.2,
    distributed_state            = .true.
 
-   adv_ens_command              = "[app_dir]/work/advance_model.csh",
-
    obs_sequence_in_name         = "obs_seq.out",
    obs_sequence_out_name        = "obs_seq.final",
    num_output_obs_members       = 0,
-   init_time_days               = -1,
-   init_time_seconds            = -1,
    first_obs_days               = -1,
    first_obs_seconds            = -1,
    last_obs_days                = -1,
@@ -68,12 +64,15 @@
 
 
 &model_nml
-   nvar                = 2,
-   time_step_days      = 0,
-   time_step_seconds   = 3600,
-   var_names           = 'LIQUID_SATURATION', 'LIQUID_PRESSURE'
+   nvar_para = 1
+   nvar_state = 1
+   para_var_names = 'LIQUID_PRESSURE'
+   para_var_qtynames = 'QTY_PFLOTRAN_LIQUID_PRESSURE'
+   state_var_names = 'TEMPERATURE'
+   state_var_qtynames = 'QTY_PFLOTRAN_TEMPERATURE'
+   max_time_diff_seconds = 400
+   debug               = .false.
    template_file       = '[app_dir]/dart_inout/prior_Rtemplate.nc'
-   var_qtynames        = 'QTY_PFLOTRAN_LIQUID_SATURATION', 'QTY_PFLOTRAN_LIQUID_PRESSURE'
    /
 
 
@@ -81,6 +80,8 @@
    input_state_files    = '[app_dir]/dart_inout/prior_template.nc'
    output_state_files   = '[app_dir]/dart_inout/mmc_output.nc'
    all_metadata_file    = 'metadata.txt'
+   obs_time_seconds = 10300
+   obs_time_days = 0
    test1thru            = 4
    run_tests            = -1
    x_ind                = 100
@@ -97,11 +98,11 @@
 
 &preprocess_nml
           overwrite_output = .true.,
-   input_obs_kind_mod_file = '[dart_dir]/models/pflotran/obs_kind/DEFAULT_obs_kind_mod.F90'
+   input_obs_kind_mod_file = '[dart_pf_dir]/obs_kind/DEFAULT_obs_kind_mod.F90'
    input_obs_def_mod_file  = '[dart_dir]/observations/forward_operators/DEFAULT_obs_def_mod.f90',
    output_obs_def_mod_file = '[dart_dir]/observations/forward_operators/obs_def_mod.f90',
   output_obs_kind_mod_file = '[dart_dir]/assimilation_code/modules/observations/obs_kind_mod.f90',
-               input_files = '[app_dir]/obs_type/obs_def_pflotran_mod.f90'
+               input_files = '[dart_pf_dir]/obs_kind/obs_def_PFLOTRAN_mod.f90'
  /
 
 &convert_nc_nml
@@ -123,6 +124,8 @@
    outlier_threshold        = -1.0,
 /
 
+&xyz_location_nml
+   /
 
 &state_vector_io_nml
    /
@@ -150,15 +153,6 @@
    print_box_level     = 0
    debug               = 0
   /
-
-
-&smoother_nml
-   num_lags              = 0,
-   start_from_restart    = .false.,
-   output_restart        = .false.,
-   restart_in_file_name  = 'smoother_ics',
-   restart_out_file_name = 'smoother_restart'
-   /
 
 
 &utilities_nml

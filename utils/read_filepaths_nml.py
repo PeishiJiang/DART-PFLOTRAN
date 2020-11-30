@@ -35,7 +35,9 @@ def read_filepaths_nml(app_dir, dart_pf_dir):
         if nml_item in ["app_dir_nml", "dart_dir_nml"]:
             continue
         for key, value in nml[nml_item].items():
-            if "[obs_type_dir]" in value:
+            if key in ['pflotran_out_prefix','use_obs_tecfile_for_prior']:
+                continue
+            elif "[obs_type_dir]" in value:
                 files_cfg[key] = value.replace("[obs_type_dir]",
                                                dirs_cfg["obs_type_dir"])
             elif "[app_work_dir]" in value:
@@ -60,6 +62,6 @@ def read_filepaths_nml(app_dir, dart_pf_dir):
                 files_cfg[key] = value.replace("[dart_work_dir]",
                                                dirs_cfg["dart_work_dir"])
             else:
-                raise Exception("Unknown value: %s" % value)
+                raise Exception("Unknown value: {}".format(value))
 
     return dirs_cfg, files_cfg

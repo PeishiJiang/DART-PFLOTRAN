@@ -5,7 +5,7 @@
 
 # TODO If there is no observation in one time window, continue running the model and move to the next time step without the data assimilation
 
-set INPUT_NML  = $1  # the input namelist file required by DART filter
+set INPUT_NML  = $1  # the input namelist file required by DART data assimilation engine
 set CONFIG_NML = $2  # the configuration files
 
 ##########################################
@@ -57,12 +57,12 @@ set ASSIM_WINDOW  = `GET_ITEM assim_window_size $CONFIG_NML`   # the assimilatio
 set PFLOTRAN_IN_DIR            = `GET_ITEM pflotran_in_dir $CONFIG_NML`           # PFLOTRAN in folder
 set PFLOTRAN_SH                = `GET_ITEM pflotran_sh_file $CONFIG_NML`           # shell script for running PFLOTRAN
 set RUN_PFLOTRAN               = `GET_ITEM run_pflotran_file $CONFIG_NML`           # shell script for running PFLOTRAN
-set FILTER_EXE                 = `GET_ITEM filter_exe $CONFIG_NML`                 # the executable filter file
+set DA_EXE                     = `GET_ITEM da_exe $CONFIG_NML`                 # the executable data assimilation engine file
 set CONVERT_NC_EXE             = `GET_ITEM convert_nc_exe $CONFIG_NML`             # the executable for generating DART obs
 set PREP_PFLOTRAN_INPUT        = `GET_ITEM prep_pflotran_input_file $CONFIG_NML`   # python script for preparing PFLOTRAN input files
 set PREP_PRIOR_NC              = `GET_ITEM prep_prior_nc $CONFIG_NML`  # python script for converting PFLOTRAN HDF 5 output to DART NetCDF prior data
 set UPDATE_DART_OBS_INFLATION  = `GET_ITEM update_dart_obs_inflation_file $CONFIG_NML`  # python script for converting PFLOTRAN HDF 5 output to DART NetCDF prior data
-set UPDATE_OBS_ENS_POSTERIOR   = `GET_ITEM update_obs_ens_posterior_file $CONFIG_NML`  # python script for updating the observation ensemble posterior
+set UPDATE_POSTERIOR           = `GET_ITEM update_posterior_file $CONFIG_NML`  # python script for updating the observation ensemble posterior
 set UPDATE_CONFIGNML_TIME      = `GET_ITEM update_confignml_time_file $CONFIG_NML` # python script for updating the time data in config.nml
 set UPDATE_PFLOTRAN_INPUT      = `GET_ITEM update_pflotran_input_file $CONFIG_NML` # python script for updating PFLOTRAN input files
 
@@ -80,8 +80,8 @@ cd $APP_WORK_DIR
 ##########################################
 # Data assimilation workflow starts here!
 ##########################################
-set MODEL_TIME = `GET_ITEM current_model_time $CONFIG_NML`  || exit 6
-set EXCEEDS_OBS_TIME = `GET_ITEM exceeds_obs_time $CONFIG_NML`  || exit 7
+set MODEL_TIME = `GET_ITEM current_model_time $CONFIG_NML`  || exit 1
+set EXCEEDS_OBS_TIME = `GET_ITEM exceeds_obs_time $CONFIG_NML`  || exit 2
 
 echo ""
 echo ""
@@ -117,7 +117,7 @@ while ($EXCEEDS_OBS_TIME == ".false.")
     echo "------------------------------------------------------------"
     echo "Update PFLOTRAN input files ..."
     echo ""
-    python $UPDATE_PFLOTRAN_INPUT  $CONFIG_NML || exit 2
+    python $UPDATE_PFLOTRAN_INPUT  $CONFIG_NML || exit 3
 
     ##########################################
     # Step 3 -- Conduct PFLOTRAN forward simulation
@@ -129,7 +129,7 @@ while ($EXCEEDS_OBS_TIME == ".false.")
     echo "Conduct the ensemble forward simulation for PFLOTRAN ..."
     echo ""
     # $PFLOTRAN_SH $CONFIG_NML  || exit 3
-    python $RUN_PFLOTRAN $CONFIG_NML  || exit 3
+    python $RUN_PFLOTRAN $CONFIG_NML  || exit 4
 
     ##########################################
     # Step 4 -- Convert the PFLOTRAN output to NetCDF format
@@ -139,7 +139,7 @@ while ($EXCEEDS_OBS_TIME == ".false.")
     echo "------------------------------------------------------------"
     echo "Convert the PFLOTRAN HDF output to DART prior NetCDF data ..."
     echo ""
-    python $PREP_PRIOR_NC $CONFIG_NML  || exit 4
+    python $PREP_PRIOR_NC $CONFIG_NML  || exit 5
 
     # ##########################################
     # # Step 5 -- Generate the DART data observation
@@ -153,7 +153,7 @@ while ($EXCEEDS_OBS_TIME == ".false.")
     # $convert_nc_exe  || exit 7
 
     ##########################################
-    # Step 1 -- Get DART observation with the current inflation coefficient
+    # Step 6 -- Get DART observation with the current inflation coefficient
     # and update the iteration step
     ##########################################
     echo ""
@@ -161,10 +161,10 @@ while ($EXCEEDS_OBS_TIME == ".false.")
     echo "------------------------------------------------------------"
     echo "Get the DART observation with the current inflation coefficient ..."
     echo ""
-    python $UPDATE_DART_OBS_INFLATION $CONFIG_NML  || exit 1
+    python $UPDATE_DART_OBS_INFLATION $CONFIG_NML  || exit 6
 
     ##########################################
-    # Step 5 -- Data Assimilation
+    # Step 7 -- Data Assimilation
     ##########################################
     echo ""
     echo ""
@@ -172,9 +172,9 @@ while ($EXCEEDS_OBS_TIME == ".false.")
     echo "Conduct the data assimilation..."
     echo ""
     if ($NCORE_DA == 1) then
-      $FILTER_EXE  || exit 1
+      $DA_EXE  || exit 7
     else
-      $MPI_RUN -n $NCORE_DA $FILTER_EXE || exit 1
+      $MPI_RUN -n $NCORE_DA $DA_EXE || exit 7
       wait
     endif
 
@@ -185,18 +185,18 @@ while ($EXCEEDS_OBS_TIME == ".false.")
 
 
   ##########################################
-  # Step 6 -- Update the observation ensemble posterior if necessary
+  # Step 8 -- Update the observation ensemble posterior if necessary
   ##########################################
   echo ""
   echo ""
   echo "------------------------------------------------------------"
-  echo "Update the observation ensemble posterior if necessary..."
+  echo "Obtain the ensemble posterior and update them by rerunning the model if necessary..."
   echo ""
-  python $UPDATE_OBS_ENS_POSTERIOR $CONFIG_NML || exit 9
+  python $UPDATE_POSTERIOR $CONFIG_NML || exit 9
 
 
   ##########################################
-  # Step 6 -- Update the model time and observation start/end time
+  # Step 9 -- Update the model time and observation start/end time
   # for the next assimilation window in the input namelist file
   ##########################################
   echo ""
@@ -204,10 +204,10 @@ while ($EXCEEDS_OBS_TIME == ".false.")
   echo "------------------------------------------------------------"
   echo "Move the time forward ..."
   echo ""
-  python $UPDATE_CONFIGNML_TIME $CONFIG_NML $INPUT_NML  || exit 5
-  set MODEL_TIME = `GET_ITEM current_model_time $CONFIG_NML`  || exit 6
-  set EXCEEDS_OBS_TIME = `GET_ITEM exceeds_obs_time $CONFIG_NML`  || exit 7
-  @ ENKSMDA_CURRENT_ITERATION = `GET_ITEM enks_mda_iteration_step $CONFIG_NML`  || exit 8
+  python $UPDATE_CONFIGNML_TIME $CONFIG_NML $INPUT_NML  || exit 10
+  set MODEL_TIME = `GET_ITEM current_model_time $CONFIG_NML`  || exit 11
+  set EXCEEDS_OBS_TIME = `GET_ITEM exceeds_obs_time $CONFIG_NML`  || exit 12
+  @ ENKSMDA_CURRENT_ITERATION = `GET_ITEM enks_mda_iteration_step $CONFIG_NML`  || exit 13
 
 end
 

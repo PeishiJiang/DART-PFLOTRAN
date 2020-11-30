@@ -6,7 +6,7 @@
 
 module model_mod
 
-! This is a template showing the interfaces required for a model to be compliant
+! These are the interfaces required for PFLOTRAN to be compliant
 ! with the DART data assimilation infrastructure. The public interfaces listed
 ! must all be supported with the argument lists as indicated. Many of the interfaces
 ! are not required for minimal implementation (see the discussion of each
@@ -15,7 +15,8 @@ module model_mod
 
 ! Modules that are absolutely required for use are listed
 use        types_mod, only : r8, i8, MISSING_R8, MISSING_I
-use time_manager_mod, only : time_type, set_time, set_time_missing, set_date
+use time_manager_mod, only : time_type, print_time, set_time, set_time_missing, set_date, get_time, &
+                             operator(-), operator(>), operator(<)
 use     location_mod, only : location_type, get_close_type, &
                              get_close_obs, get_close_state, &
                              convert_vertical_obs, convert_vertical_state, &
@@ -38,7 +39,10 @@ use state_structure_mod, only : add_domain, get_index_start, get_index_end, &
 use ensemble_manager_mod, only : ensemble_type
 use dart_time_io_mod, only  : read_model_time, write_model_time
 use default_model_mod, only : pert_model_copies, nc_write_model_vars
-use obs_kind_mod, only: get_index_for_quantity
+use obs_kind_mod, only: get_index_for_quantity, get_index_for_type_of_obs, get_name_for_quantity
+use xyz_location_mod, only : xyz_location_type, xyz_set_location, xyz_get_location,         &
+                             xyz_get_close_type, xyz_get_close_init, xyz_get_close_destroy, &
+                             xyz_find_nearest
 
 use netcdf
 
@@ -74,15 +78,18 @@ public :: nc_write_model_vars,    &
 
 ! version controlled file description for error handling, do not edit
 character(len=256), parameter :: source   = &
-   "$URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/models/template/model_mod.f90 $"
-character(len=32 ), parameter :: revision = "$Revision: 12591 $"
-character(len=128), parameter :: revdate  = "$Date: 2018-05-21 13:49:26 -0700 (Mon, 21 May 2018) $"
+   "$URL: https://svn-dares-dart.cgd.ucar.edu/DART/releases/Manhattan/models/pflotran/model_mod.f90 $"
+character(len=32 ), parameter :: revision = "$Revision: v0.3$"
+character(len=128), parameter :: revdate  = "$Date: 2020-03-14$"
 
 integer :: dom_id
 
 character(len=512) :: string1, string2, string3
 
-type(location_type), allocatable :: state_loc(:)  ! state locations, compute once and store for speed
+type(location_type), allocatable :: parastate_loc_all(:)  ! locations of both states and parameters at all time steps, compute once and store for speed
+! type(location_type), allocatable :: state_loc_unique(:)  ! unique state locations, compute once and store for speed
+! type(location_type), allocatable :: para_loc_unique(:)  ! unique parameter locations, compute once and store for speed
+! type(time_type),     allocatable :: state_time(:) ! state time, compute once and store for speed
 
 type(time_type) :: time_step
 
@@ -91,14 +98,18 @@ type(time_type) :: time_step
 ! TODO revise the time_step_days and time_step_seconds
 integer, parameter :: MAX_STATE_VARIABLES = 40
 integer, parameter :: MAX_STATE_NAME_LEN  = 256
-integer  :: time_step_days      = 0
-integer  :: time_step_seconds   = 3600
+integer, parameter :: SECONDS_PER_DAY = 86400
+integer  :: time_step_days = -1
+integer  :: time_step_seconds = -1
 
-integer          :: model_size
-integer          :: nvar
-! TODO revise var_names
+integer  :: model_size, model_size_para, model_size_state
+integer  :: nvar, nvar_para, nvar_state
 character(len=MAX_STATE_NAME_LEN) :: var_names(MAX_STATE_VARIABLES)
 character(len=MAX_STATE_NAME_LEN) :: var_qtynames(MAX_STATE_VARIABLES)
+character(len=MAX_STATE_NAME_LEN) :: para_var_names(MAX_STATE_VARIABLES)
+character(len=MAX_STATE_NAME_LEN) :: para_var_qtynames(MAX_STATE_VARIABLES)
+character(len=MAX_STATE_NAME_LEN) :: state_var_names(MAX_STATE_VARIABLES)
+character(len=MAX_STATE_NAME_LEN) :: state_var_qtynames(MAX_STATE_VARIABLES)
 integer :: qty_list(MAX_STATE_VARIABLES)
 
 ! Everything needed to describe a variable
@@ -106,36 +117,65 @@ type progvartype
    private
    character(len=MAX_STATE_NAME_LEN) :: varname
    character(len=MAX_STATE_NAME_LEN) :: dartqtyname
+   logical                           :: is_parameter
    integer                           :: domain
    integer                           :: dartqtyind
+   integer                           :: darttypeind
 end type progvartype
 
 type(progvartype), dimension(MAX_STATE_VARIABLES) :: progvar
 logical :: debug = .true.  ! turn up for more and more debug messages
 character(len=256) :: template_file = 'null'   ! optional; sets sizes of arrays
 
+! Structure for computing distances to cell centers, and assorted arrays
+! needed for the get_close code.
+type(xyz_get_close_type)             :: cc_gc
+! type(xyz_location_type), allocatable :: loc_set_xyz(:)
+type(xyz_location_type), allocatable :: loc_set_para_xyz(:)
+type(xyz_location_type), allocatable :: loc_set_state_xyz(:)
+logical  :: module_initialized = .false.
+logical  :: search_initialized = .false.
+real(r8) :: maxdist = 330000.0_r8
+
+! Define the grids/locations information
+! integer  :: nloc
+! real(r8), allocatable :: x_loc_all(:), y_loc_all(:), z_loc_all(:)  ! the grid locations of each dimension at all points
+integer  :: nloc_para, nloc_state
+real(r8), allocatable :: x_loc_para_all(:), y_loc_para_all(:), z_loc_para_all(:)  ! the grid locations of each dimension at all points
+real(r8), allocatable :: x_loc_state_all(:), y_loc_state_all(:), z_loc_state_all(:)  ! the grid locations of each dimension at all points
+
+! Define the state time information
+integer  :: ntime_state, ntime_para
+integer :: max_time_diff_seconds ! the maximum allowable time difference
+type(time_type) :: max_time_diff ! the maximum allowable time difference
+real(r8), allocatable :: state_time_all_day(:)  ! the unique state times in days
+integer, allocatable :: state_time_all_second(:)  ! the unique state times in seconds
+type(time_type), allocatable :: state_time_unique(:)  ! the unique state times in time type
+real(r8), allocatable :: para_time_all_day(:)  ! the unique parameter times in days
+integer, allocatable :: para_time_all_second(:)  ! the unique parameter times in seconds
+type(time_type), allocatable :: para_time_unique(:)  ! the unique parameter times in time type
+type(time_type), allocatable :: parastate_time_all(:)  ! all the parameters and states at all grids in time type
+
 ! uncomment this, the namelist related items in the 'use utilities' section above,
 ! and the namelist related items below in static_init_model() to enable the
 ! run-time namelist settings.
 ! TODO revise the model namelist
 namelist /model_nml/            &
-   nvar,                        &
    time_step_days,              &
    time_step_seconds,           &
+   max_time_diff_seconds,       &
    debug,                       &
-   var_names,                   &
-   template_file,               &
-   var_qtynames
+   nvar_para,                   &
+   para_var_names,              &
+   para_var_qtynames,           &
+   nvar_state,                  &
+   state_var_names,             &
+   state_var_qtynames,           &
+   template_file
+!    nvar,                        &
+!    var_names,                   &
+!    var_qtynames
 
-!namelist /model_nml/ model_size, time_step_days, time_step_seconds, pflotran_variables
-
-! Define the grids/locations information
-! TODO
-! For now, we assume structured cartesian coordinates
-real(r8) :: x0, y0, z0  ! the lowest values
-real(r8) :: dx, dy, dz  ! the grid sizes
-integer  :: nx, ny, nz  ! the numbers of grids
-real(r8), allocatable :: x_set(:), y_set(:), z_set(:)  ! the grid locations in each dimension
 
 contains
 
@@ -155,8 +195,14 @@ subroutine static_init_model()
  integer  :: ncid, dimid, varid
  integer  :: num_dims
 
+if ( module_initialized ) return ! only need to do this once.
+
 ! Print module information to log file and stdout.
 call register_module(source, revision, revdate)
+
+! Since this routine calls other routines that could call this routine
+! we'll say we've been initialized pretty dang early.
+module_initialized = .true.
 
 ! Read the model information from model_nml in input.nml
 ! the model namelist includes and the list of variable names
@@ -168,103 +214,201 @@ call check_namelist_read(iunit, io, "model_nml")
 if (do_nml_file()) write(nmlfileunit, nml=model_nml)
 if (do_nml_term()) write(     *     , nml=model_nml)
 
-! This time is both the minimum time you can ask the model to advance
-! (for models that can be advanced by filter) and it sets the assimilation
-! window.  All observations within +/- 1/2 this interval from the current
-! model time will be assimilated. If this isn't settable at runtime
-! feel free to hardcode it and not add it to a namelist.
-time_step = set_time(time_step_seconds, time_step_days)
+! Combine both model parameter and model state variables
+nvar = nvar_para + nvar_state
+do ivar = 1, nvar_para
+    var_names(ivar) = para_var_names(ivar)
+    var_qtynames(ivar) = para_var_qtynames(ivar)
+end do
+do ivar = 1, nvar_state
+    var_names(ivar+nvar_para) = state_var_names(ivar)
+    var_qtynames(ivar+nvar_para) = state_var_qtynames(ivar)
+end do
 
 ! Get the variable quantity/kind indices
 do ivar = 1, nvar
     qty_list(ivar) = get_index_for_quantity(var_qtynames(ivar))
 end do
 
-!print *, 'Wait here'
+! TODO: add two domains for parameters and model states separately
 ! Add all the variable names to the domain by using add_domain()
 ! tell dart the size of the model
 if (template_file /= 'null') then
     ! Use add_domain_from_file() function
     dom_id = add_domain(template_file, nvar, var_names, qty_list)
 else
-
+    write(string1,*) 'Problem, the template file cannot be null.'
+    call error_handler(E_ERR,'static_init_model',string1,source,revision,revdate)
 endif
 
-! Get the grid dimensions
+! Get the grid dimensions and state time dimension
 ! Read a file about the spatial information of the model.
-! Let's assume structured CARTESIAN coordinates for now.
-! That is: x0, y0, z0, nx, ny, nz, dx, dy, dz
-! There information can be read from the namelist file.
 ncid = nc_open_file_readonly(template_file, 'static_init_model')
 ! get the requested dimension size
-call nc_check( nf90_inq_dimid(ncid, "x_location", dimid), &
-               'static_init_model', 'inq dimid'//trim("x_location"))
-call nc_check( nf90_inquire_dimension(ncid, dimid, len=nx), &
-               'static_init_model', 'inquire dimension'//trim("x_location"))
-call nc_check( nf90_inq_dimid(ncid, "y_location", dimid), &
-               'static_init_model', 'inq dimid'//trim("y_location"))
-call nc_check( nf90_inquire_dimension(ncid, dimid, len=ny), &
-               'static_init_model', 'inquire dimension'//trim("y_location"))
-call nc_check( nf90_inq_dimid(ncid, "z_location", dimid), &
-               'static_init_model', 'inq dimid'//trim("z_location"))
-call nc_check( nf90_inquire_dimension(ncid, dimid, len=nz), &
-               'static_init_model', 'inquire dimension'//trim("z_location"))
+! call nc_check( nf90_inq_dimid(ncid, "location", dimid), &
+!                'static_init_model', 'inq dimid'//trim("location"))
+! call nc_check( nf90_inquire_dimension(ncid, dimid, len=nloc), &
+!                'static_init_model', 'inquire dimension'//trim("location"))
+call nc_check( nf90_inq_dimid(ncid, "para_location", dimid), &
+               'static_init_model', 'inq dimid'//trim("para_location"))
+call nc_check( nf90_inquire_dimension(ncid, dimid, len=nloc_para), &
+               'static_init_model', 'inquire dimension'//trim("para_location"))
+call nc_check( nf90_inq_dimid(ncid, "state_location", dimid), &
+               'static_init_model', 'inq dimid'//trim("state_location"))
+call nc_check( nf90_inquire_dimension(ncid, dimid, len=nloc_state), &
+               'static_init_model', 'inquire dimension'//trim("state_location"))
+call nc_check( nf90_inq_dimid(ncid, "state_time", dimid), &
+               'static_init_model', 'inq dimid'//trim("state_time"))
+call nc_check( nf90_inquire_dimension(ncid, dimid, len=ntime_state), &
+               'static_init_model', 'inquire dimension'//trim("state_time"))
+call nc_check( nf90_inq_dimid(ncid, "para_time", dimid), &
+               'static_init_model', 'inq dimid'//trim("para_time"))
+call nc_check( nf90_inquire_dimension(ncid, dimid, len=ntime_para), &
+               'static_init_model', 'inquire dimension'//trim("para_time"))
 
-! Obtain the one-dimensional location in each dimension
-allocate(x_set(nx))
-allocate(y_set(ny))
-allocate(z_set(nz))
-call nc_check( nf90_inq_varid(ncid, "x_location", varid), &
-               'static_init_model', 'inq varid'//trim("x_location"))
-call nc_check( nf90_get_var(ncid, varid, x_set), &
-               'static_init_model', 'inquire variable'//trim("x_location"))
-call nc_check( nf90_inq_varid(ncid, "y_location", varid), &
-               'static_init_model', 'inq varid'//trim("y_location"))
-call nc_check( nf90_get_var(ncid, varid, y_set), &
-               'static_init_model', 'inquire variable'//trim("y_location"))
-call nc_check( nf90_inq_varid(ncid, "z_location", varid), &
-               'static_init_model', 'inq varid'//trim("z_location"))
-call nc_check( nf90_get_var(ncid, varid, z_set), &
-               'static_init_model', 'inquire variable'//trim("z_location"))
+! Obtain all the time steps for states
+max_time_diff = set_time(max_time_diff_seconds) ! The maximum time difference in model_interpolate()
+allocate(state_time_all_day(ntime_state))
+allocate(state_time_all_second(ntime_state))
+allocate(state_time_unique(ntime_state))
+call nc_check( nf90_inq_varid(ncid, "state_time", varid), &
+                'static_init_model', 'inq varid'//trim("state_time"))
+call nc_check( nf90_get_var(ncid, varid, state_time_all_day), &
+                'static_init_model', 'inquire variable'//trim("state_time"))
 
-x0 = x_set(1)
-y0 = y_set(1)
-z0 = z_set(1)
-dx = x_set(2) - x_set(1)
-dy = y_set(2) - y_set(1)
-dz = z_set(2) - z_set(1)
+do i = 1, ntime_state
+    state_time_all_second(i) = SECONDS_PER_DAY * state_time_all_day(i)
+    state_time_unique(i) = set_time(state_time_all_second(i))
+end do
 
-! TODO
-! Change model_size*nx*ny*nz to a more flexible count of
-! the number of locations to be assimilated
+! Obtain all the time steps for parameters
+allocate(para_time_all_day(ntime_para))
+allocate(para_time_all_second(ntime_para))
+allocate(para_time_unique(ntime_para))
+call nc_check( nf90_inq_varid(ncid, "para_time", varid), &
+                'static_init_model', 'inq varid'//trim("para_time"))
+call nc_check( nf90_get_var(ncid, varid, para_time_all_day), &
+                'static_init_model', 'inquire variable'//trim("para_time"))
+
+do i = 1, ntime_para
+    para_time_all_second(i) = SECONDS_PER_DAY * para_time_all_day(i)
+    para_time_unique(i) = set_time(para_time_all_second(i))
+end do
+
+
+! ! Obtain the one-dimensional location in each dimension
+! allocate(x_loc_all(nloc))
+! allocate(y_loc_all(nloc))
+! allocate(z_loc_all(nloc))
+! call nc_check( nf90_inq_varid(ncid, "x_location", varid), &
+!                'static_init_model', 'inq varid'//trim("x_location"))
+! call nc_check( nf90_get_var(ncid, varid, x_loc_all), &
+!                'static_init_model', 'inquire variable'//trim("x_location"))
+! call nc_check( nf90_inq_varid(ncid, "y_location", varid), &
+!                'static_init_model', 'inq varid'//trim("y_location"))
+! call nc_check( nf90_get_var(ncid, varid, y_loc_all), &
+!                'static_init_model', 'inquire variable'//trim("y_location"))
+! call nc_check( nf90_inq_varid(ncid, "z_location", varid), &
+!                'static_init_model', 'inq varid'//trim("z_location"))
+! call nc_check( nf90_get_var(ncid, varid, z_loc_all), &
+!                'static_init_model', 'inquire variable'//trim("z_location"))
+
+! Obtain the locations in each dimension -- for model parameters
+allocate(x_loc_para_all(nloc_para))
+allocate(y_loc_para_all(nloc_para))
+allocate(z_loc_para_all(nloc_para))
+call nc_check( nf90_inq_varid(ncid, "para_x_location", varid), &
+               'static_init_model', 'inq varid'//trim("para_x_location"))
+call nc_check( nf90_get_var(ncid, varid, x_loc_para_all), &
+               'static_init_model', 'inquire variable'//trim("para_x_location"))
+call nc_check( nf90_inq_varid(ncid, "para_y_location", varid), &
+               'static_init_model', 'inq varid'//trim("para_y_location"))
+call nc_check( nf90_get_var(ncid, varid, y_loc_para_all), &
+               'static_init_model', 'inquire variable'//trim("para_y_location"))
+call nc_check( nf90_inq_varid(ncid, "para_z_location", varid), &
+               'static_init_model', 'inq varid'//trim("para_z_location"))
+call nc_check( nf90_get_var(ncid, varid, z_loc_para_all), &
+               'static_init_model', 'inquire variable'//trim("para_z_location"))
+
+! Obtain the locations in each dimension -- for model states
+allocate(x_loc_state_all(nloc_state))
+allocate(y_loc_state_all(nloc_state))
+allocate(z_loc_state_all(nloc_state))
+call nc_check( nf90_inq_varid(ncid, "state_x_location", varid), &
+               'static_init_model', 'inq varid'//trim("state_x_location"))
+call nc_check( nf90_get_var(ncid, varid, x_loc_state_all), &
+               'static_init_model', 'inquire variable'//trim("state_x_location"))
+call nc_check( nf90_inq_varid(ncid, "state_y_location", varid), &
+               'static_init_model', 'inq varid'//trim("state_y_location"))
+call nc_check( nf90_get_var(ncid, varid, y_loc_state_all), &
+               'static_init_model', 'inquire variable'//trim("state_y_location"))
+call nc_check( nf90_inq_varid(ncid, "state_z_location", varid), &
+               'static_init_model', 'inq varid'//trim("state_z_location"))
+call nc_check( nf90_get_var(ncid, varid, z_loc_state_all), &
+               'static_init_model', 'inquire variable'//trim("state_z_location"))
+
 ! Create storage for locations
-model_size = nvar*nx*ny*nz
-allocate(state_loc(model_size))
+model_size_para  = nvar_para * nloc_para * ntime_para
+model_size_state = nvar_state * nloc_state * ntime_state
+model_size = model_size_para + model_size_state
 
 ! Define the locations of the model state variables
 ! naturally, this can be done VERY differently for more complicated models.
 ! set_location() is different for 1D vs. 3D models, not surprisingly.
+! allocate(state_loc_all(nloc))
+! index_in = 1
+! do i = 1, nloc
+!     state_loc_all(index_in) = set_location(x_loc_all(i),y_loc_all(i),z_loc_all(i))
+!     index_in = index_in + 1
+! end do
+allocate(parastate_loc_all(model_size))
+allocate(parastate_time_all(model_size))
 index_in = 1
-do ivar = 1, nvar
-    do k = 1, nz
-        do j = 1, ny
-            do i = 1,nx
-                !state_loc(index_in) = set_location(x0+dx*(i-1),y0+dy*(j-1),z0+dz*(k-1))
-                state_loc(index_in) = set_location(x_set(i),y_set(j),z_set(k))
-                index_in = index_in + 1
-            end do
+do ivar = 1, nvar_para
+    do i = 1, nloc_para
+        do j = 1, ntime_para
+            parastate_loc_all(index_in) = set_location(x_loc_para_all(i),y_loc_para_all(i),z_loc_para_all(i))
+            parastate_time_all(index_in) = para_time_unique(j)
+            index_in = index_in + 1
+        end do
+    end do
+end do
+do ivar = 1, nvar_state
+    do i = 1, nloc_state
+        do j = 1, ntime_state
+            parastate_loc_all(index_in) = set_location(x_loc_state_all(i),y_loc_state_all(i),z_loc_state_all(i))
+            parastate_time_all(index_in) = state_time_unique(j)
+            index_in = index_in + 1
         end do
     end do
 end do
 
-
 ! Assign the variable name information locally here
-do ivar = 1, nvar
-    progvar(ivar)%varname     = var_names(ivar)
-    progvar(ivar)%domain      = dom_id
-    progvar(ivar)%dartqtyname = var_qtynames(ivar)
-    progvar(ivar)%dartqtyind  = qty_list(ivar)
+index_in = 1
+do ivar = 1, nvar_para
+    progvar(index_in)%varname     = para_var_names(ivar)
+    progvar(index_in)%domain      = dom_id
+    progvar(index_in)%dartqtyname = para_var_qtynames(ivar)
+    progvar(index_in)%dartqtyind  = get_index_for_quantity(para_var_qtynames(ivar))
+    progvar(index_in)%darttypeind = get_index_for_type_of_obs(para_var_names(ivar))
+    progvar(index_in)%is_parameter = .true.
+    index_in = index_in + 1
 end do
+do ivar = 1, nvar_state
+    progvar(index_in)%varname     = state_var_names(ivar)
+    progvar(index_in)%domain      = dom_id
+    progvar(index_in)%dartqtyname = state_var_qtynames(ivar)
+    progvar(index_in)%dartqtyind  = get_index_for_quantity(state_var_qtynames(ivar))
+    progvar(index_in)%darttypeind = get_index_for_type_of_obs(state_var_names(ivar))
+    progvar(index_in)%is_parameter = .false. 
+    index_in = index_in + 1
+end do
+! do ivar = 1, nvar
+!     progvar(ivar)%varname     = var_names(ivar)
+!     progvar(ivar)%domain      = dom_id
+!     progvar(ivar)%dartqtyname = var_qtynames(ivar)
+!     progvar(ivar)%dartqtyind  = qty_list(ivar)
+! end do
 
 ! Close the file
 call nc_close_file(ncid, 'static_init_model')
@@ -286,6 +430,8 @@ end subroutine static_init_model
 subroutine init_conditions(x)
 
 real(r8), intent(out) :: x(:)
+
+if ( .not. module_initialized ) call static_init_model
 
 x = MISSING_R8
 
@@ -312,6 +458,8 @@ subroutine adv_1step(x, time)
 real(r8),        intent(inout) :: x(:)
 type(time_type), intent(in)    :: time
 
+if ( .not. module_initialized ) call static_init_model
+
 end subroutine adv_1step
 
 
@@ -323,6 +471,8 @@ end subroutine adv_1step
 function get_model_size()
 
 integer(i8) :: get_model_size
+
+if ( .not. module_initialized ) call static_init_model
 
 get_model_size = model_size
 
@@ -343,12 +493,13 @@ subroutine init_time(time)
 
 type(time_type), intent(out) :: time
 
-! for now, just set to 0
+if ( .not. module_initialized ) call static_init_model
+
+! For now, just set to 0
+! Acutally, it is unused in PFLOTRAN
 time = set_time(0,0)
 
 end subroutine init_time
-
-
 
 
 !------------------------------------------------------------------
@@ -364,33 +515,36 @@ end subroutine init_time
 ! with identity observations (i.e. only the value of a particular
 ! state variable is observed), this can be a NULL INTERFACE.
 
-! TODO
-subroutine model_interpolate(state_handle, ens_size, location, obs_qty, expected_obs, istatus)
+! TODO: Find the ensemble of the observation variable at the exact time
+! subroutine model_interpolate(state_handle, ens_size, location, obs_qty, expected_obs, istatus)
+subroutine model_interpolate(state_handle, ens_size, location, obs_time, obs_qty, expected_obs, istatus)
 
 type(ensemble_type), intent(in) :: state_handle
 integer,             intent(in) :: ens_size
 type(location_type), intent(in) :: location
+type(time_type),     intent(in) :: obs_time
 integer,             intent(in) :: obs_qty
 real(r8),           intent(out) :: expected_obs(ens_size) !< array of interpolated values
 integer,            intent(out) :: istatus(ens_size)
 
 ! Local storage
 real(r8), dimension(LocationDims) :: loc_array
-logical :: is_find=.false.
-integer, dimension(LocationDims) :: loc_array_ens_ind
+logical  :: is_find_loc=.false.
+logical  :: is_find_time=.false.
+integer  :: loc_closest_ind, time_closest_ind
 real(r8) :: loc_x, loc_y, loc_z
-integer  :: loc_x_ind, loc_y_ind, loc_z_ind
-real(r8), dimension(LocationDims) :: loc_lrt, loc_llt, loc_urt, loc_ult
-real(r8), dimension(LocationDims) :: loc_lrb, loc_llb, loc_urb, loc_ulb
-integer, dimension(LocationDims)  :: loc_lrt_ind, loc_llt_ind, loc_urt_ind, loc_ult_ind
-integer, dimension(LocationDims)  :: loc_lrb_ind, loc_llb_ind, loc_urb_ind, loc_ulb_ind
-real(r8) :: w_lrt, w_llt, w_urt, w_ult
-real(r8) :: w_lrb, w_llb, w_urb, w_ulb, w_sum
-real(r8) :: val(2,2,2,ens_size)
-integer  :: e
-integer  :: i,j,k
+integer :: obs_time_sec
+integer :: i
+logical  :: is_para_var  ! true for model parameter and false for model state variable
+character(len=MAX_STATE_NAME_LEN) :: var_name
 
-!print *, 'ensemble', ens_size
+integer  :: e
+
+if ( .not. module_initialized ) call static_init_model
+
+! !print *, 'ensemble', ens_size
+! print *, get_location(location)
+! call print_time(obs_time)
 
 ! Let's assume failure.  Set return val to missing, then the code can
 ! just set istatus to something indicating why it failed, and return.
@@ -406,84 +560,45 @@ loc_x     = loc_array(1)
 loc_y     = loc_array(2)
 loc_z     = loc_array(3)
 
+! Get the time
+call get_time(obs_time, obs_time_sec)
+
 !if ((debug) .and. do_output()) print *, 'requesting interpolation at ', loc_x,loc_y,loc_z
 
-! TODO
-! For now, this is applied to structured cartesian grids. Later on, it should be modified to unstructured grids.
-! Note that for interpolation in unstructured grids, functions and subroutines in location_mod (e.g., get_close_obs) can be used.
-! Get the eight locations that surrounds the location to be interpolated
-! Eight locations: lower right (top), lower left (top), upper right (top), upper left (top)
-!                  lower right (bottom), lower left (bottom), upper right (bottom), upper left (bottom)
-! And their indices.
-! TODO
-! Let's first try to find the exact location in the array, if that exists, return it
-! if not, get the eight corner locations and do the IWD interpolation 
-call get_exact_location(loc_array, is_find, loc_array_ens_ind)
+! Determine whether the variable is a model parameter or model state
+do i = 1, nvar
+    ! print *, progvar(i)
+    if ( progvar(i)%dartqtyind == obs_qty ) then
+        is_para_var = progvar(i)%is_parameter
+        var_name    = progvar(i)%varname
+        exit
+    end if
+end do
 
-if ( is_find ) then
-    ! print *, "What a conincidence!"
-    ! print *, loc_array
-    ! print *, loc_array_ens_ind
-    expected_obs = get_val(state_handle, ens_size, loc_array_ens_ind, obs_qty)
-    ! print *, expected_obs
-    
+! The observation variable shouldn't be a model parameter
+if (is_para_var) then
+    write(string1,*) 'Problem, the interpolated variable should not be parameter: ', var_name
+    call error_handler(E_ERR,'model_interpolate',string1,source,revision,revdate)
+endif
+
+! Get the nearest point by using xyz_location_mod
+call find_closest_loc(loc_array, is_find_loc, loc_closest_ind)
+
+! Get the closest time
+call find_closest_time(obs_time, is_find_time, time_closest_ind)
+
+! Check whether the right ensemble state is located
+if (.not. is_find_loc) then
+    write(string1,*) 'Problem, not able to get the nearest point for location: ', loc_x, loc_y, loc_z
+    call error_handler(E_ERR,'model_interpolate',string1,source,revision,revdate)
+
+else if (.not. is_find_time) then
+    write(string1,*) 'Problem, not able to get the ensemble at time (seconds): ', obs_time_sec
+    call error_handler(E_ERR,'model_interpolate',string1,source,revision,revdate)
+
 else
-    print *, "I have to do the IWD interpolation!"
-    call get_the_eight_corners_locations(loc_array, loc_ult, loc_urt, loc_llt, loc_lrt, &
-            loc_ulb, loc_urb, loc_llb, loc_lrb, &
-            loc_ult_ind, loc_urt_ind, loc_llt_ind, loc_lrt_ind, &
-            loc_ulb_ind, loc_urb_ind, loc_llb_ind, loc_lrb_ind)
+    expected_obs = get_val(state_handle, ens_size, loc_closest_ind, time_closest_ind, obs_qty)
 
-    ! Get the weights of the four locations (based on the inverse distances of
-    ! these locations to the location to be interpolated)
-    w_ult = 1.0 / sqrt(sum((loc_ult-loc_array)**2))
-    w_urt = 1.0 / sqrt(sum((loc_urt-loc_array)**2))
-    w_llt = 1.0 / sqrt(sum((loc_llt-loc_array)**2))
-    w_lrt = 1.0 / sqrt(sum((loc_lrt-loc_array)**2))
-    w_ulb = 1.0 / sqrt(sum((loc_ulb-loc_array)**2))
-    w_urb = 1.0 / sqrt(sum((loc_urb-loc_array)**2))
-    w_llb = 1.0 / sqrt(sum((loc_llb-loc_array)**2))
-    w_lrb = 1.0 / sqrt(sum((loc_lrb-loc_array)**2))
-    w_sum = w_ult+w_urt+w_llt+w_lrt+w_ulb+w_urb+w_llb+w_lrb
-    w_ult = w_ult / w_sum
-    w_urt = w_urt / w_sum
-    w_llt = w_llt / w_sum
-    w_lrt = w_lrt / w_sum
-    w_ulb = w_ulb / w_sum
-    w_urb = w_urb / w_sum
-    w_llb = w_llb / w_sum
-    w_lrb = w_lrb / w_sum
-
-    ! Get the values of the four locations
-    ! Four locations: lower right, lower left, upper right, upper left
-    val(1, 1, 1, :) =  get_val(state_handle, ens_size, loc_ult_ind, obs_qty)
-    val(1, 2, 1, :) =  get_val(state_handle, ens_size, loc_urt_ind, obs_qty)
-    val(2, 1, 1, :) =  get_val(state_handle, ens_size, loc_llt_ind, obs_qty)
-    val(2, 2, 1, :) =  get_val(state_handle, ens_size, loc_lrt_ind, obs_qty)
-    val(1, 1, 2, :) =  get_val(state_handle, ens_size, loc_ulb_ind, obs_qty)
-    val(1, 2, 2, :) =  get_val(state_handle, ens_size, loc_urb_ind, obs_qty)
-    val(2, 1, 2, :) =  get_val(state_handle, ens_size, loc_llb_ind, obs_qty)
-    val(2, 2, 2, :) =  get_val(state_handle, ens_size, loc_lrb_ind, obs_qty)
-
-    !if (debug) then
-        !print *, 'The eight locations ....'
-        !print *, loc_ult
-        !print *, loc_urt
-        !print *, loc_llt
-        !print *, loc_lrt
-        !print *, loc_ulb
-        !print *, loc_urb
-        !print *, loc_llb
-        !print *, loc_lrb
-        !print *, "The values at the eight locations ...."
-        !print *, val(1,1,1,:),val(1,2,1,:),val(2,1,1,:),val(2,2,1,:),val(1,1,2,:),val(1,2,2,:),val(2,1,2,:),val(2,2,2,:)
-    !end if
-
-    ! Conduct the interpolation based on the weighted summation of the state values at the eight locations
-    expected_obs = w_ult * val(1,1,1,:) + w_urt * val(1,2,1,:) + &
-                w_llt * val(2,1,1,:) + w_lrt * val(2,2,1,:) + &
-                w_ulb * val(1,1,2,:) + w_urb * val(1,2,2,:) + &
-                w_llb * val(2,1,2,:) + w_lrb * val(2,2,2,:)
 end if
 
 ! if the forward operater failed set the value to missing_r8
@@ -493,319 +608,148 @@ do e = 1, ens_size
    endif
 enddo
 
-! print *, "Let's check the artificial time dimension."
-! print *, loc_array
-! print *, expected_obs
-
 end subroutine model_interpolate
 
 
+!------------------------------------------------------------
+! Modified from models/mpas_atm/model_mod.f90
+subroutine init_closest_center()
+
+! initialize a GC structure
+! to be used later in find_closest_cell_center().
+
+! set up a GC in the locations mod
+
+integer :: index_in, i
+
+if (debug) print *, "Allocate memory space for loc_set_xyz for model_interpolate..."
+allocate(loc_set_state_xyz(nloc_state))
+
+! For model state variables
+do i=1, nloc_state
+   loc_set_state_xyz(i) = xyz_set_location(x_loc_state_all(i), y_loc_state_all(i), z_loc_state_all(i))
+enddo
+
+call xyz_get_close_init(cc_gc, maxdist, nloc_state, loc_set_state_xyz)
+
+end subroutine init_closest_center
+
+
 !------------------------------------------------------------------
-! Get the exact location
-! Eight locations: lower right (top), lower left (top), upper right (top), upper left (top)
-!                  lower right (bottom), lower left (bottom), upper right (bottom), upper left (bottom)
-! And their indices.
-subroutine get_exact_location(loc_array, is_find, loc_array_ens_ind)
+! Modified from models/mpas_atm/model_mod.f90
+subroutine find_closest_loc(loc_array, is_find, closest_loc_ind)
+
+! Determine the index for the closest center to the given point
 
 real(r8), dimension(LocationDims), intent(in) :: loc_array
 logical,  intent(inout)                       :: is_find
-integer, dimension(LocationDims), intent(out) :: loc_array_ens_ind
+integer,  intent(out)                         :: closest_loc_ind
 
-real(r8), parameter :: TORELABLE_DIFF = 1.0d-8
-
-real(r8) :: loc_x, loc_y, loc_z
-real(r8) :: diff_x, diff_y, diff_z
-logical  :: find_x=.false., find_y=.false., find_z=.false.
-integer  :: i,j,k
+real(r8)  :: xloc, yloc, zloc
+type(xyz_location_type) :: pointloc
+integer :: rc
 
 ! Get the individual location values
-loc_x = loc_array(1)
-loc_y = loc_array(2)
-loc_z = loc_array(3)
+xloc = loc_array(1)
+yloc = loc_array(2)
+zloc = loc_array(3)
 
-! Get the location along x dimension
-do i = 1,nx
-    diff_x = abs(x_set(i) - loc_x)
-    if (diff_x < TORELABLE_DIFF) then
-        loc_array_ens_ind(1) = i
-        find_x = .true.
-        exit
-    end if
-end do
+! do this exactly once.
+if (.not. search_initialized) then
+   call init_closest_center()
+   search_initialized = .true.
+endif
 
-! Get the location along y dimension
-do j = 1,ny
-    diff_y = abs(y_set(j) - loc_y)
-    if (diff_y < TORELABLE_DIFF) then
-        loc_array_ens_ind(2) = j
-        find_y = .true.
-        exit
-    end if
-end do
+pointloc = xyz_set_location(xloc, yloc, zloc)
 
-! Get the location along z dimension
-do k = 1,nz
-    diff_z = abs(z_set(k) - loc_z)
-    ! print *, diff_z, TORELABLE_DIFF
-    if (diff_z < TORELABLE_DIFF) then
-        loc_array_ens_ind(3) = k
-        find_z = .true.
-        exit
-    end if
-end do
+! Search the closet location
+call xyz_find_nearest(cc_gc, pointloc, loc_set_state_xyz, closest_loc_ind, rc)
 
-if (find_x .and. find_y .and. find_z) then
+! decide what to do if we don't find anything.
+if (rc /= 0 .or. closest_loc_ind < 0) then
+    print *, 'cannot find nearest cell to the location (x,y,z): ', xloc, yloc, zloc
+    is_find = .false.
+! if we do find something, then get the nearest location
+else
     is_find = .true.
-end if
+    if (debug) then
+        print *, "The nearest location is: ", x_loc_state_all(closest_loc_ind), y_loc_state_all(closest_loc_ind), &
+                                              z_loc_state_all(closest_loc_ind)
+        print *, "The indices of the nearest location are: ", closest_loc_ind
+    end if
+endif
 
-end subroutine get_exact_location
-
+end subroutine find_closest_loc
 
 !------------------------------------------------------------------
-! Get the eight locations that surrounds the location to be interpolated
-! Eight locations: lower right (top), lower left (top), upper right (top), upper left (top)
-!                  lower right (bottom), lower left (bottom), upper right (bottom), upper left (bottom)
-! And their indices.
-subroutine get_the_eight_corners_locations(loc_array, loc_ult, loc_urt, loc_llt, loc_lrt, &
-           loc_ulb, loc_urb, loc_llb, loc_lrb, &
-           loc_ult_ind, loc_urt_ind, loc_llt_ind, loc_lrt_ind, &
-           loc_ulb_ind, loc_urb_ind, loc_llb_ind, loc_lrb_ind)
+subroutine find_closest_time(obs_time, is_find, closest_time_ind)
 
-real(r8), dimension(LocationDims), intent(in)    :: loc_array
-real(r8), dimension(LocationDims), intent(out) :: loc_lrt, loc_llt, loc_urt, loc_ult
-real(r8), dimension(LocationDims), intent(out) :: loc_lrb, loc_llb, loc_urb, loc_ulb
-integer, dimension(LocationDims), intent(out)  :: loc_lrt_ind, loc_llt_ind, loc_urt_ind, loc_ult_ind
-integer, dimension(LocationDims), intent(out)  :: loc_lrb_ind, loc_llb_ind, loc_urb_ind, loc_ulb_ind
-!real(r8), dimension(LocationDims), intent(out) :: loc_lr, loc_ll, loc_ur, loc_ul
-!integer, dimension(LocationDims), intent(out)  :: loc_lr_ind, loc_ll_ind, loc_ur_ind, loc_ul_ind
+! Determine the index for the closest center to the given time
 
-real(r8) :: loc_x, loc_y, loc_z
-integer  :: i,j,k
+type(time_type),    intent(in)                :: obs_time
+logical,  intent(inout)                       :: is_find
+integer,  intent(out)                         :: closest_time_ind
 
-! Get the individual location values
-loc_x     = loc_array(1)
-loc_y     = loc_array(2)
-loc_z     = loc_array(3)
+type(time_type) :: smallest_time_diff, current_time_diff
+real(r8)  :: xloc, yloc, zloc
+type(xyz_location_type) :: pointloc
+integer :: rc, i, time_sec
 
-! Get the location along x dimension
-do i = 1,nx
-    if (x_set(i) >= loc_x) then
-        ! grid value
-        loc_urt(1) = x_set(i)
-        loc_lrt(1) = x_set(i)
-        loc_urb(1) = x_set(i)
-        loc_lrb(1) = x_set(i)
-        ! grid index
-        loc_urt_ind(1) = i
-        loc_lrt_ind(1) = i
-        loc_urb_ind(1) = i
-        loc_lrb_ind(1) = i
-        exit
-    end if
+! Set the closest time to the first time index
+closest_time_ind  = 1
+smallest_time_diff = obs_time - state_time_unique(1)
+
+! Search the closest time
+do i = 2, ntime_state
+   current_time_diff = obs_time - state_time_unique(i)
+   
+   ! Update the smallest time diff
+   if (current_time_diff < smallest_time_diff) then
+       smallest_time_diff = current_time_diff
+       closest_time_ind   = i
+   end if
+
 end do
-if (i == 1) then
-    ! grid value
-    loc_ult(1) = x_set(i)
-    loc_llt(1) = x_set(i)
-    loc_ulb(1) = x_set(i)
-    loc_llb(1) = x_set(i)
-    ! grid index
-    loc_ult_ind(1) = i
-    loc_llt_ind(1) = i
-    loc_ulb_ind(1) = i
-    loc_llb_ind(1) = i
-else if (i == nx+1) then
-    i = i-1
-    ! grid value
-    loc_ult(1) = x_set(i)
-    loc_llt(1) = x_set(i)
-    loc_urt(1) = x_set(i)
-    loc_lrt(1) = x_set(i)
-    loc_ulb(1) = x_set(i)
-    loc_llb(1) = x_set(i)
-    loc_urb(1) = x_set(i)
-    loc_lrb(1) = x_set(i)
-    ! grid index
-    loc_ult_ind(1) = i
-    loc_llt_ind(1) = i
-    loc_urt_ind(1) = i
-    loc_lrt_ind(1) = i
-    loc_ulb_ind(1) = i
-    loc_llb_ind(1) = i
-    loc_urb_ind(1) = i
-    loc_lrb_ind(1) = i
-else
-    ! grid value
-    loc_ult(1) = x_set(i-1)
-    loc_llt(1) = x_set(i-1)
-    loc_ulb(1) = x_set(i-1)
-    loc_llb(1) = x_set(i-1)
-    ! grid index
-    loc_ult_ind(1) = i-1
-    loc_llt_ind(1) = i-1
-    loc_ulb_ind(1) = i-1
-    loc_llb_ind(1) = i-1
-end if
-!print *, 'check', i, loc_ul
-!print *, 'check', i, loc_ll
-!print *, 'check', i, loc_ur
-!print *, 'check', i, loc_lr
 
-! Get the location along y dimension
-do j = 1,ny
-    if (y_set(j) >= loc_y) then
-        ! grid value
-        loc_urt(2) = y_set(j)
-        loc_ult(2) = y_set(j)
-        loc_urb(2) = y_set(j)
-        loc_ulb(2) = y_set(j)
-        ! grid index
-        loc_urt_ind(2) = j
-        loc_ult_ind(2) = j
-        loc_urb_ind(2) = j
-        loc_ulb_ind(2) = j
-        exit
+if (smallest_time_diff > max_time_diff) then
+    call get_time(obs_time, time_sec)
+    print *, 'cannot find closest state time to the time: ', time_sec
+    is_find = .false.
+else
+    is_find = .true.
+    if (debug) then
+        call get_time(state_time_unique(closest_time_ind), time_sec)
+        print *, "The closest state time is: ", time_sec
+        print *, "The indices of the nearest location are: ", closest_time_ind
     end if
-end do
-if (j == 1) then
-    ! grid value
-    loc_lrt(2) = y_set(j)
-    loc_llt(2) = y_set(j)
-    loc_lrb(2) = y_set(j)
-    loc_llb(2) = y_set(j)
-    ! grid index
-    loc_lrt_ind(2) = j
-    loc_llt_ind(2) = j
-    loc_lrb_ind(2) = j
-    loc_llb_ind(2) = j
-else if (j == ny+1) then
-    j = j-1
-    ! grid value
-    loc_ult(2) = y_set(j)
-    loc_llt(2) = y_set(j)
-    loc_urt(2) = y_set(j)
-    loc_lrt(2) = y_set(j)
-    loc_ulb(2) = y_set(j)
-    loc_llb(2) = y_set(j)
-    loc_urb(2) = y_set(j)
-    loc_lrb(2) = y_set(j)
-    ! grid index
-    loc_lrt_ind(2) = j
-    loc_llt_ind(2) = j
-    loc_urt_ind(2) = j
-    loc_ult_ind(2) = j
-    loc_lrb_ind(2) = j
-    loc_llb_ind(2) = j
-    loc_urb_ind(2) = j
-    loc_ulb_ind(2) = j
-else
-    ! grid value
-    loc_lrt(2) = y_set(j-1)
-    loc_llt(2) = y_set(j-1)
-    loc_lrb(2) = y_set(j-1)
-    loc_llb(2) = y_set(j-1)
-    ! grid index
-    loc_lrt_ind(2) = j-1
-    loc_llt_ind(2) = j-1
-    loc_lrb_ind(2) = j-1
-    loc_llb_ind(2) = j-1
 end if
-!print *, 'check', j, loc_ul
-!print *, 'check', j, loc_ll
-!print *, 'check', j, loc_ur
-!print *, 'check', j, loc_lr
-!print *, 'check', j, y_set(j), y_set(j-1)
-!print *, 'check', y_set
-!print *, 'check', x_set
 
-! Get the location along z dimension
-do k = 1,nz
-    if (z_set(k) >= loc_z) then
-        ! grid value
-        loc_ult(3) = z_set(k)
-        loc_llt(3) = z_set(k)
-        loc_urt(3) = z_set(k)
-        loc_lrt(3) = z_set(k)
-        ! grid index
-        loc_lrt_ind(3) = k
-        loc_llt_ind(3) = k
-        loc_urt_ind(3) = k
-        loc_ult_ind(3) = k
-        exit
-    end if
-end do
-if (k == 1) then
-    ! grid value
-    loc_ulb(3) = z_set(k)
-    loc_llb(3) = z_set(k)
-    loc_urb(3) = z_set(k)
-    loc_lrb(3) = z_set(k)
-    ! grid index
-    loc_lrb_ind(3) = k
-    loc_llb_ind(3) = k
-    loc_urb_ind(3) = k
-    loc_ulb_ind(3) = k
-else if (k == nz+1) then
-    k = k-1
-    ! grid value
-    loc_ult(3) = z_set(k)
-    loc_llt(3) = z_set(k)
-    loc_urt(3) = z_set(k)
-    loc_lrt(3) = z_set(k)
-    loc_ulb(3) = z_set(k)
-    loc_llb(3) = z_set(k)
-    loc_urb(3) = z_set(k)
-    loc_lrb(3) = z_set(k)
-    ! grid index
-    loc_lrt_ind(3) = k
-    loc_llt_ind(3) = k
-    loc_urt_ind(3) = k
-    loc_ult_ind(3) = k
-    loc_lrb_ind(3) = k
-    loc_llb_ind(3) = k
-    loc_urb_ind(3) = k
-    loc_ulb_ind(3) = k
-else
-    ! grid value
-    loc_ulb(3) = z_set(k-1)
-    loc_llb(3) = z_set(k-1)
-    loc_urb(3) = z_set(k-1)
-    loc_lrb(3) = z_set(k-1)
-    ! grid index
-    loc_lrb_ind(3) = k-1
-    loc_llb_ind(3) = k-1
-    loc_urb_ind(3) = k-1
-    loc_ulb_ind(3) = k-1
-end if
-end subroutine get_the_eight_corners_locations
-
+end subroutine find_closest_time
 
 !------------------------------------------------------------------
-function get_val(state_handle, ens_size, loc_array_ind, var_kind)
+function get_val(state_handle, ens_size, loc_ind, time_ind, var_kind)
 
 type(ensemble_type), intent(in) :: state_handle
-integer, dimension(LocationDims) :: loc_array_ind
-!integer, intent(in) :: lon_index, lat_index, level, var_kind
 integer, intent(in) :: var_kind
 integer, intent(in) :: ens_size
+integer  :: loc_ind
+integer  :: time_ind
 real(r8) :: get_val(ens_size)
 
-integer :: loc_x_ind, loc_y_ind, loc_z_ind
+integer :: i
 
 character(len = 129) :: msg_string
 integer :: var_id
 integer(i8) :: state_index
 
-! Get the individual location values
-loc_x_ind = loc_array_ind(1)
-loc_y_ind = loc_array_ind(2)
-loc_z_ind = loc_array_ind(3)
+if ( .not. module_initialized ) call static_init_model
 
 var_id = get_varid_from_kind(dom_id, var_kind)
 
-! Find the index into state array and return this value
-!dom_id = progvar(var_id)%domain
-state_index = get_dart_vector_index(loc_x_ind, loc_y_ind, loc_z_ind, dom_id, var_id)
+! TODO: probably need to revise this once state-space formulation is implemented.
+! state_index = get_dart_vector_index(loc_x_ind, loc_y_ind, loc_z_ind, dom_id, var_id)
+! print *, loc_ind, time_ind, dom_id, var_id, var_kind
+state_index = get_dart_vector_index(loc_ind, time_ind, 1, dom_id, var_id)
 get_val     = get_state(state_index, state_handle)
 
 !if (debug) then
@@ -824,9 +768,27 @@ end function get_val
 ! time you want the model to advance between assimilations.
 ! This interface is required for all applications.
 
+! Note that this function is unused in DART-PFLOTRAN, because we run
+! PFLOTRAN as an external executable.
+
 function shortest_time_between_assimilations()
 
 type(time_type) :: shortest_time_between_assimilations
+
+if ( .not. module_initialized ) call static_init_model
+
+! This time is both the minimum time you can ask the model to advance
+! (for models that can be advanced by filter) and it sets the assimilation
+! window.  All observations within +/- 1/2 this interval from the current
+! model time will be assimilated. If this isn't settable at runtime
+! feel free to hardcode it and not add it to a namelist.
+! Note that time_step is unused in DART-PFLOTRAN, because we run
+! PFLOTRAN as an external executable.
+if (time_step_days < 0) then
+    time_step = set_time(0, 0)
+else
+    time_step = set_time(time_step_seconds, time_step_days)
+end if
 
 ! TODO
 ! Revise it if the unit of time_step is not the same as desired
@@ -835,29 +797,36 @@ shortest_time_between_assimilations = time_step
 end function shortest_time_between_assimilations
 
 
-
 !------------------------------------------------------------------
 ! Given an integer index into the state vector structure, returns the
-! associated location. A second intent(out) optional argument kind
+! associated location and state time. A second intent(out) optional argument kind
 ! can be returned if the model has more than one type of field (for
 ! instance temperature and zonal wind component). This interface is
 ! required for all filter applications as it is required for computing
 ! the distance between observations and state variables.
-subroutine get_state_meta_data(index_in, location, var_qty)
+subroutine get_state_meta_data(index_in, location, var_qty, state_time)
 
 integer(i8),         intent(in)  :: index_in
 type(location_type), intent(out) :: location
 integer,             intent(out), optional :: var_qty
+type(time_type),     intent(out), optional :: state_time
 
 integer  :: n
+! integer  :: index_loc_in, index_time_in
 integer  :: loc_x_ind, loc_y_ind, loc_z_ind
 integer(i8) :: index_start, index_end
 integer  :: var_id, dom_id
 character(len=256) :: varstring
 character(len=256) :: kind_string
 
+if ( .not. module_initialized ) call static_init_model
+
 ! these should be set to the actual location and state quantity
-location = state_loc(index_in)
+location   = parastate_loc_all(index_in)
+
+if (present(state_time)) then
+    state_time = parastate_time_all(index_in)
+endif
 
 !print *, get_location(location), index_in
 
@@ -903,12 +872,30 @@ end subroutine get_state_meta_data
 
 subroutine end_model()
 
-! More variables allocated in static_init_model() should be deallocated here
-deallocate(state_loc)
+if (debug) print *, "Now, let's deallocate all the memories used in model_mod.f90..."
 
-deallocate(x_set)
-deallocate(y_set)
-deallocate(z_set)
+if (search_initialized) then
+    call xyz_get_close_destroy(cc_gc)
+    deallocate(loc_set_state_xyz)
+endif
+
+! More variables allocated in static_init_model() should be deallocated here
+deallocate(parastate_loc_all)
+deallocate(parastate_time_all)
+
+deallocate(state_time_all_day)
+deallocate(state_time_all_second)
+deallocate(state_time_unique)
+deallocate(para_time_all_day)
+deallocate(para_time_all_second)
+deallocate(para_time_unique)
+
+deallocate(x_loc_state_all)
+deallocate(y_loc_state_all)
+deallocate(z_loc_state_all)
+deallocate(x_loc_para_all)
+deallocate(y_loc_para_all)
+deallocate(z_loc_para_all)
 
 end subroutine end_model
 

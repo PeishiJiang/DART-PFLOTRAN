@@ -25,11 +25,12 @@ obs_original    = configs["file_cfg"]["obs_raw_file"]        # The original obse
 obs_nc          = configs["file_cfg"]["obs_nc_original_file"]        # The converted observation file
 obs_error       = configs["da_cfg"]["obs_error"]        # The observation error
 obs_error_type  = configs["da_cfg"]["obs_error_type"]        # The observation type
-assim_start_str = configs["time_cfg"]["assim_start"]     # The map between the start of observation and spinup time
+# assim_start_str = configs["time_cfg"]["assim_start"]     # The map between the start of observation and spinup time
+model_start_str = configs["time_cfg"]["model_start"]     # The map between the start of observation and the start of spinup time
 
 # Get the reference time
 # ref_time = datetime.strptime(assim_start_str, "%Y-%m-%d %H:%M:%S")
-ref_time = datetime.strptime(assim_start_str, "%Y-%m-%d %H:%M:%S")
+ref_time = datetime.strptime(model_start_str, "%Y-%m-%d %H:%M:%S")
 
 missing_value = -99999
 
@@ -39,6 +40,7 @@ missing_value = -99999
 obs_pd = pd.read_csv(obs_original)
 
 # Get time and vertical depths
+print(obs_pd.keys())
 time_set  = obs_pd['# Datetime'].values
 z_set     = [float(z[:-2])/100 for z in obs_pd.keys()[1:]]
 ntime, nz = obs_pd.shape
@@ -55,7 +57,7 @@ dates_ref_values = [t.days+float(t.seconds)/86400. for t in dates_ref]
 # Get the true and perturbed temperature values
 temperature = obs_pd[obs_pd.keys()[1:]].values
 ntime,  nz  = temperature.shape
-if obs_error_type == "obsolute":
+if obs_error_type == "absolute":
     errors_var = obs_error / 3. * np.ones([ntime, nz])
 elif obs_error_type == "relative":
     errors_var = obs_error / 3. * temperature
