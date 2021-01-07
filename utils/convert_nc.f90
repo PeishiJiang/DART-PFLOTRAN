@@ -303,7 +303,7 @@ if ( &
    ! call create_3d_obs(xloc(k), yloc(k), zloc(k), 0, temperature_val(n,k), TEMPERATURE, temperature_err(n,k)*inflation_coefficient, oday, osec, qc, obs)
    ! oday_all = oday + osec / 86400.
    osec_all = oday * 86400. + osec
-   call create_3d_obs(xloc(k), osec_all, zloc(k), 0, temperature_val(n,k), TEMPERATURE, temperature_err(n,k)*inflation_coefficient, oday, osec, qc, obs)
+   call create_3d_obs(xloc(k), osec_all, zloc(k), 0, temperature_val(n,k), TEMPERATURE, temperature_err(n,k)/3*inflation_coefficient, oday, osec, qc, obs)
    call add_obs_to_seq(obs_seq, obs, time_obs, prev_obs, prev_time, first_obs)
 endif
 

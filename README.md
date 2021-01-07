@@ -2,6 +2,8 @@
 
 This is an software framework for integrating [PFLOTRAN](www.pflotran.org) and [DART](https://www.image.ucar.edu/DAReS/DART/). The objective is to allow user to conduct ensemble data assimilation on PFLOTRAN by using DART assimilation engine.
 
+**Jiang, P.**, X. Chen, K. Chen, J. Anderson, N. Nancy, T. Hoar, M. E. Gharamti (2021). DART-PFLOTRAN: An Ensemble-based Data Assimilation System for Estimating Subsurface Flow and Transport Model Parameters. Environmental Modeling and Software, *in prep*.
+
 ## Prerequisites
 
 It requires the installations of PFLOTRAN, DART, some Python packages, and other utitlities (e.g., fortran compiler).
@@ -69,7 +71,7 @@ The following is the the main structure of the {DART-PFLOTRAN} repository:
 
 - ```obs_kind```: This folder provides the definitions of PFLOTRAN variables in DART and the corresponding utitlities required by DART, including: (1) ```DEFAULT_obs_kind_mod.F90``` defining a list of DART variable generic quantity (along with PFLOTRAN's variables) and (2) ```obs_def_PFLOTRAN_mod.F90``` defining some interfaces of observation definions and the mapping between PFLOTRAN variable names and their names in DART quantity.
 
-- ```utils```: This folder provides a set of utility scripts for DART format observation conversion, preparing DART's prior data in NetCDF format, modifying ```DEFAULT_obs_kind_mod.F90``` by adding new PFLOTRAN's variables, preparing the input namelist file, running PFLOTRAN, updating observation with inflation, and so forth.
+- ```utils```: This folder provides a set of utility functions for DART format observation conversion, preparing DART's prior data in NetCDF format, modifying ```DEFAULT_obs_kind_mod.F90``` by adding new PFLOTRAN's variables, preparing the input namelist file, running PFLOTRAN, updating observation with inflation, and so forth.
 
 - ```applications``` This folder is where the applications should be put. A default ```template``` folder is provided, where the folder structure of each application should follow. An example of 1D thermal model is also provided in ```1dthermal``` folder. For running PFLOTRAN-DART, we suggest users to configure and run the jupyter notebook or the corresponding python file under ```workflow_ipynb``` to run through the work flow.
 
@@ -101,6 +103,7 @@ For the temporal information, the model spinup is conducted for a given period o
 
 
 ## Implementation
+Performing DART-PFLOTRAN is under ```./applications/workflow_ipynb``` through either Jupyter notebook (e.g., [```workflow.ipynb```](./applications/workflow_ipynb/workflow.ipynb)) or a corresponding Python script (e.g., [```workflow.py```](./applications/workflow_ipynb/workflow.py))
 
 ![Workflow in UML activity diagram](./figs/ActivityDiagram_MDA.png)
 
