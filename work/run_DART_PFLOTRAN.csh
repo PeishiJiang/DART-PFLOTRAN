@@ -65,6 +65,7 @@ set UPDATE_DART_OBS_INFLATION  = `GET_ITEM update_dart_obs_inflation_file $CONFI
 set UPDATE_POSTERIOR           = `GET_ITEM update_posterior_file $CONFIG_NML`  # python script for updating the observation ensemble posterior
 set UPDATE_CONFIGNML_TIME      = `GET_ITEM update_confignml_time_file $CONFIG_NML` # python script for updating the time data in config.nml
 set UPDATE_PFLOTRAN_INPUT      = `GET_ITEM update_pflotran_input_file $CONFIG_NML` # python script for updating PFLOTRAN input files
+set CONCATENATE_DART_OUTPUT    = `GET_ITEM concatenate_dart_output_file $CONFIG_NML` # python script for concatenating the dart output files
 
 # Get the EnKS-MDA iteration step information
 @ ENKSMDA_TOTAL_ITERATIONS   = `GET_ITEM enks_mda_total_iterations $CONFIG_NML` # the total iterations required by EnKS-MDA in each time step
@@ -219,6 +220,16 @@ echo "Clean up stuff ..."
 echo ""
 cd $PFLOTRAN_IN_DIR
 rm -f pflotranR*.h5
+
+echo ""
+echo ""
+echo "------------------------------------------------------------"
+echo "Last step: concatenate the prior and posterior at all times ..."
+echo ""
+# subprocess.run("python {} {}".format(concatenate_output, config_file), shell=True, check=True)
+python $CONCATENATE_DART_OUTPUT $CONFIG_NML || exit 14
+
+
 
 echo ""
 echo ""

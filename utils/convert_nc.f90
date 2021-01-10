@@ -62,9 +62,6 @@ integer  :: ncid, ios, ivar, ntime, nloc
 integer  :: n, i, oday, osec, nused, k, index
 logical  :: file_exist, first_obs
 
-! To be deleted
-real(r8) :: oday_all, osec_all
-
 integer  :: iunit, io
 
 real(r8) :: oerr, qc
@@ -300,10 +297,7 @@ locloop: do k = 1, nloc
 ! Add each observation value here
 if ( &
   temperature_val(n,k) /= temperature_miss .and. qc_temperature(n,k) == 0) then
-   ! call create_3d_obs(xloc(k), yloc(k), zloc(k), 0, temperature_val(n,k), TEMPERATURE, temperature_err(n,k)*inflation_coefficient, oday, osec, qc, obs)
-   ! oday_all = oday + osec / 86400.
-   osec_all = oday * 86400. + osec
-   call create_3d_obs(xloc(k), osec_all, zloc(k), 0, temperature_val(n,k), TEMPERATURE, temperature_err(n,k)/3*inflation_coefficient, oday, osec, qc, obs)
+   call create_3d_obs(xloc(k), yloc(k), zloc(k), 0, temperature_val(n,k), TEMPERATURE, temperature_err(n,k)/3*inflation_coefficient, oday, osec, qc, obs)
    call add_obs_to_seq(obs_seq, obs, time_obs, prev_obs, prev_time, first_obs)
 endif
 

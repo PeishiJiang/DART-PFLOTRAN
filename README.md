@@ -6,7 +6,27 @@ This is an software framework for integrating [PFLOTRAN](www.pflotran.org) and [
 
 ## Prerequisites
 
-It requires the installations of PFLOTRAN, DART, some Python packages, and other utitlities (e.g., fortran compiler).
+It requires the installations of several packages, PFLOTRAN, DART.
+
+### Install packages
+The following packages should be installed first. **Note that** it is recommended to install the Python packages and netCDF4 fortran interfaces using [conda virtual environment](./INSTALL_CONDA_VIRT_ENV.md) .
+
+- a Fortran 90 compiler
+- [C shell](https://www.grymoire.com/Unix/Csh.html)
+- (optional because it can be installed through PFLOTRAN, see below) an MPI library
+- [HDF5](https://www.hdfgroup.org/solutions/hdf5/) library
+- [netCDF4](https://www.unidata.ucar.edu/software/netcdf/) library including the F90 interfaces and [NCO](http://nco.sourceforge.net/) utitlilies
+- and the following Python3 pacakges:
+
+|Packages | tested with version|
+|:---:|:---:|
+|f90nml |  1.1.2|
+|h5py |2.9.0 |
+|numpy|  1.16.4 |
+|scipy| 1.6.0 |
+|pandas| 0.25.0 |
+|netcdf4-python| 1.5.1.2 |
+|jupyter-core|4.5.0|
 
 ### Install PFLOTRAN
 
@@ -15,23 +35,6 @@ Please refer to PFLOTRAN's official [instruction](https://www.pflotran.org/docum
 ### Install DART
 
 Please refer [here](./INSTALL_DART.md) for DART installation.
-
-### Install other packages
-
-- a Fortran 90 compiler
-- [HDF5](https://www.hdfgroup.org/solutions/hdf5/) library
-- [netCDF4](https://www.unidata.ucar.edu/software/netcdf/) library including the F90 interfaces and [NCO](http://nco.sourceforge.net/) utitlilies
-- [C shell](https://www.grymoire.com/Unix/Csh.html)
-- (optional) an MPI library
-- and the following Python pacakges:
-
-|Packages | tested with version|
-|:---:|:---:|
-|f90nml |  1.1.2|
-|h5py |2.9.0 |
-|numpy|  1.16.4 |
-|pandas| 0.25.0 |
-|netcdf4-python| 1.5.1.2 |
 
 ### Move the DART-PFLOTRAN repository into DART
 

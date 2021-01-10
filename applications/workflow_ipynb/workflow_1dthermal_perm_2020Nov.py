@@ -44,7 +44,7 @@ from datetime import datetime, timedelta
 # MPI settings
 mpi_exe_da  = '/software/petsc_v3.11.3/arch-linux2-c-opt/bin/mpirun'  # The location of mpirun
 mpi_exe_pf  = '/software/petsc_v3.11.3/arch-linux2-c-opt/bin/mpirun'
-ncore_da = 1  # The number of MPI cores used by DART
+ncore_da = 2  # The number of MPI cores used by DART
 ncore_pf = 20  # The number of MPI cores used by PFLOTRAN
 ngroup_pf= 20  # The number of group used by stochastic running in PFLOTRAN
 
@@ -53,7 +53,8 @@ pflotran_exe  = '/software/pflotran/src/pflotran/pflotran'
 
 # Main directory names
 temp_app_dir = "/home/jian449/DART/manhattan/models/pflotran/applications/1dthermal_perm"          # The template for application folder
-app_dir      = "/home/jian449/DART/manhattan/models/pflotran/applications/1dthermal_perm_parastate_50pts_3mda"          # The application folder name
+# app_dir      = "/home/jian449/DART/manhattan/models/pflotran/applications/1dthermal_perm_parastate_50pts_3mda"          # The application folder name
+app_dir      = "/home/jian449/DART/manhattan/models/pflotran/applications/1dthermal_perm_test2"          # The application folder name
 dart_dir     = "/home/jian449/DART/manhattan"
 dart_pf_dir  = "/home/jian449/DART/manhattan/models/pflotran"     # The dart pflotran utitlity folder name
 
@@ -378,9 +379,9 @@ da_cfg["obs_ens_posterior_from_model"] = True
 
 # The inflation settings used in EnKS-MDA (the alpha value)
 # da_cfg["enks_mda_alpha"] = [4., 4., 4., 4.]  # Note that the summation of the inverse of alpha should be one
-da_cfg["enks_mda_alpha"] = [3., 3., 3.]  # Note that the summation of the inverse of alpha should be one
+# da_cfg["enks_mda_alpha"] = [3., 3., 3.]  # Note that the summation of the inverse of alpha should be one
 # da_cfg["enks_mda_alpha"] = [2., 2.]  # Note that the summation of the inverse of alpha should be one
-# da_cfg["enks_mda_alpha"] = [1.]  # Note that the summation of the inverse of alpha should be one
+da_cfg["enks_mda_alpha"] = [1.]  # Note that the summation of the inverse of alpha should be one
 da_cfg["enks_mda_iteration_step"] = 1  # the ith iteration (1 for the first iteration)
 da_cfg["enks_mda_total_iterations"] = len(da_cfg["enks_mda_alpha"])  # Note that the summation of the inverse of alpha should be one
 
@@ -731,7 +732,9 @@ print("\n")
 print("------------------------------------------------------------")
 print("Generate all the executables...")
 subprocess.run("cd {}; csh {} {} -mpi".format(dart_work_dir, quickbuild, app_work_dir), shell=True, check=True)
-subprocess.run("cd {}; csh {} {}".format(dart_work_dir, quickbuild, app_work_dir), shell=True, check=True)
+# subprocess.run("cd {}; csh {} {}".format(dart_work_dir, quickbuild, app_work_dir), shell=True, check=True)
+
+exit()
 
 
 #    ## Check ```model_mod.F90``` interface file
