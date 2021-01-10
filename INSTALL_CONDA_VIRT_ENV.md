@@ -72,5 +72,5 @@ Once that is done, deactivate and activate the virtual environment again so that
 ## Step 4 Install Python packages
 To install the required Python packages, use (make sure your virtual environment is activated if you are using it):
 ```sh
-conda install numpy scipy f90nml h5py pandas netcdf4 jupyter matplotlib
+conda install numpy scipy f90nml h5py pandas netcdf4 jupyter matplotlib seaborn
 ```
