@@ -30,7 +30,7 @@ The following packages should be installed first. **Note that** it is recommende
 
 ### Install PFLOTRAN
 
-Please refer to PFLOTRAN's official [instruction](https://www.pflotran.org/documentation/user_guide/how_to/installation/linux.html#linux-install). For [NERSC Cori](https://nersc.gov/) users, a detailed instruction is available at [here](https://github.com/pnnl-sbrsfa/how-to-guide/blob/master/Compile-PFLOTRAN-on-Cori.md).
+Please refer to PFLOTRAN's official [instruction](https://www.pflotran.org/documentation/user_guide/how_to/installation/linux.html#linux-install). For [NERSC Cori](https://nersc.gov/) users, a detailed instruction is available at [here](https://gitlab.pnnl.gov/sbrsfa/how-to-guide/-/blob/master/Compile-PFLOTRAN-on-Cori.md).
 
 ### Install DART
 

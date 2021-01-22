@@ -38,9 +38,12 @@ chmod +x {DART}/manhattan/assimilation_code/modules/utilities/fixsystem
 
 ## Step 4: Configure DART for PFLOTRAN-DART interface usage
 
-Fix the following bugs in DART Manhattan version to allow the usage of the PFLOTRAN-DART interface:
+Replace the following files in DART:
+- first, replace ```{DART}/manhattan/observations/obs_converters/utilities/obs_utilities_mod.f90``` with ```{DART-PFLOTRAN}/smoother/obs_utilities_mod.f90```;
+- second, replace ```{DART}/manhattan/assimilation_code/modules/utilities/types_mod.f90``` with ```{DART-PFLOTRAN}/smoother/types_mod.f90```.
 
-- Modify ```{DART}/manhattan/observations/obs_converters/utilities/obs_utilities_mod.f90```, to allow the subroutine ```set_obs_def_location()``` to read cartesian 3D grids by replacing:
+The new files contains the following changes in the original DART Manhattan version to allow the usage of the DART-PFLOTRAN interface:
+- Modifying ```{DART}/manhattan/observations/obs_converters/utilities/obs_utilities_mod.f90```, to allow the subroutine ```set_obs_def_location()``` to read cartesian 3D grids by replacing:
 
   ```fortran
   type(obs_def_type)    :: obs_def
@@ -64,7 +67,7 @@ Fix the following bugs in DART Manhattan version to allow the usage of the PFLOT
   call set_obs_def_type_of_obs(obs_def, okind)
   ```
 
-- Modify ```{DART}/manhattan/assimilation_code/modules/utilities/types_mod.f90```, to increase the maximum allowed observation type name length by replacing:
+- Modifying ```{DART}/manhattan/assimilation_code/modules/utilities/types_mod.f90```, to increase the maximum allowed observation type name length by replacing:
 
   ```fortran
   integer, parameter :: obstypelength    = 31

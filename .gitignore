@@ -17,7 +17,6 @@ model_mod_copy.f90
 /work/preprocess
 
 /applications/*
-!/applications/1dthermal
 !/applications/1dthermal_perm
 !/applications/1dthermal_flow
 !/applications/template
