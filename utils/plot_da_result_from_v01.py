@@ -628,3 +628,101 @@ class DaResults(object):
         ax2.set_xlabel("Time (day)")
         ax1.set_ylim(ylim)
         ax2.set_ylim(ylim)
+    
+    
+    def compute_univar_spatial_average_diff(self, var_name, true_file_name, model_time_offset=1800./86400., method='mae'):
+        """Compute the bias between a spatial averaged analyzed variable and the true values from other source
+           Note that the true_file_name has to be a csv file with two columns (the first for time and the second for the values)
+        """
+        # Get the parameter
+        nens , ntime     = self.nens,  self.ntime
+        prior, posterior = self.prior, self.posterior
+
+        assim_start_str       = self.assim_start_time
+        pflotran_var_set      = self.pflotran_var_set
+        model_time_list       = self.model_time_list
+        model_time_dates_list = self.model_time_dates_list
+        model_start_time      = self.model_start_time
+        model_end_time        = self.model_end_time
+        tunits                = self.tunits
+
+        # Get the reference, start and end dates
+        ref_time = datetime.strptime(assim_start_str, "%Y-%m-%d %H:%M:%S")
+        # model_start_date, model_end_date = model_time_dates_list[0], model_time_dates_list[-1]
+
+        # Read the true value from file_name
+        true_set           = pd.read_csv(true_file_name)
+        true_set_raw_time  = true_set.iloc[:, 0].values
+        true_set_dates     = [datetime.strptime(t, '%m/%d/%Y %H:%M') for t in true_set_raw_time]
+        dates_ref          = [t-ref_time for t in true_set_dates]
+        true_set_time      = np.array([t.days+float(t.seconds)/86400. for t in dates_ref])
+        true               = true_set.iloc[:, 1].values
+        true_set_used_ind  = (true_set_time >= model_start_time) & (true_set_time <= model_end_time)
+        true_set_time_used = true_set_time[true_set_used_ind]
+        true_set_used      = true[true_set_used_ind]
+
+        true_set_used_ave = [np.mean(true[(true_set_time >  (model_time_list[i-1]+model_time_offset)) & 
+                                          (true_set_time <= (model_time_list[i]+model_time_offset))]) 
+        #                      if i != 0 else np.mean(true[(true_set_time >  (model_time_list[i]-model_time_offset)) & 
+        #                                                  (true_set_time <= (model_time_list[i]+model_time_offset))])
+                             if i != 0 else np.mean(true[true_set_time <= (model_time_list[i]+model_time_offset)])
+                             for i in range(len(model_time_list))]
+
+        # Get the spatially averaged analyzed variable (prior and posterior)
+        var_ind                = pflotran_var_set.index(var_name)
+        analyzed_prior_ens     = np.mean(prior[var_ind, :, :, :, :, :], axis=(2, 3, 4))
+        analyzed_posterior_ens = np.mean(posterior[var_ind, :, :, :, :, :], axis=(2, 3, 4))
+
+        # Compute the bias
+        prior_diff = np.zeros([ntime, nens])
+        post_diff = np.zeros([ntime, nens])
+        for j in range(nens):
+            prior_diff[:, j] = analyzed_prior_ens[j,:] - true_set_used_ave
+            post_diff[:, j] = analyzed_posterior_ens[j,:] - true_set_used_ave
+        
+        if method.lower() == 'mae':
+            prior_diff = np.mean(np.abs(prior_diff), axis=1)
+            post_diff = np.mean(np.abs(post_diff), axis=1)
+        elif method.lower() == 'bias':
+            prior_diff = np.mean(prior_diff, axis=1)
+            post_diff = np.mean(post_diff, axis=1)
+        
+        return prior_diff, post_diff
+    
+    
+    def compute_univar_spatial_average_sd(self, var_name, model_time_offset=0.):
+        """Compute the std of a spatial averaged analyzed variable.
+           Note that the true_file_name has to be a csv file with two columns (the first for time and the second for the values)
+        """
+         # Get the parameter
+        nens , ntime     = self.nens,  self.ntime
+        prior, posterior = self.prior, self.posterior
+
+        assim_start_str       = self.assim_start_time
+        pflotran_var_set      = self.pflotran_var_set
+        model_time_list       = self.model_time_list
+        model_time_dates_list = self.model_time_dates_list
+        model_start_time      = self.model_start_time
+        model_end_time        = self.model_end_time
+        tunits                = self.tunits
+
+        # Get the reference, start and end dates
+        ref_time = datetime.strptime(assim_start_str, "%Y-%m-%d %H:%M:%S")
+        # model_start_date, model_end_date = model_time_dates_list[0], model_time_dates_list[-1]
+
+        # Get the spatially averaged analyzed variable (prior and posterior)
+        var_ind                = pflotran_var_set.index(var_name)
+        analyzed_prior_ens     = np.mean(prior[var_ind, :, :, :, :, :], axis=(2, 3, 4))
+        analyzed_posterior_ens = np.mean(posterior[var_ind, :, :, :, :, :], axis=(2, 3, 4))
+
+#         # Plot the prior
+#         ax1 = axes[0]
+#         # Plot the bias
+#         diff = np.zeros([ntime, nens])
+#         for j in range(nens):
+#             prior_diff[:, j] = analyzed_prior_ens[j,:] - true_set_used_ave
+#             post_diff[:, j] = analyzed_posterior_ens[j,:] - true_set_used_ave
+        prior_std = np.std(analyzed_prior_ens, axis=0)
+        post_std = np.std(analyzed_posterior_ens, axis=0)
+        
+        return prior_std, post_std

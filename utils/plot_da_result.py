@@ -640,6 +640,110 @@ class DaResults(object):
         return line1, line2
 
     
+    def compute_obs_at_point_diff(self, obs_name, obs_loc_ind=0, method='mae'):
+        """Compute the bias of the updated observation variable against the true values"""
+        nvar, nens = self.nvar, self.nens
+        prior_state, posterior_state = self.prior["state"], self.posterior["state"]
+
+        ntime_state, ntime_para = self.ntime_state, self.ntime_para
+        nvar_state, nvar_para = self.nvar_state, self.nvar_para
+        obs_var_set           = self.obs_var_set
+        para_var_set          = self.para_var_set
+        state_time_set        = self.state_time_set
+        para_time_set         = self.para_time_set
+        obs_time_set_used     = self.obs_time_set_used
+        obs_value_set_used    = self.obs_value_set_used
+        obs_loc_set           = self.obs_loc_set
+        has_immediate_mda_results = self.has_immediate_mda_results
+
+        xloc_set_state, yloc_set_state, zloc_set_state = self.xloc_set_state, self.yloc_set_state, self.zloc_set_state
+
+        model_loc_set = np.array([xloc_set_state, yloc_set_state, zloc_set_state]).T
+
+        if obs_name not in obs_var_set:
+            raise Exception('Unknown observation variable name %s' % obs_name)
+
+        # Get the observation point and values
+        obs_value = obs_value_set_used[obs_name][obs_loc_ind, :]
+        obs_loc   = obs_loc_set[obs_loc_ind]
+
+        # Find the closest location in the model grids for this observation
+        dist, model_loc_ind = spatial.KDTree(model_loc_set).query(obs_loc)
+        model_loc = model_loc_set[model_loc_ind]
+        print("The observation location of interest is {}".format(obs_loc))
+        print("The corresponding model grid is {}".format(model_loc))
+
+        # Get the index of observation
+        obs_var_ind = obs_var_set.index(obs_name)
+
+        # Get the difference between the estimated and the true for each realization
+        if has_immediate_mda_results:
+            prior_ens     = prior_state[obs_var_ind, 0, :, :, model_loc_ind]
+            posterior_ens = posterior_state[obs_var_ind, -1, :, :, model_loc_ind]
+        else:
+            prior_ens     = prior_state[obs_var_ind, :, :, model_loc_ind]
+            posterior_ens = posterior_state[obs_var_ind, :, :, model_loc_ind]
+        diff_prior = prior_ens[:, :] - obs_value[:]
+        diff_post = posterior_ens[:, :] - obs_value[:]
+        if method.lower() == 'mae':
+            diff_prior = np.mean(np.abs(diff_prior), axis=0)
+            diff_post = np.mean(np.abs(diff_post), axis=0)
+        elif method.lower() == 'bias':
+            diff_prior = np.mean(diff_prior, axis=0)
+            diff_post = np.mean(diff_post, axis=0)
+        
+        return diff_prior, diff_post
+
+
+    def compute_obs_at_point_sd(self, obs_name, obs_loc_ind=0):
+        """Compute the std of the updated observation variable against the true values"""
+        nvar, nens = self.nvar, self.nens
+        prior_state, posterior_state = self.prior["state"], self.posterior["state"]
+
+        ntime_state, ntime_para = self.ntime_state, self.ntime_para
+        nvar_state, nvar_para = self.nvar_state, self.nvar_para
+        obs_var_set           = self.obs_var_set
+        para_var_set          = self.para_var_set
+        state_time_set        = self.state_time_set
+        para_time_set         = self.para_time_set
+        obs_time_set_used     = self.obs_time_set_used
+        obs_value_set_used    = self.obs_value_set_used
+        obs_loc_set           = self.obs_loc_set
+        has_immediate_mda_results = self.has_immediate_mda_results
+
+        xloc_set_state, yloc_set_state, zloc_set_state = self.xloc_set_state, self.yloc_set_state, self.zloc_set_state
+
+        model_loc_set = np.array([xloc_set_state, yloc_set_state, zloc_set_state]).T
+
+        if obs_name not in obs_var_set:
+            raise Exception('Unknown observation variable name %s' % obs_name)
+
+        # Get the observation point and values
+        obs_value = obs_value_set_used[obs_name][obs_loc_ind, :]
+        obs_loc   = obs_loc_set[obs_loc_ind]
+
+        # Find the closest location in the model grids for this observation
+        dist, model_loc_ind = spatial.KDTree(model_loc_set).query(obs_loc)
+        model_loc = model_loc_set[model_loc_ind]
+        print("The observation location of interest is {}".format(obs_loc))
+        print("The corresponding model grid is {}".format(model_loc))
+
+        # Get the index of observation
+        obs_var_ind = obs_var_set.index(obs_name)
+
+        # Get the difference between the estimated and the true for each realization
+        if has_immediate_mda_results:
+            prior_ens     = prior_state[obs_var_ind, 0, :, :, model_loc_ind]
+            posterior_ens = posterior_state[obs_var_ind, -1, :, :, model_loc_ind]
+        else:
+            prior_ens     = prior_state[obs_var_ind, :, :, model_loc_ind]
+            posterior_ens = posterior_state[obs_var_ind, :, :, model_loc_ind]
+        std_prior = np.std(prior_ens, axis=0)
+        std_post  = np.std(posterior_ens, axis=0)
+        
+        return std_prior, std_post
+        
+    
     def compare_obs_at_point_bias(self, obs_name, axes, obs_loc_ind=0, constrained_layout=True, 
                                   plot_time_offset=0, ylim=None, xlim=None):
         """Plot the temporal evolution of the bias and MAE of the updated observation variables against the true value."""
@@ -1014,7 +1118,69 @@ class DaResults(object):
         # return
         return diff_mean, analyzed_posterior_ens.mean(axis=0), true_set_used_ave, true, true_set_time, true_set_dates
 
+    
+    def compute_univar_spatial_average_diff(self, var_name, true_file_name, model_time_offset=0., method='mae'):
+        """Compute the bias between a spatial averaged analyzed variable and the true values from other source
+           Note that the true_file_name has to be a csv file with two columns (the first for time and the second for the values)
+        """
+        nvar, nens = self.nvar, self.nens
+        prior_para, posterior_para = self.prior["para"], self.posterior["para"]
 
+        ntime_para    = self.ntime_para
+        nvar_para     = self.nvar_para
+        para_var_set  = self.para_var_set
+        para_time_set = self.para_time_set
+        assim_start_set = self.assim_start_set
+        assim_end_set = self.assim_end_set
+        tunits        = self.tunits
+        model_start_str = self.model_start_time
+        has_immediate_mda_results = self.has_immediate_mda_results
+
+        if var_name not in para_var_set:
+            raise Exception('Unknown analyzed variable name %s' % var_name)
+
+        # Get the reference, start and end dates
+        ref_time = datetime.strptime(model_start_str, "%Y-%m-%d %H:%M:%S")
+        # model_start_date, model_end_date = model_time_dates_list[0], model_time_dates_list[-1]
+
+        # Read the true value from file_name
+        true_set           = pd.read_csv(true_file_name)
+        true_set_raw_time  = true_set.iloc[:, 0].values
+        true_set_dates     = [datetime.strptime(t, '%m/%d/%Y %H:%M') for t in true_set_raw_time]
+        dates_ref          = [t-ref_time for t in true_set_dates]
+        true_set_time      = np.array([t.days+float(t.seconds)/86400. for t in dates_ref])
+        true               = true_set.iloc[:, 1].values
+
+        # Compute the temporal averaged true values
+        true_set_used_ave = [np.mean(true[(true_set_time >  (assim_start_set[i]+model_time_offset)) &
+                                          (true_set_time <= (assim_end_set[i]+model_time_offset))])
+                            #  if i != 0 else np.mean(true[(true_set_time <= (model_time_list[i]+model_time_offset))])
+                             for i in range(len(para_time_set))]
+        true_set_used_ave = np.array(true_set_used_ave)
+
+        # Get the spatially averaged analyzed variable (prior and posterior)
+        var_ind                = para_var_set.index(var_name)
+        if has_immediate_mda_results:
+            analyzed_prior_ens     = np.mean(prior_para[var_ind, 0, :, :, :], axis=(2))
+            analyzed_posterior_ens = np.mean(posterior_para[var_ind, -1, :, :, :], axis=(2))
+        else:
+            analyzed_prior_ens     = np.mean(prior_para[var_ind, :, :, :], axis=(2))
+            analyzed_posterior_ens = np.mean(posterior_para[var_ind, :, :, :], axis=(2))
+
+
+        # Get the difference between the estimated and the true for each realization
+        diff_prior = analyzed_prior_ens[:, :] - true_set_used_ave[:]
+        diff_post = analyzed_posterior_ens[:, :] - true_set_used_ave[:]
+        if method.lower() == 'bias':
+            diff_prior = np.mean(diff_prior, axis=0)
+            diff_post = np.mean(diff_post, axis=0)
+        elif method.lower() == 'mae':
+            diff_prior = np.mean(np.abs(diff_prior), axis=0)
+            diff_post = np.mean(np.abs(diff_post), axis=0)
+        
+        return diff_prior, diff_post
+
+        
     def compare_univar_spatial_average_bias(self, var_name, true_file_name, axes, plot_time_offset=0,
                                             model_time_offset=0., constrained_layout=True, ylim=None, xlim=None, unit=''):
         """Plot the temporal evolution of the bias between a spatial averaged analyzed variable
@@ -1162,6 +1328,45 @@ class DaResults(object):
         # return
         return line1
 
+
+    def compute_univar_spatial_average_sd(self, var_name, model_time_offset=0.):
+        """Compute the std of a spatial averaged analyzed variable.
+           Note that the true_file_name has to be a csv file with two columns (the first for time and the second for the values)
+        """
+        nvar, nens = self.nvar, self.nens
+        prior_para, posterior_para = self.prior["para"], self.posterior["para"]
+
+        ntime_para    = self.ntime_para
+        nvar_para     = self.nvar_para
+        para_var_set  = self.para_var_set
+        para_time_set = self.para_time_set
+        assim_start_set = self.assim_start_set
+        assim_end_set = self.assim_end_set
+        tunits        = self.tunits
+        model_start_str = self.model_start_time
+        has_immediate_mda_results = self.has_immediate_mda_results
+
+        if var_name not in para_var_set:
+            raise Exception('Unknown analyzed variable name %s' % var_name)
+
+        # Get the reference, start and end dates
+        ref_time = datetime.strptime(model_start_str, "%Y-%m-%d %H:%M:%S")
+        # model_start_date, model_end_date = model_time_dates_list[0], model_time_dates_list[-1]
+
+        # Get the spatially averaged analyzed variable (prior and posterior)
+        var_ind                = para_var_set.index(var_name)
+        if has_immediate_mda_results:
+            analyzed_prior_ens = np.mean(prior_para[var_ind, -1, :, :, :], axis=(2))
+            analyzed_posterior_ens = np.mean(posterior_para[var_ind, -1, :, :, :], axis=(2))
+        else:
+            analyzed_prior_ens = np.mean(prior_para[var_ind, :, :, :], axis=(2))
+            analyzed_posterior_ens = np.mean(posterior_para[var_ind, :, :, :], axis=(2))
+
+        # Plot the std
+        std_prior = np.std(analyzed_prior_ens, axis=0)
+        std_post = np.std(analyzed_posterior_ens, axis=0)
+        return std_prior, std_post
+    
 
     def compare_univar_spatial_average_sd(self, var_name, true_file_name, ax, plot_time_offset=None,
                                            model_time_offset=0., constrained_layout=True, ylim=None, xlim=None, unit=''):
